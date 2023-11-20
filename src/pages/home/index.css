@@ -1,0 +1,59 @@
+.grid_ {
+  margin: auto;
+  height: 300px;
+  width: 300px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 15px;
+}
+
+.grid-btn {
+  margin: auto;
+  width: 130px;
+  height: 130px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5;
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  font-weight: 500;
+  font-size: 18px;
+}
+
+.grid-btn-image {
+  position: relative;
+  top: 10px;
+  width: 115px;
+  height: 115px;
+}
+.grid-btn-title {
+  position: relative;
+  bottom: 18px;
+}
+
+.noticeview-title {
+  position: relative;
+  left: 20px;
+  font-weight: 600;
+  font-size: 24px;
+}
+
+.noticeview {
+  position: relative;
+  top: 20px;
+   /* height: calc(100vh - 430px); */
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+   /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+   /* border: 1px solid red; */
+}
+
+.noticeview-item {
+  margin: auto;
+  margin-top: 20px;
+  width: 90%;
+  height: 80px;
+}
