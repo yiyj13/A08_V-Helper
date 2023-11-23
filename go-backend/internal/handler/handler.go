@@ -46,4 +46,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.DELETE("/vaccination-records/:id", vaccinationRecordHandler.HandleDeleteVaccinationRecordByID)
 	router.GET("/vaccination-records/profile/:id", vaccinationRecordHandler.HandleGetVaccinationRecordsByProfileID)
 
+	// 疫苗信息
+	infoService := service.NewInfoService(db)
+	router.GET("/vaxinfo", infoService.GetInfo)
 }

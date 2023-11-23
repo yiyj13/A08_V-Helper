@@ -1,15 +1,14 @@
 # TODO
 
-- [x] 设置 Go 项目，创建测试路由
-- [x] 编写简单数据库模型和接口
-- [x] 配置文件，数据库连接
-- [x] 通过docker-compose部署测试
+- [X] 设置 Go 项目，创建测试路由
+- [X] 编写简单数据库模型和接口
+- [X] 配置文件，数据库连接
+- [X] 通过docker-compose部署测试
 - [ ] 完善数据库模型
   - [ ] 在model中加入新模型时，需要在init中进行迁移
   - [ ] 在service中实现对模型的增删改查
   - [ ] 在handler中实现API接口，并注册路由
 - [ ] 用户注册登录，JWT验证
-
 
 需要以下数据表来支持后端的功能：
 
@@ -20,72 +19,80 @@
     - Email
     - Phone
 
+   - UserID (主键)
+   - UserName
+   - Password (存储哈希值)
+   - Email
+   - Phone
+   - CreatedAt
+   - UpdatedAt
 2. **身份表 (Profiles)**:
-    - ProfileID (主键)
-    - UserID (外键)
-    - FullName
-    - Gender
-    - DateOfBirth
-    - Relationship (例如本人、子女等)
 
+   - ProfileID (主键)
+   - UserID (外键)
+   - FullName
+   - Gender
+   - DateOfBirth
+   - Relationship (例如本人、子女等)
 3. **疫苗表 (Vaccines)**:
-    - VaccineID (主键)
-    - Name
-    - Description
-    - TargetDisease
-    - SideEffects
-    - Precautions
 
+   - VaccineID (主键)
+   - Name
+   - Description
+   - TargetDisease
+   - SideEffects
+   - Precautions
 4. **接种记录表 (VaccinationRecords)**:
-    - RecordID (主键)
-    - ProfileID (外键)
-    - VaccineID (外键)
-    - VaccinationDate
-    - VaccinationLocation
-    - VaccinationDoctor
-    - NextVaccinationDate
-    - CreatedAt
-    - UpdatedAt
 
+   - RecordID (主键)
+   - ProfileID (外键)
+   - VaccineID (外键)
+   - VaccinationDate
+   - VaccinationLocation
+   - VaccinationDoctor
+   - NextVaccinationDate
+   - CreatedAt
+   - UpdatedAt
 5. **医生表 (Doctors)**:
-    - DoctorID (主键)
-    - FullName
-    - Specialty
-    - Hospital
-    - ContactInfo
 
+   - DoctorID (主键)
+   - FullName
+   - Specialty
+   - Hospital
+   - ContactInfo
 6. **预约表 (Appointments)**:
-    - AppointmentID (主键)
-    - ProfileID (外键)
-    - DoctorID (外键)
-    - VaccineID (外键)
-    - AppointmentDate
-    - AppointmentLocation
-    - CreatedAt
-    - UpdatedAt
 
+   - AppointmentID (主键)
+   - ProfileID (外键)
+   - DoctorID (外键)
+   - VaccineID (外键)
+   - AppointmentDate
+   - AppointmentLocation
+   - CreatedAt
+   - UpdatedAt
 7. **体温记录表 (TemperatureRecords)**:
-    - RecordID (主键)
-    - ProfileID (外键)
-    - Date
-    - Temperature
 
+   - RecordID (主键)
+   - ProfileID (外键)
+   - Date
+   - Temperature
 8. **社区帖子表 (CommunityPosts)**:
-    - PostID (主键)
-    - UserID (外键)
-    - Title
-    - Content
-    - CreatedAt
-    - UpdatedAt
 
+   - PostID (主键)
+   - UserID (外键)
+   - Title
+   - Content
+   - CreatedAt
+   - UpdatedAt
 9. **社区回复表 (CommunityReplies)**:
-    - ReplyID (主键)
-    - PostID (外键)
-    - UserID (外键)
-    - Content
-    - CreatedAt
 
+   - ReplyID (主键)
+   - PostID (外键)
+   - UserID (外键)
+   - Content
+   - CreatedAt
 10. **接种地点表 (VaccinationLocations)**:
+
     - LocationID (主键)
     - Name
     - Address
