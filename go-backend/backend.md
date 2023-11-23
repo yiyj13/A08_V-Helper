@@ -111,4 +111,4 @@ type VaccineInfo struct {
 
 测试 `tests/info_test.py`
 
-修改数据库初始疫苗信息 `pkg/db/db.go: AddVaxInfo()`
+修改数据库初始疫苗信息 `pkg/db/vaxinfo.json`

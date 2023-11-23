@@ -1,0 +1,14 @@
+[
+    {
+        "Name": "Pfizer",
+        "TargetDisease": "Covid-19",
+        "SideEffects": "Fever",
+        "Contraindication": "none"
+    },
+    {
+        "Name": "Sinovac",
+        "TargetDisease": "Covid-19",
+        "SideEffects": "Fever",
+        "Contraindication": "none"
+    }
+]
