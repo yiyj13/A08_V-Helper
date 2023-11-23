@@ -18,4 +18,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.POST("/login", authService.Login)
 	router.POST("/register", authService.Register)
 
+	// 疫苗信息
+	infoService := service.NewInfoService(db)
+	router.GET("/vaxinfo", infoService.GetInfo)
 }
