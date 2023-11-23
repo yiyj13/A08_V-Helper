@@ -25,15 +25,7 @@ func Init(cfg config.Config) *gorm.DB {
 	}
 
 	// 自动迁移，注意每新建一个 model 都需要在此处添加
-	db.AutoMigrate(
-		&model.User{},
-		&model.Article{},
-		&model.VaccineInfo{})
-
-	// 添加疫苗信息
-	if err := AddVaxInfo(db); err != nil {
-		log.Fatalf("Error adding vaccine info: %v", err)
-	}
+	db.AutoMigrate(&model.User{}, &model.Article{}, &model.Profile{}, &model.Vaccine{}, &model.VaccinationRecord{})
 
 	return db
 }
