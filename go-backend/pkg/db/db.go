@@ -42,8 +42,8 @@ func AddVaxInfo(db *gorm.DB) error {
 	}
 
 	slice_vaccine := []model.VaccineInfo{
-		{Name: "Pfizer", Adverse: "Fever", Contraindication: "none"},
-		{Name: "Sinovac", Adverse: "Fever", Contraindication: "none"},
+		{Name: "Pfizer", TargetDisease: "Covid-19", SideEffects: "Fever", Contraindication: "none"},
+		{Name: "Sinovac", TargetDisease: "Covid-19", SideEffects: "Fever", Contraindication: "none"},
 	}
 
 	// 遍历要添加的疫苗信息切片

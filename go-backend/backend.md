@@ -99,11 +99,13 @@
 
 返回疫苗信息格式
 
-```json
-{
-	Name: "Pfizer", // 疫苗名称
-	Adverse: "Fever", // 不良反应
-	Contraindication: "none" // 禁忌
+```go
+type VaccineInfo struct {
+	gorm.Model
+	Name             string
+	TargetDisease    string // 目标疾病
+	SideEffects      string // 副作用
+	Contraindication string // 禁忌
 }
 ```
 
