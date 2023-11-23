@@ -1,3 +1,3 @@
 export default function Blank() {
-  return <div></div>;
+  return <div></div>
 }

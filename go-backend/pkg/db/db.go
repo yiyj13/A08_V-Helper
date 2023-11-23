@@ -6,6 +6,10 @@ import (
 	"v-helper/internal/model"
 	"v-helper/pkg/config"
 
+	"encoding/json"
+	"io"
+	"os"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -33,10 +37,26 @@ func AddVaxInfo(db *gorm.DB) error {
 		return err
 	}
 
-	slice_vaccine := []model.VaccineInfo{
-		{Name: "Pfizer", Adverse: "Fever", Contraindication: "none"},
-		{Name: "Sinovac", Adverse: "Fever", Contraindication: "none"},
+	jsonFile, err := os.Open("pkg/db/vaxinfo.json")
+	if err != nil {
+		log.Fatalf("Error opening JSON file: %v", err)
+		return err
 	}
+	defer jsonFile.Close()
+
+	byteValue, _ := io.ReadAll(jsonFile)
+
+	var slice_vaccine []model.VaccineInfo
+	err = json.Unmarshal(byteValue, &slice_vaccine)
+	if err != nil {
+		log.Fatalf("Error unmarshalling JSON: %v", err)
+		return err
+	}
+
+	// slice_vaccine := []model.VaccineInfo{
+	// 	{Name: "Pfizer", TargetDisease: "Covid-19", SideEffects: "Fever", Contraindication: "none"},
+	// 	{Name: "Sinovac", TargetDisease: "Covid-19", SideEffects: "Fever", Contraindication: "none"},
+	// }
 
 	// 遍历要添加的疫苗信息切片
 	for _, vaccine := range slice_vaccine {

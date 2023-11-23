@@ -99,6 +99,18 @@
     - ContactNumber
     - OperatingHours
 
+```go
+type VaccineInfo struct {
+	gorm.Model
+	Name             string
+	TargetDisease    string // 目标疾病
+	SideEffects      string // 副作用
+	Contraindication string // 禁忌
+}
+```
+
+修改数据库初始疫苗信息 `pkg/db/vaxinfo.json`
+
 
 ## 遇到的问题
 
@@ -123,7 +135,8 @@
 ```bash
 # wait-for-it.sh 或类似脚本
 while !</dev/tcp/db/3306; do sleep 1; done;
-```
+
+
 
 然后，在启动应用之前执行这个脚本。
 
@@ -194,4 +207,7 @@ JWT 主要包含三个部分，用点（`.`）分隔：
 - **存储**: 不要在 JWT 中存储敏感信息，因为有效载荷可以被解码。
 - **短期有效性**: 为 JWT 设置合理的过期时间，以减少被盗用的风险。
 
+
 通过使用 JWT，我们可以实现无状态的身份验证，这意味着服务器不需要存储任何用户的登录信息，从而使应用更加易于扩展。同时，它也为客户端和服务器之间的通信提供了一种安全可靠的方式来验证和传输用户身份信息。
+
+

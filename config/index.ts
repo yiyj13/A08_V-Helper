@@ -24,6 +24,10 @@ const config = {
     prebundle: { enable: false },
   },
   mini: {
+    miniCssExtractPluginOption: {
+      //忽略css文件引入顺序
+      ignoreOrder: true,
+    },
     webpackChain(chain, webpack) {
       chain.merge({
         plugin: {

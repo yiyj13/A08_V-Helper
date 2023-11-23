@@ -1,11 +1,11 @@
-import HomePage from "../pages/home";
-import MapPage from "../pages/map";
-import DatePage from "../pages/date";
-import ProfilePage from "../pages/my";
-import CustomTabBar from "../tabbar";
+import { useState, PropsWithChildren } from 'react'
+import { useTabStore } from '../models'
 
-import { useTabStore } from "../models";
-import { useState, PropsWithChildren } from "react";
+import HomePage from '../pages/home'
+import MapPage from '../pages/map'
+import DatePage from '../pages/date'
+import ProfilePage from '../pages/my'
+import CustomTabBar from '../tabbar'
 
 export default function Index() {
   return (
@@ -17,22 +17,18 @@ export default function Index() {
       ))}
       <CustomTabBar />
     </div>
-  );
+  )
 }
 
 function LazyLoadTab(props: PropsWithChildren<{ tabIndex: number }>) {
-  const tabIndex = useTabStore((state) => state.tabIndex);
-  const [loaded, setLoaded] = useState(false);
+  const tabIndex = useTabStore((state) => state.tabIndex)
+  const [loaded, setLoaded] = useState(false)
 
   if (props.tabIndex != tabIndex && !loaded) {
-    return null;
+    return null
   } else if (!loaded) {
-    setLoaded(true);
+    setLoaded(true)
   }
 
-  return (
-    <div style={{ display: tabIndex === props.tabIndex ? "block" : "none" }}>
-      {props.children}
-    </div>
-  );
+  return <div style={{ display: tabIndex === props.tabIndex ? 'block' : 'none' }}>{props.children}</div>
 }
