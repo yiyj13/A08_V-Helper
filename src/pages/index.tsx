@@ -1,5 +1,5 @@
 import { useState, PropsWithChildren } from 'react'
-import { useTabStore } from '../models'
+import { useTabStore, useUserStore } from '../models'
 
 import HomePage from '../pages/home'
 import MapPage from '../pages/map'
@@ -7,7 +7,13 @@ import DatePage from '../pages/date'
 import ProfilePage from '../pages/my'
 import CustomTabBar from '../tabbar'
 
+import LoginPage from '../pages/login'
+
 export default function Index() {
+  const isLogged = useUserStore.use.isLogged()
+
+  if (!isLogged) return <LoginPage />
+
   return (
     <div>
       {[HomePage, MapPage, DatePage, ProfilePage].map((Content, index) => (

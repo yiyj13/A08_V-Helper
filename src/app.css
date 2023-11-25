@@ -7,9 +7,28 @@ page {
   --nutui-brand-color: #176b87;
   --nutui-brand-color-start: #def5e5;
   --nutui-brand-color-end: #64ccc5;
-  --nutui-calendar-base-font-size: 12px;
+  /* --nutui-calendar-base-font-size: 12px; */
+  /* --nutui-calendar-day-height: 40px; */
+  --nutui-divider-margin: 0 4;
+  --nutui-divider-text-color: #D0D5DC;
 }
 
 .std-box-shadow {
   box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.brand-color {
+  color: var(--nutui-brand-color);
+}
+
+.bg-brand-color {
+  background-color: var(--nutui-brand-color);
+}
+
+.h-without-tab {
+  height: calc(100vh - 100px);
+}
+
+.debug {
+  border: 1px solid red;
 }
