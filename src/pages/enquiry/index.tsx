@@ -28,7 +28,7 @@ export default function VaccineEnquiry() {
 
   useEffect(() => {
     api.request({ url: '/api/vaccines' }).then((res) => {
-      const result = res.data.data as TVaccine[]
+      const result = res.data as TVaccine[]
       setVaccineList(result)
     })
   }, [])
