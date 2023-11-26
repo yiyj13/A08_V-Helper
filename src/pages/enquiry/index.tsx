@@ -1,5 +1,6 @@
 import { Elevator, Loading } from '@nutui/nutui-react-taro'
 import { useEffect, useState } from 'react'
+import Taro from '@tarojs/taro'
 
 import api from '../../api'
 
@@ -63,9 +64,13 @@ export default function VaccineEnquiry() {
     return list
   }
 
+  const onItemClick = (_key: string, item: TElevatorItem) => {
+    Taro.navigateTo({ url: '/pages/vacDetails/index?id=' + item.id })
+  }
+
   return (
     <div className='flex flex-col p-2'>
-      <Elevator list={getRenderList(vaccineList)} height='auto'></Elevator>
+      <Elevator list={getRenderList(vaccineList)} height='auto' onItemClick={onItemClick}></Elevator>
     </div>
   )
 }
