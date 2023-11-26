@@ -33,6 +33,7 @@ func Init(cfg config.Config) *gorm.DB {
 		&model.VaccinationRecord{},
 		&model.Reply{})
 
+	AddVaxInfo(db)
 	return db
 }
 
