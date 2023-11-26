@@ -23,7 +23,7 @@ function CustomTabBar() {
   }
 
   return (
-    <Tabbar className='customtabbar z-50' fixed safeArea onSwitch={(index) => setTabIndex(index)} value={tabIndex}>
+    <Tabbar className='customtabbar' fixed safeArea onSwitch={(index) => setTabIndex(index)} value={tabIndex}>
       <Tabbar.Item title='首页' icon={<Home width={18} height={18} />} />
       <Tabbar.Item title='地图' icon={<Location2 width={18} height={18} />} />
       <Button

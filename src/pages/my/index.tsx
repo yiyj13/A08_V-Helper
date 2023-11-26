@@ -26,7 +26,7 @@ export default function ProfilePage() {
           <ActionFlexColItem icon={<Tips size={24} className='brand-color' />} text='关于' />
         </div>
 
-        <div className='flex flex-col-reverse h-full p-8 w-32 m-auto'>
+        <div className='flex flex-col-reverse h-full p-8 m-auto'>
           <Button fill='outline' type='danger' onClick={handleLogout}>
             退出登录
           </Button>

@@ -36,6 +36,7 @@ const config = {
             args: [
               {
                 appType: "taro",
+                injectAdditionalCssVarScope: true,
               },
             ],
           },
