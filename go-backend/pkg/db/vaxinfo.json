@@ -1,14 +1,16 @@
 [
     {
-        "Name": "Pfizer",
-        "TargetDisease": "Covid-19",
-        "SideEffects": "Fever",
-        "Contraindication": "none"
+        "name": "Pfizer",
+        "description": "A vaccine for Covid-19",
+        "targetDisease": "Covid-19",
+        "sideEffects": "Fever",
+        "precautions": "none"
     },
     {
-        "Name": "Sinovac",
-        "TargetDisease": "Covid-19",
-        "SideEffects": "Fever",
-        "Contraindication": "none"
+        "name": "Sinovac",
+        "description": "A vaccine for Covid-19",
+        "targetDisease": "Covid-19",
+        "sideEffects": "Fever",
+        "precautions": "none"
     }
 ]

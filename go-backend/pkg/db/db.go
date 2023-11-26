@@ -30,38 +30,29 @@ func Init(cfg config.Config) *gorm.DB {
 	return db
 }
 
+// 用于在数据库初始化时添加疫苗信息
+// 考虑用数据库脚本替换
 func AddVaxInfo(db *gorm.DB) error {
-	var vaxCount int64
-	if err := db.Model(&model.VaccineInfo{}).Count(&vaxCount).Error; err != nil {
-		log.Fatalf("Error getting vaccine info count: %v", err)
-		return err
-	}
-
+	// 读取json文件
 	jsonFile, err := os.Open("pkg/db/vaxinfo.json")
 	if err != nil {
 		log.Fatalf("Error opening JSON file: %v", err)
 		return err
 	}
 	defer jsonFile.Close()
-
 	byteValue, _ := io.ReadAll(jsonFile)
 
-	var slice_vaccine []model.VaccineInfo
+	var slice_vaccine []model.Vaccine
 	err = json.Unmarshal(byteValue, &slice_vaccine)
 	if err != nil {
 		log.Fatalf("Error unmarshalling JSON: %v", err)
 		return err
 	}
 
-	// slice_vaccine := []model.VaccineInfo{
-	// 	{Name: "Pfizer", TargetDisease: "Covid-19", SideEffects: "Fever", Contraindication: "none"},
-	// 	{Name: "Sinovac", TargetDisease: "Covid-19", SideEffects: "Fever", Contraindication: "none"},
-	// }
-
 	// 遍历要添加的疫苗信息切片
 	for _, vaccine := range slice_vaccine {
 		// 查询数据库中是否已经存在相同名称的疫苗
-		var existingVaccine model.VaccineInfo
+		var existingVaccine model.Vaccine
 		result := db.Where("name = ?", vaccine.Name).First(&existingVaccine)
 
 		if result.Error == gorm.ErrRecordNotFound {

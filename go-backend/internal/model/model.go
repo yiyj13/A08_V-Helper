@@ -49,7 +49,8 @@ type VaccinationRecord struct {
 // Article 文章模型
 type Article struct {
 	gorm.Model
-	Title   string `json:"title"`
-	Content string `json:"content"`
-	UserID  uint   `json:"userId"`
+	Title    string `json:"title"`
+	Content  string `json:"content"`
+	UserName string `json:"userName"`
+	UserID   uint   `json:"userId"`
 }

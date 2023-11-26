@@ -14,7 +14,7 @@ def test_CreateArticle():
     data = {
         "title": formatted_time + " test title",
         "content": "hello",
-        "creatorName": "tzh"
+        "userName": "tzh"
     }
     response = requests.post(url, json=data)
     print(response.text)
@@ -27,7 +27,7 @@ def test_UpdateArticle():
     data = {
         "title": formatted_time + " test update title",
         "content": "hello",
-        "creatorName": "tzh"
+        "userName": "tzh"
     }
     response = requests.put(url + "/1", json=data)
     print(response.text)
