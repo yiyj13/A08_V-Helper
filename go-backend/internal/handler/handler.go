@@ -59,4 +59,13 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.PUT("/articles/:id", articleHandler.HandleUpdateArticleByID)
 	router.DELETE("/articles/:id", articleHandler.HandleDeleteArticleByID)
 	// router.GET("/articles/user/:id", articleHandler.HandleGetArticlesByUserID)
+
+	// 帖子回复
+	replyService := service.NewReplyService(db)
+	replyHandler := NewReplyHandler(replyService)
+	router.GET("/replys", replyHandler.HandleGetReplys)
+	router.POST("/replys", replyHandler.HandleCreateReply)
+	router.GET("/replys/:id", replyHandler.HandleGetReplyByID)
+	router.PUT("/replys/:id", replyHandler.HandleUpdateReplyByID)
+	router.DELETE("/replys/:id", replyHandler.HandleDeleteReplyByID)
 }

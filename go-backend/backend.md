@@ -92,27 +92,41 @@
 
    | 方法 | 路由 | 功能 |
    | ---- | ---- | ---- |
-   |GET   |/articles   |获取全部帖子   |
-   |POST   |/articles   |发布帖子      |
-   |GET   |/articles/:id   |获取指定 id 的帖子      |
-   |PUT   |/articles/:id   |更新指定 id 的帖子      |
-   |DELETE |/articles/:id   |删除指定 id 的帖子      |
+   | GET | /articles | 获取全部帖子 |
+   | POST | /articles | 发布帖子 |
+   | GET | /articles/:id | 获取指定 id 的帖子 |
+   | PUT | /articles/:id | 更新指定 id 的帖子 |
+   | DELETE | /articles/:id | 删除指定 id 的帖子 |
 
-10. **社区回复表 (CommunityReplies)**:
+9. **社区回复表 (CommunityReplies)**:
 
-    - ReplyID (主键)
-    - PostID (外键)
-    - UserID (外键)
-    - Content
-    - CreatedAt
-11. **接种地点表 (VaccinationLocations)**:
+   ```go
+   type Reply struct {
+      gorm.Model
+      ArticleID uint   `json:"articleId"`
+      Content   string `json:"content"`
+      UserName  string `json:"userName"`
+      UserID    uint   `json:"userId"`
+   }
+   ```
+
+   | 方法 | 路由 | 功能 |
+   | ---- | ---- | ---- |
+   | GET | /replys | 获取全部回复 |
+   | POST | /replys | 发布帖子 |
+   | GET | /articles/:id | 获取指定 id 的帖子 |
+   | GET | /articles?article_id=x | 获取 id 为 x 的文章的所有 |
+   | PUT | /articles/:id | 更新指定 id 的帖子 |
+   | DELETE | /articles/:id | 删除指定 id 的帖子 |
+
+10. **接种地点表 (VaccinationLocations)**:
 
     - LocationID (主键)
     - Name
     - Address
     - ContactNumber
     - OperatingHours
-12. 收藏表
+11. **收藏表**:
 
     - VaccineID（主键）
     - Name

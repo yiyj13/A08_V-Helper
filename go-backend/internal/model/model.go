@@ -54,3 +54,12 @@ type Article struct {
 	UserName string `json:"userName"`
 	UserID   uint   `json:"userId"`
 }
+
+// Reply 回复模型
+type Reply struct {
+	gorm.Model
+	ArticleID uint   `json:"articleId"`
+	Content   string `json:"content"`
+	UserName  string `json:"userName"`
+	UserID    uint   `json:"userId"`
+}
