@@ -47,6 +47,16 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.GET("/vaccination-records/profile/:id", vaccinationRecordHandler.HandleGetVaccinationRecordsByProfileID)
 
 	// 疫苗信息
-	infoService := service.NewInfoService(db)
-	router.GET("/vaxinfo", infoService.GetInfo)
+	// infoService := service.NewInfoService(db)
+	// router.GET("/vaxinfo", infoService.GetInfo)
+
+	// 帖子
+	articleService := service.NewArticleService(db)
+	articleHandler := NewArticleHandler(articleService)
+	router.GET("/articles", articleHandler.HandleGetAllArticles)
+	router.POST("/articles", articleHandler.HandleCreateArticle)
+	router.GET("/articles/:id", articleHandler.HandleGetArticleByID)
+	router.PUT("/articles/:id", articleHandler.HandleUpdateArticleByID)
+	router.DELETE("/articles/:id", articleHandler.HandleDeleteArticleByID)
+	// router.GET("/articles/user/:id", articleHandler.HandleGetArticlesByUserID)
 }
