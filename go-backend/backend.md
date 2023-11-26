@@ -14,48 +14,96 @@
 
 1. **用户表 (Users)**:
 
-   - UserID (主键)
-   - UserName
-   - Password (存储哈希值)
-   - Email
-   - Phone
-   - UserID (主键)
-   - UserName
-   - Password (存储哈希值)
-   - Email
-   - Phone
-   - CreatedAt
-   - UpdatedAt
+   ```go
+   // User 用户模型
+   type User struct {
+      gorm.Model        //gorm.Model 包含了 CreatedAt、UpdatedAt、DeletedAt（用于软删除）以及 ID 字段
+      UserName   string `gorm:"unique" json:"userName"`
+      Password   string `json:"-"` // 存储哈希值，JSON中忽略
+      Email      string `gorm:"unique" json:"email"`
+      Phone      string `gorm:"unique" json:"phone"`
+   }
+   ```
+
+   | 方法 | 路由 | 功能 |
+   | ---- | ---- | ---- |
+   | GET | /users | 获取全部用户信息 |
+   | POST | /users | 添加用户 |
+   | GET | /users/:id | 获取指定 id 的用户信息 |
+   | PUT | /users/:id | 更新指定 id 的用户信息 |
+   | DELETE | /users/:id | 删除指定 id 的用户 |
+
 2. **身份表 (Profiles)**:
 
-   - ProfileID (主键)
-   - UserID (外键)
-   - FullName
-   - Gender
-   - DateOfBirth
-   - Relationship (例如本人、子女等)
+   ```go
+   // Profile 接种者身份模型
+   type Profile struct {
+      gorm.Model
+      UserID       uint      `json:"userId"` // 软件使用者的 ID
+      FullName     string    `json:"fullName"`
+      Gender       string    `json:"gender"`
+      DateOfBirth  time.Time `json:"dateOfBirth"`
+      Relationship string    `json:"relationship"`
+   }
+   ```
+
+   | 方法 | 路由 | 功能 |
+   | ---- | ---- | ---- |
+   | GET | /profiles | 获取全部身份信息 |
+   | POST | /profiles | 添加身份 |
+   | GET | /profiles/:id | 获取指定 id 的身份信息 |
+   | GET | /profiles/user/:id | 获取指定 id 的用户管理的所有身份信息 |
+   | PUT | /profiles/:id | 更新指定 id 的身份信息 |
+   | DELETE | /profiles/:id | 删除指定 id 的身份 |
+
 3. **疫苗表 (Vaccines)**:
 
-   - VaccineID (主键)
-   - Name
-   - Description
-   - TargetDisease
-   - SideEffects
-   - Precautions
+   ```go
+   // Vaccine 疫苗模型
+   type Vaccine struct {
+      gorm.Model
+      Name          string `json:"name"`
+      Description   string `json:"description"` 
+      TargetDisease string `json:"targetDisease"` // 目标疾病
+      SideEffects   string `json:"sideEffects"` // 副作用
+      Precautions   string `json:"precautions"` // 接种禁忌
+   }
+   ```
+
+   | 方法 | 路由 | 功能 |
+   | ---- | ---- | ---- |
+   | GET | /vaccines | 获取全部疫苗信息 |
+   | POST | /vaccines | 添加疫苗 |
+   | GET | /vaccines/:id | 获取指定 id 的疫苗信息 |
+   | PUT | /vaccines/:id | 更新指定 id 的疫苗信息 |
+   | DELETE | /vaccines/:id | 删除指定 id 的疫苗信息 |
 
    修改数据库初始疫苗信息 `pkg/db/vaxinfo.json`
 
 4. **接种记录表 (VaccinationRecords)**:
 
-   - RecordID (主键)
-   - ProfileID (外键)
-   - VaccineID (外键)
-   - VaccinationDate
-   - VaccinationLocation
-   - VaccinationDoctor
-   - NextVaccinationDate
-   - CreatedAt
-   - UpdatedAt
+   ```go
+   // VaccinationRecord 接种记录模型
+   type VaccinationRecord struct {
+      gorm.Model
+      ProfileID           uint      `json:"profileId"`
+      VaccineID           uint      `json:"vaccineId"`
+      VaccinationDate     time.Time `json:"vaccinationDate"`
+      VaccinationLocation string    `json:"vaccinationLocation"`
+      VaccinationDoctor   string    `json:"vaccinationDoctor"`
+      NextVaccinationDate time.Time `json:"nextVaccinationDate"`
+   }
+   ```
+
+   | 方法 | 路由 | 功能 |
+   | ---- | ---- | ---- |
+   | GET | /vaccination-records | 获取全部接种记录 |
+   | POST | /vaccination-records | 添加接种记录 |
+   | GET | /vaccination-records/:id | 获取指定 id 的接种记录 |
+   | GET | /vaccination-records/profile/:id | 获取指定 id 的接种者的接种记录 |
+   | PUT | /vaccination-records/:id | 更新指定 id 的疫苗信息 |
+   | DELETE | /vaccination-records/:id | 删除指定 id 的疫苗信息 |
+
 5. **医生表 (Doctors)**:
 
    - DoctorID (主键)
@@ -63,6 +111,7 @@
    - Specialty
    - Hospital
    - ContactInfo
+
 6. **预约表 (Appointments)**:
 
    - AppointmentID (主键)
@@ -73,12 +122,14 @@
    - AppointmentLocation
    - CreatedAt
    - UpdatedAt
+
 7. **体温记录表 (TemperatureRecords)**:
 
    - RecordID (主键)
    - ProfileID (外键)
    - Date
    - Temperature
+
 8. **社区帖子表 (CommunityPosts)**:
 
    ```go
@@ -126,6 +177,7 @@
     - Address
     - ContactNumber
     - OperatingHours
+
 11. **收藏表**:
 
     - VaccineID（主键）
