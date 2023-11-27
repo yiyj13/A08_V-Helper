@@ -1,6 +1,8 @@
 import { Tabbar, Button } from '@nutui/nutui-react-taro'
 import { Home, Location2, Uploader, Date, My } from '@nutui/icons-react-taro'
-import { useActionSheet } from 'taro-hooks'
+import { useActionSheet, useRouter } from 'taro-hooks'
+import { useEffect } from 'react'
+import { escapeState } from '@taro-hooks/shared'
 
 import './index.css'
 
@@ -10,11 +12,17 @@ function CustomTabBar() {
   const setTabIndex = useTabStore((state) => state.setTabIndex)
   const tabIndex = useTabStore((state) => state.tabIndex)
 
-  const { show } = useActionSheet()
-
-  // Method 2:
-  // const setTabIndex = useTabStore.use.setTabIndex();
-  // const tabIndex = useTabStore.use.tabIndex();
+  const [, { navigate }] = useRouter()
+  const { show, tapItem } = useActionSheet()
+  useEffect(() => {
+    if (escapeState(tapItem)) {
+      const { tapIndex } = escapeState(tapItem)
+      tapIndex === 0 && (() => {})()
+      tapIndex === 1 && (() => {})()
+      tapIndex === 2 && navigate('/pages/sendpost/index')
+      tapIndex === 3 && (() => {})()
+    }
+  }, [tapItem, navigate])
 
   const handleChangeOption = () => {
     show({
