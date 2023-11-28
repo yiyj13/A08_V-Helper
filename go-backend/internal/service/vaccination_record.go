@@ -20,7 +20,7 @@ func (s *VaccinationRecordService) CreateVaccinationRecord(record model.Vaccinat
 
 func (s *VaccinationRecordService) GetVaccinationRecordsByProfileID(profileID uint) ([]model.VaccinationRecord, error) {
 	var records []model.VaccinationRecord
-	if err := s.db.Where("profile_id = ?", profileID).Find(&records).Error; err != nil {
+	if err := s.db.Where("profile_id = ?", profileID).Preload("Vaccine").Find(&records).Error; err != nil {
 		return nil, err
 	}
 	return records, nil
@@ -28,7 +28,7 @@ func (s *VaccinationRecordService) GetVaccinationRecordsByProfileID(profileID ui
 
 func (s *VaccinationRecordService) GetAllVaccinationRecords() ([]model.VaccinationRecord, error) {
 	var records []model.VaccinationRecord
-	if err := s.db.Find(&records).Error; err != nil {
+	if err := s.db.Preload("Vaccine").Find(&records).Error; err != nil {
 		return nil, err
 	}
 	return records, nil
@@ -36,7 +36,7 @@ func (s *VaccinationRecordService) GetAllVaccinationRecords() ([]model.Vaccinati
 
 func (s *VaccinationRecordService) GetVaccinationRecordByID(id uint) (model.VaccinationRecord, error) {
 	var record model.VaccinationRecord
-	if err := s.db.First(&record, id).Error; err != nil {
+	if err := s.db.Preload("Vaccine").First(&record, id).Error; err != nil {
 		return record, err
 	}
 	return record, nil

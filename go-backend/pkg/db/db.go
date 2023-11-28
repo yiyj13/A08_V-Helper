@@ -31,7 +31,9 @@ func Init(cfg config.Config) *gorm.DB {
 		&model.Profile{},
 		&model.Vaccine{},
 		&model.VaccinationRecord{},
-		&model.Reply{})
+		&model.Reply{},
+		&model.TempertureRecord{},
+	)
 
 	AddVaxInfo(db)
 	return db

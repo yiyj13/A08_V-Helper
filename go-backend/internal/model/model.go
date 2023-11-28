@@ -1,8 +1,6 @@
 package model
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 )
 
@@ -18,11 +16,11 @@ type User struct {
 // Profile 身份模型
 type Profile struct {
 	gorm.Model
-	UserID       uint      `json:"userId"`
-	FullName     string    `json:"fullName"`
-	Gender       string    `json:"gender"`
-	DateOfBirth  time.Time `json:"dateOfBirth"`
-	Relationship string    `json:"relationship"`
+	UserID       uint   `json:"userId"`
+	FullName     string `json:"fullName"`
+	Gender       string `json:"gender"`
+	DateOfBirth  string `json:"dateOfBirth"`
+	Relationship string `json:"relationship"`
 }
 
 // Vaccine 疫苗模型
@@ -36,14 +34,27 @@ type Vaccine struct {
 }
 
 // VaccinationRecord 接种记录模型
+// 对应一个Profile和一个Vaccine，记录接种类型、接种时间、接种凭证、备注，同时希望能看到疫苗的详细信息(名称、有效期...)
+// 地点、是否提醒、下次接种时间
 type VaccinationRecord struct {
 	gorm.Model
-	ProfileID           uint      `json:"profileId"`
-	VaccineID           uint      `json:"vaccineId"`
-	VaccinationDate     time.Time `json:"vaccinationDate"`
-	VaccinationLocation string    `json:"vaccinationLocation"`
-	VaccinationDoctor   string    `json:"vaccinationDoctor"`
-	NextVaccinationDate time.Time `json:"nextVaccinationDate"`
+	ProfileID           uint    `json:"profileId"`
+	VaccineID           uint    `json:"vaccineId"`
+	Vaccine             Vaccine `gorm:"foreignKey:VaccineID" json:"vaccine"`
+	VaccinationDate     string  `json:"vaccinationDate"` // 注意用string与前端交互
+	Voucher             string  `json:"voucher"`
+	VaccinationLocation string  `json:"vaccinationLocation"`
+	Reminder            bool    `json:"reminder"`
+	NextVaccinationDate string  `json:"nextVaccinationDate"`
+	Note                string  `json:"note"`
+}
+
+// TempertureRecord 体温记录模型
+type TempertureRecord struct {
+	gorm.Model
+	ProfileID  uint    `json:"profileId"`
+	Date       string  `json:"date"`
+	Temperture float32 `json:"temperture"`
 }
 
 // Article 文章模型

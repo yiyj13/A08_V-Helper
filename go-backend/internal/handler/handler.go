@@ -64,4 +64,14 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.GET("/replys/:id", replyHandler.HandleGetReplyByID)
 	router.PUT("/replys/:id", replyHandler.HandleUpdateReplyByID)
 	router.DELETE("/replys/:id", replyHandler.HandleDeleteReplyByID)
+
+	// 体温记录
+	tempertureRecordService := service.NewTempertureRecordService(db)
+	tempertureRecordHandler := NewTempertureRecordHandler(tempertureRecordService)
+	router.GET("/temperture-records", tempertureRecordHandler.HandleGetAllTempertureRecords)
+	router.POST("/temperture-records", tempertureRecordHandler.HandleCreateTempertureRecord)
+	router.GET("/temperture-records/:id", tempertureRecordHandler.HandleGetTempertureRecordByID)
+	router.PUT("/temperture-records/:id", tempertureRecordHandler.HandleUpdateTempertureRecordByID)
+	router.DELETE("/temperture-records/:id", tempertureRecordHandler.HandleDeleteTempertureRecordByID)
+	router.GET("/temperture-records/profile/:id", tempertureRecordHandler.HandleGetTempertureRecordsByProfileID)
 }
