@@ -1,3 +1,5 @@
+import Mock from 'mockjs'
+
 export default {
   'POST /api/login': {
     code: '200',
@@ -84,4 +86,68 @@ export default {
       name: '女儿',
     },
   ],
+
+  'POST /api/vaccination-records': (req, res) => {
+    res.status(200).json({
+      message: 'Vaccination record submitted successfully',
+      success: true,
+      data: {
+        id: req.body.id,
+        name: req.body.name,
+        type: req.body.type,
+        date: req.body.date,
+        valid: req.body.valid,
+        reminder: req.body.reminder,
+        voucher: req.body.voucher,
+        note: req.body.note,
+      }
+    })
+  },
+  
+  'POST /api/temperature-records': (req,res) => {
+    res.status(200).json({
+      message: 'Temperature record submitted successfully',
+      success: true,
+      data: {
+        id: req.body.id,
+        time: req.body.time,
+        value: req.body.val,
+        note: req.body.note,
+      }
+    })
+  },
 }
+
+// const VaccinationRecord = Mock.mock({
+//   "list|1-10": [{
+//     "profileId|+1": 0,
+//     "vaccineId|+1": 0,
+//     "vaccineType|+1": 0,
+//     "vaccineDate": "@date",
+//     "vaccineValid": '@integer(1, 10) * 365',
+//     "vaccineReminder": '@boolean',
+//     "vaccineVoucher": Mock.Random.dataImage(),
+//     "vaccineNote": '@cparagraph(1, 3)',
+//   }]
+// })
+
+// Mock.mock('/api/vaccination-records/', 'post', (options) => {
+//   let body = JSON.parse(options.body)
+//   VaccinationRecord.list.push(Mock.mock({
+//     "profileId": body.id,
+//     "vaccineId": body.name,
+//     "vaccineType": body.type,
+//     "vaccineDate": body.date,
+//     "vaccineValid": body.valid,
+//     "vaccineReminder": body.reminder,
+//     "vaccineVoucher": body.voucher,
+//     "vaccineNote": body.note,
+//   }))
+
+//   return {
+//     status: 200,
+//     message: 'ok',
+//     success: true,
+//     list: VaccinationRecord.list,
+//   }
+// })
