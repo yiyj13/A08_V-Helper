@@ -6,6 +6,8 @@ export default defineAppConfig({
     'pages/vacDetails/index',
     'pages/blank/index',
     'pages/enquiry/index',
+    'pages/record/index',
+    'pages/temper/index',
   ],
   window: {
     backgroundTextStyle: 'light',
