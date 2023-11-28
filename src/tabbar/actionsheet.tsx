@@ -7,12 +7,12 @@ export default function ButtonActionSheet() {
 
   const [, { navigate }] = useRouter()
 
-  const navDual = (url: string) => () => navigate(url).finally(setIsVisible(false))
+  const navDual = (url: string) => () => navigate(url).finally(useActionReset)
 
   return (
     <ActionSheet
       visible={isVisible}
-      onSelect={(item, index) => {
+      onSelect={(_item, index) => {
         console.log(index)
       }}
       onCancel={() => setIsVisible(false)}

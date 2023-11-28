@@ -1,5 +1,6 @@
 import Taro from '@tarojs/taro'
 import { StorageSceneKey } from '../utils'
+import { BASE_URL } from './config'
 
 // TODO:
 class Http {
@@ -11,22 +12,38 @@ class Http {
     return this.instance || (this.instance = new Http())
   }
 
-  public async request(options: Taro.request.Option) {
-    const BASE_URL = 'http://127.0.0.1:9527' // mockjs default url
+  public request(params: Taro.request.Option & { contentType?: string }) {
+    let url = BASE_URL + params.url
 
-    const { url, method = 'GET', data } = options
-    const token = Taro.getStorageSync(StorageSceneKey.USER)
+    let method = params.method || 'GET'
+
     const header = {
-      'content-type': 'application/json',
-      Authorization: token,
+      'content-type': params.contentType || 'application/json',
+      Authorization: Taro.getStorageSync(StorageSceneKey.USER),
     }
 
-    return await Taro.request({
-      url: BASE_URL + url,
+    return Taro.request({
+      ...params,
+      url,
       method,
-      data,
       header,
     })
+  }
+
+  public get(url: string, data?: any) {
+    return this.request({ url, data })
+  }
+
+  public post(url: string, data?: any, contentType?: string) {
+    return this.request({ url, method: 'POST', data, contentType })
+  }
+
+  public put(url: string, data?: any) {
+    return this.request({ url, method: 'PUT', data })
+  }
+
+  public delete(url: string, data?: any) {
+    return this.request({ url, method: 'DELETE', data })
   }
 }
 
