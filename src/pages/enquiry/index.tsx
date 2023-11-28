@@ -5,7 +5,7 @@ import Taro from '@tarojs/taro'
 import api from '../../api'
 
 type TVaccine = {
-  id: number
+  ID: number
   name: string
   type: string
   description: string
@@ -49,14 +49,14 @@ export default function VaccineEnquiry() {
           list: [
             {
               name: item.name,
-              id: item.id,
+              id: item.ID,
             },
           ],
         })
       } else {
         list[index].list.push({
           name: item.name,
-          id: item.id,
+          id: item.ID,
         })
       }
     })
