@@ -5,14 +5,14 @@
     4. Gradient color for the slider 
 */
 
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import Taro from '@tarojs/taro'
-import { View, Text, Textarea, Slider, Navigator } from '@tarojs/components'
-import { Picker, Range, DatePicker, Cell, Loading, Button } from '@nutui/nutui-react-taro';
+import { Text } from '@tarojs/components'
+import { Picker, Range, DatePicker, Cell, Button } from '@nutui/nutui-react-taro';
 import { PickerOption } from "@nutui/nutui-react-taro/dist/types/packages/picker/types";
 
-import api from '../../api'
-import {ComboBox} from 'src/components/combobox';
+// import api from '../../api'
+// import {ComboBox} from 'src/components/combobox';
 
 type TemperData = {
     id: number // 测温人
@@ -79,20 +79,13 @@ export default function TemperRecord() {
     const endDate = new Date(2025, 11, 30)
     const [show, setShow] = useState(false)
     const [desc, setDesc] = useState('2022-05-10 10:10')
-    const confirm = (values: (string | number)[], options: PickerOption[]) => {
+    const confirm = (values: (string | number)[], _options: PickerOption[]) => {
         const date = values.slice(0, 3).join('-');
         const time = values.slice(3).join(':');
         setDesc(`${date} ${time}`)
     }
 
     // TODO: coordinate with the APIs to be implemented by the backend
-    const submitFailed = (error: any) => {
-        Taro.showToast({ title: JSON.stringify(error), icon: 'error' })
-    }
-    const submitSucceed = (values: any) => {
-        Taro.showToast({ title: JSON.stringify(values), icon: 'success' })
-    }
-
     const handleSubmission = () => {
         if (temperature.id >= 0) {
             // api.submitTemperature(temperature).then(submitSucceed).catch(submitFailed);
@@ -100,7 +93,7 @@ export default function TemperRecord() {
             Taro.navigateBack()
         }
         else {
-            Taro.showToast({ title: '请填写完整记录', icon: 'none' })
+            Taro.showToast({ title: '请填写完整记录', icon: 'error' })            
         }
 
     }
@@ -170,7 +163,11 @@ export default function TemperRecord() {
                                 40.0: 40.0,
                                 41.0: 41.0,
                             }}
-                            onChange={(val) => updateTemperature((val as number).toFixed(1))}
+                            onChange={(val) => {
+                                if (typeof val === 'number') {
+                                    updateTemperature(parseFloat(val.toFixed(1)));
+                                }
+                            }}
                         />
                     </Cell>
                 </Cell.Group>
