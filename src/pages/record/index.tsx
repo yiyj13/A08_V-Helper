@@ -6,7 +6,7 @@
 */
 
 import Taro from '@tarojs/taro'
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Cell, Switch, Picker, Uploader, Button, DatePicker } from '@nutui/nutui-react-taro';
 import { TextArea } from '@nutui/nutui-react-taro';
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types';
@@ -168,14 +168,11 @@ export default function VaccineRecord() {
 
     const handleSubmission = async () => {
         console.log('record:', record);// for debug
-        if (record && record.id >= 0 && record.name >= 0 && record.type >= 0 && record.date && record.valid > 0) {
+        if (record && record.id >= 0 && record.name >= 0 && record.type >= 0 && record.date) {
             try {
                 const res = await api.request({ url: '/api/vaccination-records', method: 'POST', data: record })
-                console.log(res.data);
+                console.log(res.data);// for debug
                 Taro.showToast({ title: '提交成功', icon: 'success' })
-                // Taro.nextTick(() => {
-                //     Taro.navigateBack()
-                // })
                 setTimeout(() => {
                     Taro.navigateBack()
                 },1000)

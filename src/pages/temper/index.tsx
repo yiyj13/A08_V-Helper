@@ -8,16 +8,17 @@
 import { useState } from "react";
 import Taro from '@tarojs/taro'
 import { Text } from '@tarojs/components'
-import { Picker, Range, DatePicker, Cell, Button } from '@nutui/nutui-react-taro';
+import { Picker, Range, DatePicker, Cell, Button, TextArea } from '@nutui/nutui-react-taro';
 import { PickerOption } from "@nutui/nutui-react-taro/dist/types/packages/picker/types";
 
-// import api from '../../api'
+import api from '../../api'
 // import {ComboBox} from 'src/components/combobox';
 
 type TemperData = {
     id: number // 测温人
     time: string // 测温时间
     val: number // 体温值
+    note: string // 备注
 }
 
 // type MemberData = {
@@ -26,8 +27,6 @@ type TemperData = {
 // }
 
 export default function TemperRecord() {
-    const [visible, setVisible] = useState(false)
-    const [baseDesc, setBaseDesc] = useState('')
     const MemberData = [
         [
             { value: 0, text: '本人', },
@@ -38,8 +37,9 @@ export default function TemperRecord() {
 
     const [temperature, setTemperature] = useState<TemperData>({
         id: -1,
-        time: '2023-11-27 12:00',
+        time: '',
         val: 36.2,
+        note: '',
     });
 
     const updateTemperature = (value: number) => {
@@ -62,12 +62,14 @@ export default function TemperRecord() {
     // if (!MemberList) {
     //     return <Loading className='h-screen w-screen' />
     // }
-    const confirmPicker = (options: PickerOption[], values: (string | number)[]) => {
+    const [idVisible, setIdVisible] = useState(false)
+    const [idDesc, setIdDesc] = useState('')
+    const confirmId = (options: PickerOption[], values: (string | number)[]) => {
         let description = ''
         options.forEach((option: any) => {
             description += option.text
         })
-        setBaseDesc(description)
+        setIdDesc(description)
         setTemperature({
             ...temperature,
             // get the coordinate value in MemberData according to option.text
@@ -77,20 +79,37 @@ export default function TemperRecord() {
 
     const startDate = new Date(2000, 0, 1)
     const endDate = new Date(2025, 11, 30)
-    const [show, setShow] = useState(false)
-    const [desc, setDesc] = useState('2022-05-10 10:10')
-    const confirm = (values: (string | number)[], _options: PickerOption[]) => {
+    const [dateShow, setDateShow] = useState(false)
+    const [dateDesc, setDateDesc] = useState('2022-05-10 10:10')
+    const confirmDate = (values: (string | number)[], _options: PickerOption[]) => {
         const date = values.slice(0, 3).join('-');
         const time = values.slice(3).join(':');
-        setDesc(`${date} ${time}`)
+        setDateDesc(`${date} ${time}`)
+    }
+
+    const onTextChange = (value: string) => {
+        setTemperature({
+            ...temperature,
+            note: value,
+        });
     }
 
     // TODO: coordinate with the APIs to be implemented by the backend
-    const handleSubmission = () => {
+    const handleSubmission = async () => {
+        console.log('temperature:', temperature);// for debug   
         if (temperature.id >= 0) {
-            // api.submitTemperature(temperature).then(submitSucceed).catch(submitFailed);
-            // timeout
-            Taro.navigateBack()
+            try {
+                const res = await api.request({ url: '/api/temperature-records', method: 'POST', data: temperature })
+                console.log(res.data);// for debug
+                Taro.showToast({ title: '提交成功', icon: 'success' })
+                setTimeout(() => {
+                    Taro.navigateBack()
+                },1000)
+                
+            } catch (error) {
+                console.log('Error submitting vaccination record:', error);
+                Taro.showToast({ title: '提交失败', icon: 'error' });
+            }
         }
         else {
             Taro.showToast({ title: '请填写完整记录', icon: 'error' })            
@@ -101,37 +120,38 @@ export default function TemperRecord() {
     const handleReset = () => {
         setTemperature({
             id: -1,
-            time: '2023-11-27 12:00',
+            time: '',
             val: 36.2,
+            note: ''
         });
-        setBaseDesc('');
-        setDesc('2022-05-10 10:10');
-        setVisible(false); // 关闭 Picker
-        setShow(false); // 关闭 DatePicker
+        setIdDesc('');
+        setDateDesc('');
+        setIdVisible(false); // 关闭 Picker
+        setDateShow(false); // 关闭 DatePicker
         Taro.showToast({ title: '重置成功', icon: 'success' })
     }
 
     return (
         <>
-            <Cell title="测温人员" description={baseDesc} onClick={() => setVisible(!visible)}
+            <Cell title="测温成员" description={idDesc} onClick={() => setIdVisible(!idVisible)}
                 style={{ textAlign: 'center' }} />
             <Picker
-                title="member"
-                visible={visible}
+                title="测温成员"
+                visible={idVisible}
                 options={MemberData}
-                onConfirm={(list, values) => confirmPicker(list, values)}
-                onClose={() => setVisible(false)}
+                onConfirm={(list, values) => confirmId(list, values)}
+                onClose={() => setIdVisible(false)}
             />
-            <Cell title="测温时间" description={desc} onClick={() => setShow(true)}
+            <Cell title="测温时间" description={dateDesc} onClick={() => setDateShow(true)}
                 style={{ textAlign: 'center' }} />
             <DatePicker
-                title="date"
+                title="测温时间"
                 startDate={startDate}
                 endDate={endDate}
-                visible={show}
+                visible={dateShow}
                 type="datetime"
-                onClose={() => setShow(false)}
-                onConfirm={(options, values) => confirm(values, options)}
+                onClose={() => setDateShow(false)}
+                onConfirm={(options, values) => confirmDate(values, options)}
             />
 
             {/* <View id='temper_slider' style={{ textAlign: 'center' }}>
@@ -172,7 +192,7 @@ export default function TemperRecord() {
                     </Cell>
                 </Cell.Group>
             </>
-
+            <TextArea rows={5} autoSize onChange={(value) => onTextChange(value)} />
             <Button className="submit_btm" formType="submit" type="primary" onClick={handleSubmission} >
                 提交
             </Button>
