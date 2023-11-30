@@ -1,6 +1,7 @@
 import { Avatar, Button } from '@nutui/nutui-react-taro'
 import { Follow, Notice, People, RectRight, Comment, Ask, Tips } from '@nutui/icons-react-taro'
 import { useUserStore } from '../../models'
+import Taro from '@tarojs/taro'
 
 export default function ProfilePage() {
   const removeToken = useUserStore.use.removeToken()
@@ -15,7 +16,11 @@ export default function ProfilePage() {
         <ProfileCard />
 
         <div className='flex flex-row justify-between ml-4 mr-4'>
-          <ActionFlexRowItem icon={<People size={24} className='brand-color' />} text='成员档案' />
+          <ActionFlexRowItem
+            icon={<People size={24} className='brand-color' />}
+            text='成员档案'
+            onClick={() => Taro.navigateTo({ url: '/pages/member/index' })}
+          />
           <ActionFlexRowItem icon={<Follow size={24} className='brand-color' />} text='收藏记录' />
           <ActionFlexRowItem icon={<Comment size={24} className='brand-color' />} text='社区回复' />
         </div>

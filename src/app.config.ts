@@ -8,6 +8,8 @@ export default defineAppConfig({
     'pages/enquiry/index',
     'pages/record/index',
     'pages/temper/index',
+    'pages/member/index',
+    'pages/addMember/index',
   ],
   window: {
     backgroundTextStyle: 'light',
