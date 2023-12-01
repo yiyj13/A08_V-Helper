@@ -10,6 +10,8 @@ export default defineAppConfig({
     'pages/temper/index',
     'pages/my/about/index',
     'pages/my/notice/index',
+    'pages/member/index',
+    'pages/addMember/index',
   ],
   window: {
     backgroundTextStyle: 'light',
