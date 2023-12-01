@@ -8,6 +8,8 @@ export default defineAppConfig({
     'pages/enquiry/index',
     'pages/record/index',
     'pages/temper/index',
+    'pages/my/about/index',
+    'pages/my/notice/index',
   ],
   window: {
     backgroundTextStyle: 'light',
