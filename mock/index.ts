@@ -98,6 +98,7 @@ export default {
         date: req.body.date,
         valid: req.body.valid,
         reminder: req.body.reminder,
+        remindDate: req.body.remindDate,
         voucher: req.body.voucher,
         note: req.body.note,
       }
