@@ -10,7 +10,66 @@
   - [ ] 在handler中实现API接口，并注册路由
 - [ ] 用户注册登录，JWT验证
 
-需要以下数据表来支持后端的功能：
+# API 设计
+
+这部分介绍提供给前端的 API 接口，包括请求方法、请求路径、请求参数、请求体、响应体等。
+
+## 用户
+
+登录(通过微信接口而无需密码)，修改个人信息
+
+## 身份
+
+
+
+## 接种记录
+
+| 方法 | 路由 | 功能 |
+| ---- | ---- | ---- |
+| POST | /api/vaccination-records | 添加接种记录 |
+| GET | /api/vaccination-records | 获取全部接种记录 |
+| GET | /api/vaccination-records/:id | 获取指定 id 的接种记录 |
+| GET | /api/vaccination-records/profile/:id | 获取指定 id 的接种者的接种记录 |
+| PUT | /api/vaccination-records/:id | 更新指定 id 的疫苗信息 |
+| DELETE | /api/vaccination-records/:id | 删除指定 id 的疫苗信息 |
+
+json样例：
+```json
+{
+   "profileId": 1,
+   "vaccineId": 2,
+   "vaccinationDate": "2021-07-01",
+   "voucher": "Voucher123",
+   "vaccinationLocation": "本地社区医院",
+   "reminder": true,
+   "nextVaccinationDate": "2022-07-01",
+   "note": "无明显不适反应",
+}
+```
+
+## 体温记录
+
+| 方法 | 路由 | 功能 |
+| ---- | ---- | ---- |
+| POST | /api/temperature-records | 添加体温记录 |
+| GET | /api/temperature-records | 获取全部体温记录 |
+| GET | /api/temperature-records/:id | 获取指定 id 的体温记录 |
+| GET | /api/temperature-records/profile/:id | 获取指定 id 的接种者的体温记录 |
+| PUT | /api/temperature-records/:id | 更新指定 id 的体温记录 |
+| DELETE | /api/temperature-records/:id | 删除指定 id 的体温记录 |
+
+json样例：
+```json
+{
+  "profileId": 1,
+  "date": "2023-09-01 12:00",
+  "temperture": 36.7
+}
+```
+
+# 模型设计
+
+通过以下数据表来支持后端的功能：
 
 1. **用户表 (Users)**:
 
@@ -63,10 +122,12 @@
    type Vaccine struct {
       gorm.Model
       Name          string `json:"name"`
-      Description   string `json:"description"` 
-      TargetDisease string `json:"targetDisease"` // 目标疾病
-      SideEffects   string `json:"sideEffects"` // 副作用
-      Precautions   string `json:"precautions"` // 接种禁忌
+      Description   string `json:"description"`
+      TargetDisease string `json:"targetDisease"`
+      SideEffects   string `json:"sideEffects"`
+      Precautions   string `json:"precautions"` // 接种前注意事项
+      ValidPeriod   int    `json:"validPeriod"` // 有效期，单位为天
+      Type          string `json:"type"`        // 疫苗类型，常规疫苗、特殊疫苗、其他
    }
    ```
 
@@ -84,14 +145,19 @@
 
    ```go
    // VaccinationRecord 接种记录模型
+   // 对应一个Profile和一个Vaccine，记录接种类型、接种时间、接种凭证、备注，同时希望能看到疫苗的详细信息(名称、有效期...)
+   // 地点、是否提醒、下次接种时间
    type VaccinationRecord struct {
       gorm.Model
-      ProfileID           uint      `json:"profileId"`
-      VaccineID           uint      `json:"vaccineId"`
-      VaccinationDate     time.Time `json:"vaccinationDate"`
-      VaccinationLocation string    `json:"vaccinationLocation"`
-      VaccinationDoctor   string    `json:"vaccinationDoctor"`
-      NextVaccinationDate time.Time `json:"nextVaccinationDate"`
+      ProfileID           uint    `json:"profileId"`
+      VaccineID           uint    `json:"vaccineId"`
+      Vaccine             Vaccine `gorm:"foreignKey:VaccineID" json:"vaccine"`
+      VaccinationDate     string  `json:"vaccinationDate"` // 注意用string与前端交互，例如"2021-07-01"
+      Voucher             string  `json:"voucher"`
+      VaccinationLocation string  `json:"vaccinationLocation"`
+      Reminder            bool    `json:"reminder"`
+      NextVaccinationDate string  `json:"nextVaccinationDate"`
+      Note                string  `json:"note"`
    }
    ```
 
@@ -104,40 +170,78 @@
    | PUT | /vaccination-records/:id | 更新指定 id 的疫苗信息 |
    | DELETE | /vaccination-records/:id | 删除指定 id 的疫苗信息 |
 
-5. **医生表 (Doctors)**:
+5. **体温记录表 (TemperatureRecords)**:
 
-   - DoctorID (主键)
-   - FullName
-   - Specialty
-   - Hospital
-   - ContactInfo
+   ```go
+   // TemperatureRecord 体温记录模型
+   type TemperatureRecord struct {
+      gorm.Model
+      ProfileID uint    `json:"profileId"`
+      Date      string  `json:"date"` // 包含日期和时间，例如"2021-07-01 12:00"
+      Temperature float32 `json:"temperature"`
+   }
+   ```
+
+   | 方法 | 路由 | 功能 |
+   | ---- | ---- | ---- |
+   | GET | /temperature-records | 获取全部体温记录 |
+   | POST | /temperature-records | 添加体温记录 |
+   | GET | /temperature-records/:id | 获取指定 id 的体温记录 |
+   | GET | /temperature-records/profile/:id | 获取指定 id 的接种者的体温记录 |
+   | PUT | /temperature-records/:id | 更新指定 id 的体温记录 |
+   | DELETE | /temperature-records/:id | 删除指定 id 的体温记录 |
 
 6. **预约表 (Appointments)**:
 
-   - AppointmentID (主键)
-   - ProfileID (外键)
-   - DoctorID (外键)
-   - VaccineID (外键)
-   - AppointmentDate
-   - AppointmentLocation
-   - CreatedAt
-   - UpdatedAt
+   ```go
+   // VaccinationAppointment 预约接种模型，可以取消预约，也可以在接种后转换为接种记录
+   type VaccinationAppointment struct {
+      gorm.Model
+      ProfileID           uint    `json:"profileId"`
+      VaccineID           uint    `json:"vaccineId"`
+      Vaccine             Vaccine `gorm:"foreignKey:VaccineID" json:"vaccine"`
+      VaccinationDate     string  `json:"vaccinationDate"` // 注意用string与前端交互，例如"2021-07-01"
+      VaccinationLocation string  `json:"vaccinationLocation"`
+      Note                string  `json:"note"`
+   }
+   ```
 
-7. **体温记录表 (TemperatureRecords)**:
-
-   - RecordID (主键)
-   - ProfileID (外键)
-   - Date
-   - Temperature
-
-8. **社区帖子表 (CommunityPosts)**:
+7. ** 消息提醒表 (Messages)**:
 
    ```go
-   type Post struct {
+   // Message 消息提醒模型，包含消息内容、接收者、发送者、发送时间
+   type Message struct {
       gorm.Model
-      Title       string `json:"title"`
-      Content     string `json:"content"`
-      CreatorName string `json:"creatorName"` // 创建者名称
+      Content   string `json:"content"`
+      Receiver  string `json:"receiver"`
+      Sender    string `json:"sender"`
+      SendTime  string `json:"sendTime"`
+      IsRead    bool   `json:"isRead"`
+      IsDeleted bool   `json:"isDeleted"`
+   }
+   ```
+
+   | 方法 | 路由 | 功能 |
+   | ---- | ---- | ---- |
+   | GET | /messages | 获取全部消息 |
+   | POST | /messages | 发送消息 |
+   | GET | /messages/:id | 获取指定 id 的消息 |
+   | GET | /messages?receiver=x | 获取接收者为 x 的所有消息 |
+   | PUT | /messages/:id | 更新指定 id 的消息 |
+   | DELETE | /messages/:id | 删除指定 id 的消息 |
+
+8. **social media 帖子表 (Articles)**:
+
+   ```go
+   // Article 文章模型，与疫苗绑定
+   type Article struct {
+      gorm.Model
+      Title     string `json:"title"`
+      Content   string `json:"content"`
+      UserName  string `json:"userName"`
+      UserID    uint   `json:"userId"`
+      IsBind    bool   `json:"isBind"` // 是否绑定疫苗，如果未绑定，则归为其他类型
+      VaccineID uint   `json:"vaccineId"`
    }
    ```
 
@@ -146,6 +250,7 @@
    | GET | /articles | 获取全部帖子 |
    | POST | /articles | 发布帖子 |
    | GET | /articles/:id | 获取指定 id 的帖子 |
+   | GET | /articles?article_id=x | 获取 id 为 x 的文章的所有 |
    | PUT | /articles/:id | 更新指定 id 的帖子 |
    | DELETE | /articles/:id | 删除指定 id 的帖子 |
 
@@ -204,8 +309,7 @@
 ```bash
 # wait-for-it.sh 或类似脚本
 while !</dev/tcp/db/3306; do sleep 1; done;
-
-
+```
 
 然后，在启动应用之前执行这个脚本。
 

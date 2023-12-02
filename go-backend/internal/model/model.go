@@ -30,7 +30,9 @@ type Vaccine struct {
 	Description   string `json:"description"`
 	TargetDisease string `json:"targetDisease"`
 	SideEffects   string `json:"sideEffects"`
-	Precautions   string `json:"precautions"`
+	Precautions   string `json:"precautions"` // 接种前注意事项
+	ValidPeriod   int    `json:"validPeriod"` // 有效期，单位为天
+	Type          string `json:"type"`        // 疫苗类型，常规疫苗、特殊疫苗、其他
 }
 
 // VaccinationRecord 接种记录模型
@@ -41,8 +43,8 @@ type VaccinationRecord struct {
 	ProfileID           uint    `json:"profileId"`
 	VaccineID           uint    `json:"vaccineId"`
 	Vaccine             Vaccine `gorm:"foreignKey:VaccineID" json:"vaccine"`
-	VaccinationDate     string  `json:"vaccinationDate"` // 注意用string与前端交互
-	Voucher             string  `json:"voucher"`
+	VaccinationDate     string  `json:"vaccinationDate"` // 注意用string与前端交互，例如"2021-07-01"
+	Voucher             string  `json:"voucher"`         // 接种凭证，之后实现为图片链接
 	VaccinationLocation string  `json:"vaccinationLocation"`
 	Reminder            bool    `json:"reminder"`
 	NextVaccinationDate string  `json:"nextVaccinationDate"`
@@ -53,17 +55,30 @@ type VaccinationRecord struct {
 type TempertureRecord struct {
 	gorm.Model
 	ProfileID  uint    `json:"profileId"`
-	Date       string  `json:"date"`
+	Date       string  `json:"date"` // 包含日期和时间，例如"2021-07-01 12:00"
 	Temperture float32 `json:"temperture"`
 }
 
-// Article 文章模型
+// VaccinationAppointment 预约接种模型，可以取消预约，也可以在接种后转换为接种记录
+type VaccinationAppointment struct {
+	gorm.Model
+	ProfileID           uint    `json:"profileId"`
+	VaccineID           uint    `json:"vaccineId"`
+	Vaccine             Vaccine `gorm:"foreignKey:VaccineID" json:"vaccine"`
+	VaccinationDate     string  `json:"vaccinationDate"` // 注意用string与前端交互，例如"2021-07-01"
+	VaccinationLocation string  `json:"vaccinationLocation"`
+	Note                string  `json:"note"`
+}
+
+// Article 文章模型，与疫苗绑定
 type Article struct {
 	gorm.Model
-	Title    string `json:"title"`
-	Content  string `json:"content"`
-	UserName string `json:"userName"`
-	UserID   uint   `json:"userId"`
+	Title     string `json:"title"`
+	Content   string `json:"content"`
+	UserName  string `json:"userName"`
+	UserID    uint   `json:"userId"`
+	IsBind    bool   `json:"isBind"` // 是否绑定疫苗，如果未绑定，则归为其他类型
+	VaccineID uint   `json:"vaccineId"`
 }
 
 // Reply 回复模型
@@ -73,4 +88,13 @@ type Reply struct {
 	Content   string `json:"content"`
 	UserName  string `json:"userName"`
 	UserID    uint   `json:"userId"`
+}
+
+// Message 消息模型
+type Message struct {
+	gorm.Model
+	Content  string `json:"content"` // 消息内容，将不同字段拼接成字符串
+	UserName string `json:"userName"`
+	UserID   uint   `json:"userId"`
+	SendTime string `json:"sendTime"` // 发送时间，注意用string与前端交互，例如"2021-07-01 12:00"
 }

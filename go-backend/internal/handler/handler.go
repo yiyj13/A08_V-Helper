@@ -10,47 +10,52 @@ import (
 func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	userService := service.NewUserService(db)
 	userHandler := NewUserHandler(userService)
-
-	router.GET("/users", userHandler.HandleGetAllUsers)
 	router.POST("/users", userHandler.HandleCreateUser)
+	router.GET("/users", userHandler.HandleGetAllUsers)
 	router.GET("/users/:id", userHandler.HandleGetUserByID)
 	router.PUT("/users/:id", userHandler.HandleUpdateUserByID)
 	router.DELETE("/users/:id", userHandler.HandleDeleteUserByID)
 
 	profileService := service.NewProfileService(db)
 	profileHandler := NewProfileHandler(profileService)
-
-	router.GET("/profiles", profileHandler.HandleGetAllProfiles)
 	router.POST("/profiles", profileHandler.HandleCreateProfile)
+	router.GET("/profiles", profileHandler.HandleGetAllProfiles)
 	router.GET("/profiles/:id", profileHandler.HandleGetProfileByID)
+	router.GET("/profiles/user/:userID", profileHandler.HandleGetProfilesByUserID)
 	router.PUT("/profiles/:id", profileHandler.HandleUpdateProfileByID)
 	router.DELETE("/profiles/:id", profileHandler.HandleDeleteProfileByID)
-	router.GET("/profiles/user/:id", profileHandler.HandleGetProfilesByUserID)
 
 	vaccineService := service.NewVaccineService(db)
 	vaccineHandler := NewVaccineHandler(vaccineService)
-
-	router.GET("/vaccines", vaccineHandler.HandleGetAllVaccines)
 	router.POST("/vaccines", vaccineHandler.HandleCreateVaccine)
+	router.GET("/vaccines", vaccineHandler.HandleGetAllVaccines)
 	router.GET("/vaccines/:id", vaccineHandler.HandleGetVaccineByID)
 	router.PUT("/vaccines/:id", vaccineHandler.HandleUpdateVaccineByID)
 	router.DELETE("/vaccines/:id", vaccineHandler.HandleDeleteVaccineByID)
 
 	vaccinationRecordService := service.NewVaccinationRecordService(db)
 	vaccinationRecordHandler := NewVaccinationRecordHandler(vaccinationRecordService)
-
-	router.GET("/vaccination-records", vaccinationRecordHandler.HandleGetAllVaccinationRecords)
 	router.POST("/vaccination-records", vaccinationRecordHandler.HandleCreateVaccinationRecord)
+	router.GET("/vaccination-records", vaccinationRecordHandler.HandleGetAllVaccinationRecords)
 	router.GET("/vaccination-records/:id", vaccinationRecordHandler.HandleGetVaccinationRecordByID)
+	router.GET("/vaccination-records/profile/:profileID", vaccinationRecordHandler.HandleGetVaccinationRecordsByProfileID)
 	router.PUT("/vaccination-records/:id", vaccinationRecordHandler.HandleUpdateVaccinationRecordByID)
 	router.DELETE("/vaccination-records/:id", vaccinationRecordHandler.HandleDeleteVaccinationRecordByID)
-	router.GET("/vaccination-records/profile/:id", vaccinationRecordHandler.HandleGetVaccinationRecordsByProfileID)
+
+	tempertureRecordService := service.NewTempertureRecordService(db)
+	tempertureRecordHandler := NewTempertureRecordHandler(tempertureRecordService)
+	router.POST("/temperture-records", tempertureRecordHandler.HandleCreateTempertureRecord)
+	router.GET("/temperture-records", tempertureRecordHandler.HandleGetAllTempertureRecords)
+	router.GET("/temperture-records/:id", tempertureRecordHandler.HandleGetTempertureRecordByID)
+	router.GET("/temperture-records/profile/:profileID", tempertureRecordHandler.HandleGetTempertureRecordsByProfileID)
+	router.PUT("/temperture-records/:id", tempertureRecordHandler.HandleUpdateTempertureRecordByID)
+	router.DELETE("/temperture-records/:id", tempertureRecordHandler.HandleDeleteTempertureRecordByID)
 
 	// 帖子
 	articleService := service.NewArticleService(db)
 	articleHandler := NewArticleHandler(articleService)
-	router.GET("/articles", articleHandler.HandleGetAllArticles)
 	router.POST("/articles", articleHandler.HandleCreateArticle)
+	router.GET("/articles", articleHandler.HandleGetAllArticles)
 	router.GET("/articles/:id", articleHandler.HandleGetArticleByID)
 	router.PUT("/articles/:id", articleHandler.HandleUpdateArticleByID)
 	router.DELETE("/articles/:id", articleHandler.HandleDeleteArticleByID)
@@ -65,13 +70,4 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.PUT("/replys/:id", replyHandler.HandleUpdateReplyByID)
 	router.DELETE("/replys/:id", replyHandler.HandleDeleteReplyByID)
 
-	// 体温记录
-	tempertureRecordService := service.NewTempertureRecordService(db)
-	tempertureRecordHandler := NewTempertureRecordHandler(tempertureRecordService)
-	router.GET("/temperture-records", tempertureRecordHandler.HandleGetAllTempertureRecords)
-	router.POST("/temperture-records", tempertureRecordHandler.HandleCreateTempertureRecord)
-	router.GET("/temperture-records/:id", tempertureRecordHandler.HandleGetTempertureRecordByID)
-	router.PUT("/temperture-records/:id", tempertureRecordHandler.HandleUpdateTempertureRecordByID)
-	router.DELETE("/temperture-records/:id", tempertureRecordHandler.HandleDeleteTempertureRecordByID)
-	router.GET("/temperture-records/profile/:id", tempertureRecordHandler.HandleGetTempertureRecordsByProfileID)
 }
