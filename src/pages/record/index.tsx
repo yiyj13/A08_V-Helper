@@ -6,14 +6,14 @@
 */
 
 import Taro from '@tarojs/taro'
-import { useState } from 'react'
-import { Cell, Switch, Picker, Uploader, Button, DatePicker } from '@nutui/nutui-react-taro'
-import { TextArea } from '@nutui/nutui-react-taro'
+import { useState, useEffect } from 'react'
+import { Cell, Switch, Picker, Uploader, Button, DatePicker, TextArea, Input } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
-// import {ComboBox} from 'src/components/combobox';
+import ComboBox from '../../components/combobox'
 import api from '../../api'
 
+// TODO: remind部分三个变量，设计不够优雅
 type RecordData = {
   id: number // 接种人
   name: number // 疫苗名称
@@ -21,6 +21,9 @@ type RecordData = {
   date: string // 接种时间
   valid: number // 有效期
   reminder: boolean // 接种提醒
+  remindValue: number // 提醒时间数值
+  remindUnit: string // 提醒单位
+  remindDate: number //根据提醒时间数值和单位计算出的提醒时间（多少天前）
   voucher: string // 接种凭证
   note: string // 备注
 }
@@ -78,7 +81,10 @@ export default function VaccineRecord() {
     type: -1,
     date: '',
     valid: 0,
-    reminder: true,
+    reminder: false,
+    remindValue: 0,
+    remindUnit: '',
+    remindDate: 0,
     voucher: '',
     note: '',
   })
@@ -151,11 +157,33 @@ export default function VaccineRecord() {
       valid: parseInt(description) * (description.includes('年') ? 365 : 30), // 假设只有年和月的单位
     })
   }
+
+  const [remindVisible, setRemindVisible] = useState(false)
+  const [remindValue, setRemindValue] = useState('')
+  const [remindUnit, setRemindUnit] = useState('')
+
   const onSwitchChange = (value: boolean) => {
     setRecord({
       ...record,
       reminder: value,
     })
+    setRemindVisible(value)
+  }
+
+  const onRemindValueChange = (value: string) => {
+    setRecord({
+      ...record,
+      remindValue: parseInt(value) || 0,
+    })
+    setRemindValue(value)
+  }
+
+  const onRemindUnitSet = (option: string) => {
+    setRecord({
+      ...record,
+      remindUnit: option,
+    })
+    setRemindUnit(option)
   }
 
   const onTextChange = (value: string) => {
@@ -164,10 +192,33 @@ export default function VaccineRecord() {
       note: value,
     })
   }
+  useEffect(() => {
+    console.log('record:', record)
+  }, [record])
+
+  const calculateRemindDate = () => {
+    if (!isNaN(record.remindValue)) {
+      const unitMultiplier = {
+        日: 1,
+        周: 7,
+        月: 30,
+      }
+      setRecord({
+        ...record,
+        remindDate: record.remindValue * unitMultiplier[remindUnit],
+      })
+    } else {
+      // Default to -1 if remindValue is not a valid number
+      setRecord({
+        ...record,
+        remindDate: -1,
+      })
+    }
+  }
 
   const handleSubmission = async () => {
-    console.log('record:', record) // for debug
-    if (record && record.id >= 0 && record.name >= 0 && record.type >= 0 && record.date) {
+    calculateRemindDate()
+    if (record && record.id >= 0 && record.name >= 0 && record.type >= 0 && record.date && record.remindDate >= 0) {
       try {
         const res = await api.request({ url: '/api/vaccination-records', method: 'POST', data: record })
         console.log(res.data) // for debug
@@ -191,7 +242,10 @@ export default function VaccineRecord() {
       type: -1,
       date: '',
       valid: 0,
-      reminder: true,
+      reminder: false,
+      remindValue: 0,
+      remindUnit: '',
+      remindDate: 0,
       voucher: '',
       note: '',
     })
@@ -272,27 +326,55 @@ export default function VaccineRecord() {
         style={{ textAlign: 'center' }}
       />
       <Picker
-        title='期限'
+        title='有效期限'
         visible={validVisible}
         options={ValidData}
         onConfirm={(list, values) => confirmValid(list, values)}
         onClose={() => setValidVisible(false)}
       />
-      <div className='flex-content'>
-        接种提醒
-        <Switch defaultChecked onChange={(value) => onSwitchChange(value)} />
+      <div className='col-span-full flex-content flex items-center '>
+        <span className='text-sm ml-2 '>接种提醒</span>
+        <Switch className=' ml-2' onChange={(value) => onSwitchChange(value)} />
+        {remindVisible && (
+          <div className='ml-2 flex items-center'>
+            <Input
+              type='number'
+              placeholder='数字'
+              value={remindValue}
+              onChange={(value) => onRemindValueChange(value)}
+              className='mr-2 border border-gray-200 rounded p-1'
+            />
+            <ComboBox
+              title={''}
+              options={['日', '周', '月']}
+              onSelect={(option) => onRemindUnitSet(option)}
+              className='mr-2'
+            />
+            <span className='text-sm ml-2'>前提醒</span>
+          </div>
+        )}
       </div>
-      <div className='flex-content'>
-        接种凭证
-        <Uploader url='https://img13.360buyimg.com/imagetools/jfs/t1/169186/5/33010/1762/639703a1E898bcb96/6c372c661c6dddfe.png' />
+
+      <div className='col-span-full flex-content items-center'>
+        <span className='ml-2 text-sm'>接种凭证</span>
+        <Uploader
+          className='w-full px-2'
+          url='https://img13.360buyimg.com/imagetools/jfs/t1/169186/5/33010/1762/639703a1E898bcb96/6c372c661c6dddfe.png'
+        />
       </div>
-      <TextArea rows={5} autoSize onChange={(value) => onTextChange(value)} />
-      <Button className='submit_btm' formType='submit' type='primary' onClick={handleSubmission}>
-        提交
-      </Button>
-      <Button className='reset_btm' formType='reset' style={{ marginLeft: '20px' }} onClick={handleReset}>
-        重置
-      </Button>
+      <Cell title='TextArea' className='col-span-full px-8' style={{ borderRadius: '8px' }}>
+        <TextArea placeholder='请输入备注' autoSize onChange={(value) => onTextChange(value)} />
+      </Cell>
+      <div className='col-span-full flex justify-center mt-4'>
+        <Button className='submit_btm' formType='submit' type='primary' onClick={handleSubmission}>
+          提交
+        </Button>
+        <div style={{ marginLeft: '16px' }}>
+          <Button className='reset_btm' formType='reset' onClick={handleReset}>
+            重置
+          </Button>
+        </div>
+      </div>
     </>
   )
 }

@@ -3,7 +3,7 @@
     2. Navigate with the MemberData to fill in the form if the user clicks on the member
 */
 
-import React, { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { VirtualList, Button } from '@nutui/nutui-react-taro'
 import { IconFont, Edit } from '@nutui/icons-react-taro'
 import Taro from '@tarojs/taro'
