@@ -1,4 +1,6 @@
 import { RectRight, Tips } from '@nutui/icons-react-taro'
+import { Image } from '@tarojs/components'
+import Logo from '../../../assets/about/logo.png'
 
 export default function Index() {
   return (
@@ -6,10 +8,13 @@ export default function Index() {
       <div className='flex flex-col h-full w-11/12 m-5 rounded-2xl std-box-shadow'>
         
         <div className='m-4 flex flex-col'>
+          <div className='flex flex-col items-center p-2'>
+            <Image src={Logo} style='width: 100px; height: 100px;' />
+          </div>
           <div className='p-2 flex flex-col items-center'>
             <p className='text-lg'>V-helper</p>
           </div>
-          <div className='p-4 flex flex-col items-center'>
+          <div className='p-2 flex flex-col items-center'>
             <p>版本 1.0</p>
           </div>
         </div>
@@ -20,7 +25,7 @@ export default function Index() {
         </div>
 
         <div className='h-full m-4 flex flex-col-reverse'>
-          <div className='flex flex-col p-2 justify-evenly items-center'>
+          <div className='flex flex-col p-2 justify-evenly items-center text-slate-400'>
             <p>开发者：杨朗 易郁杰 刘博非 唐子涵</p>
             <p>联系方式：vaxhelper1024@google.com</p>
           </div>
