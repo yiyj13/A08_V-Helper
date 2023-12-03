@@ -32,28 +32,3 @@
   position: relative;
   bottom: 18px;
 }
-
-.noticeview-title {
-  position: relative;
-  left: 20px;
-  font-weight: 600;
-  font-size: 24px;
-}
-
-.noticeview {
-  position: relative;
-  top: 20px;
-   /* height: calc(100vh - 430px); */
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-   /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
-   /* border: 1px solid red; */
-}
-
-.noticeview-item {
-  margin: auto;
-  margin-top: 20px;
-  width: 90%;
-  height: 80px;
-}
