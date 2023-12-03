@@ -8,10 +8,10 @@ export default function InputCustom(props: Props) {
   return (
     <div className='relative mt-4'>
       <FocusableInput
+        {...props}
         baseClass='peer block h-auto w-auto appearance-none rounded-xl bg-transparent px-1 py-2.5 text-xl font-bold text-gray-600'
         focusClass='focused'
         placeholderShownClass='placed'
-        {...props}
       />
       <label
         className='absolute top-3 w-auto origin-[0] -translate-y-6 transform px-1 text-xs text-gray-500 duration-150

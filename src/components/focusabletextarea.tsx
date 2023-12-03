@@ -14,11 +14,11 @@ function FocusableTextArea(props: FocusableTextAreaProps) {
     baseClass + ' ' + (focus ? focusClass : blurClass) + ' ' + (value || focus ? '' : placeholderShownClass)
   return (
     <Textarea
+      {...props}
       onFocus={() => setFocus(true)}
       onBlur={() => setFocus(false)}
       className={newClassName}
       controlled
-      {...props}
     />
   )
 }
