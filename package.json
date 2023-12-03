@@ -57,6 +57,7 @@
     "@tarojs/shared": "3.6.18",
     "@tarojs/taro": "3.6.18",
     "@types/mockjs": "^1.0.10",
+    "dayjs": "^1.11.10",
     "immer": "^10.0.3",
     "mockjs": "^1.1.0",
     "react": "^18.0.0",
