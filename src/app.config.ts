@@ -9,6 +9,11 @@ export default defineAppConfig({
     'pages/enquiry/index',
     'pages/record/index',
     'pages/temper/index',
+    'pages/my/about/index',
+    'pages/my/notice/index',
+    'pages/my/feedback/index',
+    'pages/member/index',
+    'pages/addMember/index',
   ],
   window: {
     backgroundTextStyle: 'light',
