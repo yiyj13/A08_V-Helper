@@ -22,11 +22,11 @@ function FocusableInput(props: FocusableInputProps) {
     baseClass + ' ' + (focus ? focusClass : blurClass) + ' ' + (value || focus ? '' : placeholderShownClass)
   return (
     <Input
+      {...props}
       onFocus={() => setFocus(true)}
       onBlur={() => setFocus(false)}
       className={newClassName}
       controlled
-      {...props}
     />
   )
 }

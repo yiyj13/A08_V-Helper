@@ -26,9 +26,9 @@ export default function ProfilePage() {
         </div>
 
         <div className='flex flex-col m-4'>
-          <ActionFlexColItem icon={<Notice size={24} className='brand-color' />} text='消息设置' />
-          <ActionFlexColItem icon={<Ask size={24} className='brand-color' />} text='反馈' />
-          <ActionFlexColItem icon={<Tips size={24} className='brand-color' />} text='关于' />
+          <ActionFlexColItem icon={<Notice size={24} className='brand-color' />} text='消息设置' onClick={() => Taro.navigateTo({ url: '/pages/my/notice/index' })} />
+          <ActionFlexColItem icon={<Ask size={24} className='brand-color' />} text='反馈' onClick={() => Taro.navigateTo({ url: '/pages/my/feedback/index' })} />
+          <ActionFlexColItem icon={<Tips size={24} className='brand-color' />} text='关于' onClick={() => Taro.navigateTo({ url: '/pages/my/about/index' })} />
         </div>
 
         <div className='flex flex-col-reverse h-full p-8 m-auto'>

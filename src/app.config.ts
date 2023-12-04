@@ -2,12 +2,16 @@ export default defineAppConfig({
   pages: [
     //
     'pages/index',
+    'pages/vacCalendar/index',
     'pages/sendpost/index',
     'pages/vacDetails/index',
     'pages/blank/index',
     'pages/enquiry/index',
     'pages/record/index',
     'pages/temper/index',
+    'pages/my/about/index',
+    'pages/my/notice/index',
+    'pages/my/feedback/index',
     'pages/member/index',
     'pages/addMember/index',
   ],

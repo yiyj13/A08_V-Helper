@@ -8,11 +8,11 @@ export default function TextAreaCustom(props: Props) {
   return (
     <div className='relative h-full w-auto my-4'>
       <FocusableTextArea
+        {...props}
         baseClass='peer block px-1 py-2 mb-2 text-base h-full w-auto rounded-xl'
         focusClass='focused'
         placeholderShownClass='placed'
         maxlength={500}
-        {...props}
       ></FocusableTextArea>
       <label
         className='absolute top-3 w-auto origin-[0] -translate-y-6 transform px-1 text-sm text-gray-500 duration-150

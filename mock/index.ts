@@ -132,6 +132,30 @@ export default {
       }
     })
   },
+  
+  'GET /api/notices': [
+    {
+      ID: 1,
+      profile: "张三",
+      vaccine: "新冠疫苗",
+      type: "第一针",
+      date: "2023-01-01",
+    },
+    {
+      ID: 2,
+      profile: "张三",
+      vaccine: "新冠疫苗",
+      type: "第二针",
+      date: "2023-02-01",
+    },
+    {
+      ID: 3,
+      profile: "张三",
+      vaccine: "新冠疫苗",
+      type: "第三针",
+      date: "2023-03-01",
+    },
+  ],
 }
 
 // const VaccinationRecord = Mock.mock({
