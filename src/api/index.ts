@@ -1,6 +1,9 @@
 import Taro from '@tarojs/taro'
 import { StorageSceneKey } from '../utils'
 import { BASE_URL } from './config'
+import { interceptors } from './interceptor'
+
+interceptors.forEach((interceptor) => Taro.addInterceptor(interceptor))
 
 // TODO:
 class Http {
