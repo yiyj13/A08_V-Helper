@@ -1,230 +1,208 @@
-// /* TODO: 
-//     1. Coordinate with the backend APIs (implemented)
-//     2. Add a ComboBox component to replace the Picker component
-//     3. CSS style for the menu and the buttons
-// */
+/* TODO: 
+    1. Coordinate with the backend APIs (implemented)
+    2. Add a ComboBox component to replace the Picker component
+    3. CSS style for the menu and the buttons
+*/
 
-// import Taro from '@tarojs/taro'
-// import { useState } from "react";
-// import { Cell, Switch, Picker, Uploader, Button, DatePicker } from '@nutui/nutui-react-taro';
-// import { TextArea } from '@nutui/nutui-react-taro';
-// import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types';
+import Taro from '@tarojs/taro'
+import { useState, useEffect } from 'react'
+import { Input, Cell, Checkbox, Picker, Uploader, Button, DatePicker } from '@nutui/nutui-react-taro'
+import { TextArea } from '@nutui/nutui-react-taro'
+import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
-// // import {ComboBox} from 'src/components/combobox';
-// import api from '../../api'
+// import {ComboBox} from 'src/components/combobox';
+import api from '../../api'
 
-// type MemberData = {
-//     avatar: string, // 头像
-//     relationship: string, // 与本人关系
-//     name: string // 成员姓名
-//     gender: string // 性别
-//     birthday: string // 出生日期
-// }
+type MemberData = {
+  name: string // 成员姓名
+  relationship: number // 与本人关系
+  gender: number // 性别，男0女1
+  birthday: string // 出生日期
+  avatar: string // 头像
+  note: string // 备注
+}
 
-// export default function addMember() {
+export default function addMember() {
+  const MemberData = [
+    [
+      { value: 0, text: '本人' },
+      { value: 1, text: '父亲' },
+      { value: 2, text: '母亲' },
+      { value: 3, text: '儿子' },
+      { value: 4, text: '女儿' },
+      { value: 5, text: '配偶' },
+      { value: 6, text: '其他' },
+    ],
+  ]
 
-//     const [record, setRecord] = useState<MemberData>({
-//         avatar: '',
-//         relationship: '',
-//         name: '',
-//         gender: '',
-//         birthday: '',
-//     });
+  const [member, setMember] = useState<MemberData>({
+    name: '',
+    relationship: -1,
+    gender: -1,
+    birthday: '',
+    avatar: 'https://img.yzcdn.cn/vant/cat.jpeg',
+    note: '',
+  })
 
-//     const [idVisible, setIdVisible] = useState(false)
-//     const [idDesc, setIdDesc] = useState('')
-//     const confirmID = (options: PickerOption[], values: (string | number)[]) => {
-//         let description = ''
-//         options.forEach((option: any) => {
-//             description += option.text
-//         })
-//         setIdDesc(description)
-//         setRecord({
-//             ...record,
-//             id: values[0] as number,
-//         });
-//     }
+  useEffect(() => {
+    console.log('member:', member)
+  }, [member])
 
-//     const [nameVisible, setNameVisible] = useState(false)
-//     const [nameDesc, setNameDesc] = useState('')
-//     const confirmName = (options: PickerOption[], values: (string | number)[]) => {
-//         let description = ''
-//         options.forEach((option: any) => {
-//             description += option.text
-//         })
-//         setNameDesc(description)
-//         setRecord({
-//             ...record,
-//             name: values[0] as number,
-//         });
-//     }
+  const [nameValue, setNameValue] = useState('')
+  const onNameChange = (value: string) => {
+    setMember({
+      ...member,
+      name: value,
+    })
+    setNameValue(value)
+  }
+  const [relationVisible, setRelationVisible] = useState(false)
+  const [relationDesc, setRelationDesc] = useState('')
+  const confirmRelation = (options: PickerOption[], values: (string | number)[]) => {
+    let description = ''
+    options.forEach((option: any) => {
+      description += option.text
+    })
+    setRelationDesc(description)
+    setMember({
+      ...member,
+      relationship: values[0] as number,
+    })
+  }
 
-//     const [typeVisible, setTypeVisible] = useState(false)
-//     const [typeDesc, setTypeDesc] = useState('')
-//     const confirmType = (options: PickerOption[], values: (string | number)[]) => {
-//         let description = ''
-//         options.forEach((option: any) => {
-//             description += option.text
-//         })
-//         setTypeDesc(description)
-//         setRecord({
-//             ...record,
-//             type: values[0] as number,
-//         });
-//     }
+  const onGenderChange = (value: number) => {
+    setMember({
+      ...member,
+      gender: value,
+    })
+  }
+  const startDate = new Date(1900, 0, 1)
+  const endDate = new Date(2023, 11, 1)
+  const [dateVisible, setDateVisible] = useState(false)
+  const [dateDesc, setDateDesc] = useState('')
+  const confirmDate = (values: (string | number)[], _options: PickerOption[]) => {
+    const date = values.slice(0, 3).join('-')
+    setDateDesc(`${date}`)
+    setMember({
+      ...member,
+      birthday: date,
+    })
+  }
 
-//     const startDate = new Date(2000, 0, 1)
-//     const endDate = new Date(2025, 11, 30)
-//     const [dateVisible, setDateVisible] = useState(false)
-//     const [dateDesc, setDateDesc] = useState('')
-//     const confirmDate = (values: (string | number)[], _options: PickerOption[]) => {
-//         const date = values.slice(0, 3).join('-');
-//         setDateDesc(`${date}`)
-//         setRecord({
-//             ...record,
-//             date: date,
-//         });
-//     }
+  const onNoteChange = (value: string) => {
+    setMember({
+      ...member,
+      note: value,
+    })
+  }
 
-//     const [validVisible, setValidVisible] = useState(false)
-//     const [validDesc, setValidDesc] = useState('')
-//     const confirmValid = (options: PickerOption[], _values: (string | number)[]) => {
-//         let description = ''
-//         options.forEach((option: any) => {
-//             description += option.text
-//         })
-//         setValidDesc(description)
-//         setRecord({
-//             ...record,
-//             valid: parseInt(description) * (description.includes('年') ? 365 : 30),// 假设只有年和月的单位
+  const handleSubmission = async () => {
+    console.log('member:', member) // for debug
+    if (member && member.name && member.relationship >= 0 && member.gender) {
+      try {
+        const res = await api.request({ url: '/api/vaccination-records', method: 'POST', data: member })
+        console.log(res.data) // for debug
+        Taro.showToast({ title: '提交成功', icon: 'success' })
+        setTimeout(() => {
+          Taro.navigateBack()
+        }, 1000)
+      } catch (error) {
+        console.log('Error submitting vaccination record:', error)
+        Taro.showToast({ title: '提交失败', icon: 'error' })
+      }
+    } else {
+      Taro.showToast({ title: '请填写完整记录', icon: 'error' })
+    }
+  }
 
-//         });
-//     }
-//     const onSwitchChange = (value: boolean) => {
-//         setRecord({
-//             ...record,
-//             reminder: value,
-//         });
-//     }
+  const handleReset = () => {
+    setMember({
+      name: '',
+      relationship: -1,
+      gender: -1,
+      birthday: '',
+      avatar: 'https://img.yzcdn.cn/vant/cat.jpeg',
+      note: '',
+    })
+    setRelationDesc('')
+    setDateDesc('')
 
-//     const onTextChange = (value: string) => {
-//         setRecord({
-//             ...record,
-//             note: value,
-//         });
-//     }
+    setDateVisible(false)
+    Taro.showToast({ title: '重置成功', icon: 'success' })
+  }
 
-//     const handleSubmission = async () => {
-//         console.log('record:', record);// for debug
-//         if (record && record.id >= 0 && record.name >= 0 && record.type >= 0 && record.date) {
-//             try {
-//                 const res = await api.request({ url: '/api/vaccination-records', method: 'POST', data: record })
-//                 console.log(res.data);// for debug
-//                 Taro.showToast({ title: '提交成功', icon: 'success' })
-//                 setTimeout(() => {
-//                     Taro.navigateBack()
-//                 },1000)
-                
-//             } catch (error) {
-//                 console.log('Error submitting vaccination record:', error);
-//                 Taro.showToast({ title: '提交失败', icon: 'error' });
-//             }
+  return (
+    <>
+      <Cell.Group className='col-span-full'>
+        <Cell title='成员姓名' style={{ borderRadius: '8px' }}>
+          <Input
+            type='text'
+            placeholder='请输入成员姓名'
+            value={nameValue}
+            onChange={(value) => onNameChange(value)}
+            className='border border-gray-200 rounded p-1'
+          />
+        </Cell>
+      </Cell.Group>
 
-//         } else {
-//             Taro.showToast({ title: '请填写完整记录', icon: 'error' });
-//         }
+      <Cell.Group className='col-span-full'>
+        <Cell title='性别' style={{ textAlign: 'center' }}>
+          <Checkbox.Group className='flex' onChange={(value) => onGenderChange(value[0] === '0' ? 0 : 1)}>
+            <Checkbox title='男' value={0} className='mr-2'>
+              男
+            </Checkbox>
+            <Checkbox title='女' value={1}>
+              女
+            </Checkbox>
+          </Checkbox.Group>
+        </Cell>
+      </Cell.Group>
 
-//     }
-
-//     const handleReset = () => {
-//         setRecord({
-//             id: -1,
-//             name: -1,
-//             type: -1,
-//             date: '',
-//             valid: 0,
-//             reminder: true,
-//             voucher: '',
-//             note: '',
-//         });
-//         setIdDesc('');
-//         setNameDesc('');
-//         setTypeDesc('');
-//         setDateDesc('');
-//         setValidDesc('');
-
-//         setIdVisible(false);
-//         setNameVisible(false);
-//         setTypeVisible(false);
-//         setDateVisible(false);
-//         setValidVisible(false);
-//         Taro.showToast({ title: '重置成功', icon: 'success' })
-//     }
-
-//     return (
-//         <>
-//             <Cell title="接种人" description={idDesc} onClick={() => setIdVisible(!idVisible)}
-//                 style={{ textAlign: 'center' }} />
-//             <Picker
-//                 title="接种人"
-//                 visible={idVisible}
-//                 options={MemberData}
-//                 onConfirm={(list, values) => confirmID(list, values)}
-//                 onClose={() => setIdVisible(false)}
-//             />
-//             <Cell title="疫苗名称" description={nameDesc} onClick={() => setNameVisible(!nameVisible)}
-//                 style={{ textAlign: 'center' }} />
-//             <Picker
-//                 title="疫苗名称"
-//                 visible={nameVisible}
-//                 options={VaccineData}
-//                 onConfirm={(list, values) => confirmName(list, values)}
-//                 onClose={() => setNameVisible(false)}
-//             />
-//             <Cell title="接种类型" description={typeDesc} onClick={() => setTypeVisible(!typeVisible)}
-//                 style={{ textAlign: 'center' }} />
-//             <Picker
-//                 title="接种类型"
-//                 visible={typeVisible}
-//                 options={TypeData}
-//                 onConfirm={(list, values) => confirmType(list, values)}
-//                 onClose={() => setTypeVisible(false)}
-//             />
-//             <Cell title="接种时间" description={dateDesc} onClick={() => setDateVisible(true)}
-//                 style={{ textAlign: 'center' }} />
-//             <DatePicker
-//                 title="接种时间"
-//                 startDate={startDate}
-//                 endDate={endDate}
-//                 visible={dateVisible}
-//                 type="date"
-//                 onClose={() => setDateVisible(false)}
-//                 onConfirm={(options, values) => confirmDate(values, options)}
-//             />
-//             <Cell title="有效期限" description={validDesc} onClick={() => setValidVisible(!validVisible)}
-//                 style={{ textAlign: 'center' }} />
-//             <Picker
-//                 title="期限"
-//                 visible={validVisible}
-//                 options={ValidData}
-//                 onConfirm={(list, values) => confirmValid(list, values)}
-//                 onClose={() => setValidVisible(false)}
-//             />
-//             <div className="flex-content">接种提醒
-//                 <Switch defaultChecked onChange={(value) => onSwitchChange(value)} />
-//             </div>
-//             <div className="flex-content">接种凭证
-//                 <Uploader
-//                     url="https://img13.360buyimg.com/imagetools/jfs/t1/169186/5/33010/1762/639703a1E898bcb96/6c372c661c6dddfe.png" />
-//             </div>
-//             <TextArea rows={5} autoSize onChange={(value) => onTextChange(value)} />
-//             <Button className="submit_btm" formType="submit" type="primary" onClick={handleSubmission} >
-//                 提交
-//             </Button>
-//             <Button className="reset_btm" formType="reset" style={{ marginLeft: '20px' }} onClick={handleReset} >
-//                 重置
-//             </Button>
-//         </>
-//     )
-
-// }
+      <Cell
+        title='与本人关系'
+        description={relationDesc}
+        onClick={() => setRelationVisible(!relationVisible)}
+        style={{ textAlign: 'center' }}
+      />
+      <Picker
+        title='与本人关系'
+        visible={relationVisible}
+        options={MemberData}
+        onConfirm={(list, values) => confirmRelation(list, values)}
+        onClose={() => setRelationVisible(false)}
+      />
+      <Cell
+        title='出生日期'
+        description={dateDesc}
+        onClick={() => setDateVisible(true)}
+        style={{ textAlign: 'center' }}
+      />
+      <DatePicker
+        title='出生日期'
+        startDate={startDate}
+        endDate={endDate}
+        visible={dateVisible}
+        type='date'
+        onClose={() => setDateVisible(false)}
+        onConfirm={(options, values) => confirmDate(values, options)}
+      />
+      <div className='flex-content col-span-full'>
+        头像
+        <Uploader url='https://img.yzcdn.cn/vant/cat.jpeg' />
+      </div>
+      <Cell title='TextArea' className='col-span-full px-8' style={{ borderRadius: '8px' }}>
+        <TextArea placeholder='请输入备注' autoSize onChange={(value) => onNoteChange(value)} />
+      </Cell>
+      <div className='col-span-full flex justify-center mt-4'>
+        <Button className='submit_btm' formType='submit' type='primary' onClick={handleSubmission}>
+          提交
+        </Button>
+        <div style={{ marginLeft: '16px' }}>
+          <Button className='reset_btm' formType='reset' onClick={handleReset}>
+            重置
+          </Button>
+        </div>
+      </div>
+    </>
+  )
+}

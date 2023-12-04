@@ -117,6 +117,21 @@ export default {
       }
     })
   },
+
+  'POST /api/profiles': (req,res) => {
+    res.status(200).json({
+      message: 'New memeber added successfully',
+      success: true,
+      data: {
+        Fullname: req.body.name,
+        Gender: req.body.gender,
+        DateOfBirth: req.body.birthday,
+        Relationship: req.body.relationship,
+        avatar: req.body.avatar,
+        note: req.body.note,
+      }
+    })
+  },
 }
 
 // const VaccinationRecord = Mock.mock({
