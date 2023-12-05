@@ -58,6 +58,56 @@ func (h *ArticleHandler) HandleGetArticleByID(c *gin.Context) {
 	c.JSON(http.StatusOK, article)
 }
 
+func (h *ArticleHandler) HandleGetArticlesByUserID(c *gin.Context) {
+	userID, err := strconv.ParseUint(c.Param("userID"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	// 可能需要分页，page指定页数，size指定每页大小
+	var page uint64 = 0
+	var size uint64 = 0
+	p := c.Query("page")
+	s := c.Query("size")
+	if p != "" {
+		page, err = strconv.ParseUint(p, 10, 32)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page number"})
+			return
+		}
+	}
+	if s != "" {
+		size, err = strconv.ParseUint(s, 10, 32)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page size"})
+			return
+		}
+	}
+
+	articles, err := h.articleService.GetArticlesByUserID(uint(userID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error fetching articles"})
+		return
+	}
+
+	// 分页
+	if size != 0 {
+		start := (page - 1) * size
+		end := page * size
+		if start > uint64(len(articles)) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page number"})
+			return
+		}
+		if end > uint64(len(articles)) {
+			end = uint64(len(articles))
+		}
+		articles = articles[start:end]
+	}
+
+	c.JSON(http.StatusOK, articles)
+}
+
 func (h *ArticleHandler) HandleUpdateArticleByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -93,20 +143,3 @@ func (h *ArticleHandler) HandleDeleteArticleByID(c *gin.Context) {
 	log.Println("article deleted successfully: ", id)
 	c.JSON(http.StatusOK, gin.H{"message": "article deleted successfully"})
 }
-
-// GetArticlesByUserID 处理通过 UserID 获取 Article 的请求
-// func (h *ArticleHandler) HandleGetArticlesByUserID(c *gin.Context) {
-// 	userID, err := strconv.ParseUint(c.Param("userID"), 10, 32)
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
-// 		return
-// 	}
-
-// 	articles, err := h.articleService.GetArticlesByUserID(uint(userID))
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error fetching articles"})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, articles)
-// }

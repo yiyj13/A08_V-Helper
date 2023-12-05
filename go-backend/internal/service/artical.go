@@ -34,6 +34,14 @@ func (s *ArticleService) GetArticleByID(id uint) (model.Article, error) {
 	return article, nil
 }
 
+func (s *ArticleService) GetArticlesByUserID(userID uint) ([]model.Article, error) {
+	var articles []model.Article
+	if err := s.db.Where("user_id = ?", userID).Find(&articles).Error; err != nil {
+		return nil, err
+	}
+	return articles, nil
+}
+
 func (s *ArticleService) UpdateArticleByID(id uint, article model.Article) error {
 	return s.db.Model(&article).Where("id = ?", id).Updates(article).Error
 }
@@ -41,12 +49,3 @@ func (s *ArticleService) UpdateArticleByID(id uint, article model.Article) error
 func (s *ArticleService) DeleteArticleByID(id uint) error {
 	return s.db.Where("id = ?", id).Delete(&model.Article{}).Error
 }
-
-// GetArticlesByUserID 通过 UserID 查询所有相关的 Article
-// func (s *ArticleService) GetArticlesByUserID(userID uint) ([]model.Article, error) {
-// 	var articles []model.Article
-// 	if err := s.db.Where("user_id = ?", userID).Find(&articles).Error; err != nil {
-// 		return nil, err
-// 	}
-// 	return articles, nil
-// }
