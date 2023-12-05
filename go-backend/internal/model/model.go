@@ -7,7 +7,8 @@ import (
 // User 用户模型
 type User struct {
 	gorm.Model        //gorm.Model 包含了 CreatedAt、UpdatedAt、DeletedAt（用于软删除）以及 ID 字段
-	UserName   string `gorm:"unique" json:"userName"`
+	OpenID     string `gorm:"unique" json:"openId"`
+	UserName   string `json:"userName"`
 	Password   string `json:"-"` // 存储哈希值，JSON中忽略
 	Email      string `gorm:"unique" json:"email"`
 	Phone      string `gorm:"unique" json:"phone"`

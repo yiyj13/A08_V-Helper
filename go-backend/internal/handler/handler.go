@@ -15,6 +15,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.GET("/users/:id", userHandler.HandleGetUserByID)
 	router.PUT("/users/:id", userHandler.HandleUpdateUserByID)
 	router.DELETE("/users/:id", userHandler.HandleDeleteUserByID)
+	router.GET("/users/login", userHandler.LogInHandler)
 
 	profileService := service.NewProfileService(db)
 	profileHandler := NewProfileHandler(profileService)

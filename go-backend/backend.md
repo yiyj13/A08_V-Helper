@@ -1,3 +1,4 @@
+[TOC]
 # TODO
 
 - [X] 设置 Go 项目，创建测试路由
@@ -9,12 +10,14 @@
   - [ ] 在service中实现对模型的增删改查
   - [ ] 在handler中实现API接口，并注册路由
 - [ ] 用户登录，主要通过微信接口实现(可能考虑用JWT验证保证安全)
-- [ ] 对有需要的模型在获取时进行分页、排序和筛选
+- [ ] 对有需要的模型在获取时进行分页、排序(时间排序)和筛选(按疫苗)
   - [ ] 帖子
   - [ ] 疫苗
   - [ ] 接种记录
   - [ ] 体温记录
 - [ ] 消息提醒的发送
+- [ ] 接种记录加字段
+- [ ] 图片
 
 
 # API 设计
@@ -286,9 +289,12 @@ json样例：
 
     - LocationID (主键)
     - Name
-    - Address
+    - Address strin
     - ContactNumber
     - OperatingHours
+    - PositionX
+    - PositionY
+    - OptionalVaccine 
 
 11. **收藏表**:
 
