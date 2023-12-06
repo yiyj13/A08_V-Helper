@@ -1,43 +1,93 @@
 [
     {
-        "name": "Pfizer",
-        "description": "A vaccine for Covid-19",
-        "targetDisease": "Covid-19",
-        "sideEffects": "Fever",
-        "precautions": "none"
-    },
-    {
-        "name": "Sinovac",
-        "description": "A vaccine for Covid-19",
-        "targetDisease": "Covid-19",
-        "sideEffects": "Fever",
-        "precautions": "none"
+        "name": "新冠疫苗",
+        "description": "本品适用于预防新型冠状病毒(SARS-CoV-2) 感染所致的疾病(COVID-19)。",
+        "targetDisease": "新型冠状病毒(SARS-CoV-2)",
+        "sideEffects": "接种部位：疼痛、肿胀、瘙痒、红斑、硬结 \n 全身：头痛、疲乏、肌痛、恶心、腹泻、关节痛、咳嗽、寒战、瘙痒、食欲减退、流涕、咽痛、鼻充血、腹痛",
+        "precautions": "对疫苗成分过敏者禁用。"
     },
     {
         "name": "乙肝疫苗",
         "description": "用于预防乙型肝炎的疫苗。",
         "targetDisease": "乙型肝炎",
         "sideEffects": "注射部位红肿、疼痛",
-        "precautions": "对疫苗成分过敏者禁用。",
-        "validPeriod": 3650, 
-        "type": "常规疫苗"
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "卡介苗",
+        "description": "",
+        "targetDisease": "结核病",
+        "sideEffects": "注射部位红肿、疼痛",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "脊灰灭活疫苗",
+        "description": "",
+        "targetDisease": "小儿麻痹症",
+        "sideEffects": "注射部位红肿、疼痛",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "百白破疫苗",
+        "description": "",
+        "targetDisease": "百日咳、白喉、破伤风",
+        "sideEffects": "注射部位红肿、疼痛",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "二价脊灰疫苗",
+        "description": "",
+        "targetDisease": "小儿麻痹症",
+        "sideEffects": "注射部位红肿、疼痛",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "A群流脑疫苗",
+        "description": "",
+        "targetDisease": "A群脑膜炎球菌引起的流行性脑脊髓膜炎",
+        "sideEffects": "注射部位红肿、疼痛",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "麻腮风疫苗",
+        "description": "",
+        "targetDisease": "麻疹、流行性腮腺炎、风疹",
+        "sideEffects": "注射部位红肿、疼痛",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "甲肝减毒活疫苗",
+        "description": "",
+        "targetDisease": "甲型肝炎",
+        "sideEffects": "注射部位红肿、疼痛",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "A+C群流脑疫苗",
+        "description": "",
+        "targetDisease": "A群和C群脑膜炎球菌引起的流行性脑脊髓膜炎",
+        "sideEffects": "注射部位红肿、疼痛",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "白破疫苗",
+        "description": "",
+        "targetDisease": "白喉、破伤风",
+        "sideEffects": "注射部位红肿、疼痛",
+        "precautions": "对疫苗成分过敏者禁用。"
     },
     {
         "name": "水痘疫苗",
         "description": "用于预防水痘的活病毒疫苗。",
         "targetDisease": "水痘",
         "sideEffects": "轻微发热、皮肤轻微过敏反应",
-        "precautions": "免疫力低下者应在医生指导下接种。",
-        "validPeriod": 7300, 
-        "type": "常规疫苗"
+        "precautions": "免疫力低下者应在医生指导下接种。"
     },
     {
         "name": "流感疫苗",
         "description": "每年更新的流感疫苗，用于预防季节性流感。",
         "targetDisease": "季节性流感",
         "sideEffects": "注射部位轻微疼痛，少数人可能发热",
-        "precautions": "注射前应告知医生过往的过敏史。",
-        "validPeriod": 365,
-        "type": "特殊疫苗"
+        "precautions": "注射前应告知医生过往的过敏史。"
     }
 ]
