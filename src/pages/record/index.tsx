@@ -46,9 +46,10 @@ export default function VaccineRecord() {
       { value: 0, text: '免疫接种第一针' },
       { value: 1, text: '免疫接种第二针' },
       { value: 2, text: '免疫接种第三针' },
-      { value: 3, text: '常规接种' },
-      { value: 4, text: '加强针剂' },
-      { value: 5, text: '补种疫苗' },
+      { value: 3, text: '免疫接种第四针' },
+      { value: 4, text: '常规接种' },
+      { value: 5, text: '加强针剂' },
+      { value: 6, text: '补种疫苗' },
     ],
   ]
 
