@@ -1,0 +1,30 @@
+export default function TimeTable() {
+  return (
+    <table>
+      <thead>
+        <tr>
+          <th>月龄</th>
+          <th>疫苗</th>
+          <th>剂次</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>出生</td>
+          <td>乙肝疫苗</td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td>出生</td>
+          <td>卡介苗</td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td>1月龄</td>
+          <td>乙肝疫苗</td>
+          <td>2</td>
+        </tr>
+      </tbody>
+    </table>
+  )
+}

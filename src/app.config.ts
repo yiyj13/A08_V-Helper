@@ -14,6 +14,7 @@ export default defineAppConfig({
     'pages/my/feedback/index',
     'pages/member/index',
     'pages/addMember/index',
+    'pages/reference/index',
   ],
   window: {
     backgroundTextStyle: 'light',
