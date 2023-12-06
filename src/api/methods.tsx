@@ -62,6 +62,7 @@ export type RecordData = GinBase & {
   remindValue: number // 提醒时间数值
   remindUnit: string // 提醒单位
   remindDate: number //根据提醒时间数值和单位计算出的提醒时间（多少天前）
+  nextVaccinationDate: string // 下次接种时间
   voucher: string // 接种凭证
   note: string // 备注
 }

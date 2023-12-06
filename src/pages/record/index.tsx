@@ -15,23 +15,31 @@ import api from '../../api'
 import { Vaccine, Profile, RecordData } from '../../api/methods'
 
 export default function VaccineRecord() {
-  let VaccineData: PickerOption[] = []
-  api.get('/api/vaccines').then((res) => {
-    let vacData = res.data as Vaccine[]
-    vacData.forEach((item) => {
-      VaccineData.push({ value: item.ID, text: item.name })
-    })
-    console.log(VaccineData)
+  const [record, setRecord] = useState<Partial<RecordData>>({
+    vaccinationDate: '',
+    valid: 0,
+    reminder: false,
+    remindValue: 0,
+    remindUnit: '',
+    remindDate: 0,
+    voucher: '',
+    note: '',
   })
 
-  let MemberData: PickerOption[] = []
-  api.get('/api/profiles').then((res) => {
-    let memData = res.data as Profile[]
-    memData.forEach((item) => {
-      MemberData.push({ value: item.ID, text: item.relationship })
+  const [VaccineData, setVaccineData] = useState<PickerOption[]>([])
+  const [MemberData, setMemberData] = useState<PickerOption[]>([])
+
+  useEffect(() => {
+    api.get('/api/vaccines').then((res) => {
+      let vacData = res.data as Vaccine[]
+      setVaccineData(vacData.map((item) => ({ value: item.ID, text: item.name })))
     })
-    console.log(MemberData)
-  })
+
+    api.get('/api/profiles').then((res) => {
+      let memData = res.data as Profile[]
+      setMemberData(memData.map((item) => ({ value: item.ID, text: item.relationship })))
+    })
+  }, [record])
 
   const TypeData = [
     [
@@ -62,17 +70,6 @@ export default function VaccineRecord() {
       { value: 13, text: '终身' },
     ],
   ]
-
-  const [record, setRecord] = useState<Partial<RecordData>>({
-    vaccinationDate: '',
-    valid: 0,
-    reminder: false,
-    remindValue: 0,
-    remindUnit: '',
-    remindDate: 0,
-    voucher: '',
-    note: '',
-  })
 
   const [idVisible, setIdVisible] = useState(false)
   const [idDesc, setIdDesc] = useState('')
@@ -180,13 +177,8 @@ export default function VaccineRecord() {
     setNoteValue(value)
   }
 
-  useEffect(() => {
-    console.log('record:', record)
-  }, [record])
-
   const calculateRemindDate = () => {
     if (record.remindValue !== undefined && !isNaN(record.remindValue)) {
-
       const unitMultiplier = {
         日: 1,
         周: 7,
@@ -217,9 +209,7 @@ export default function VaccineRecord() {
       record.type >= 0 &&
       record.valid !== undefined &&
       record.valid >= 0 &&
-      record.vaccinationDate &&
-      record.remindDate !== undefined &&
-      record.remindDate >= 0
+      record.vaccinationDate
     ) {
       try {
         const res = await api.request({ url: '/api/vaccination-records', method: 'POST', data: record })
@@ -365,7 +355,7 @@ export default function VaccineRecord() {
         />
       </div>
       <Cell title='TextArea' className='col-span-full px-8' style={{ borderRadius: '8px' }}>
-        <TextArea placeholder='请输入备注' value={noteValue} onChange={(value) => onNoteChange(value)} />
+        <TextArea placeholder='请输入备注' value={noteValue} autoSize onChange={(value) => onNoteChange(value)} />
       </Cell>
       <div className='col-span-full flex justify-center mt-4'>
         <Button className='submit_btm' formType='submit' type='primary' onClick={handleSubmission}>

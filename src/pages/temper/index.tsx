@@ -5,7 +5,7 @@
     4. Gradient color for the slider 
 */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Taro from '@tarojs/taro'
 import { Text } from '@tarojs/components'
 import { Picker, Range, DatePicker, Cell, Button, TextArea } from '@nutui/nutui-react-taro'
@@ -16,14 +16,14 @@ import api from '../../api'
 import { TemperatureRecord, Profile } from '../../api/methods'
 
 export default function TemperRecord() {
-  let MemberData: PickerOption[] = []
-  api.get('/api/profiles').then((res) => {
-    let data = res.data as Profile[]
-    data.forEach((item) => {
-      MemberData.push({ value: item.ID, text: item.relationship })
+  const [MemberData, setMemberData] = useState<PickerOption[]>([])
+
+  useEffect(() => {
+    api.get('/api/profiles').then((res) => {
+      let memData = res.data as Profile[]
+      setMemberData(memData.map((item) => ({ value: item.ID, text: item.relationship })))
     })
-    // console.log(MemberData)
-  })
+  }, [])
 
   const [tempRecord, setTempRecord] = useState<Partial<TemperatureRecord>>({
     date: '',
@@ -39,18 +39,6 @@ export default function TemperRecord() {
     setTempRecord(newTemperRecord)
   }
 
-  // const [MemberList, setMemberList] = useState<MemberData[] | null>()
-
-  // useEffect(() => {
-  //     api.request({ url: '/api/member' }).then((res) => {
-  //         const result = res.data as MemberData[]
-  //         setMemberList(result)
-  //     })
-  // }, [])
-
-  // if (!MemberList) {
-  //     return <Loading className='h-screen w-screen' />
-  // }
   const [idVisible, setIdVisible] = useState(false)
   const [idDesc, setIdDesc] = useState('')
   const confirmId = (options: PickerOption[], values: (string | number)[]) => {
@@ -61,7 +49,6 @@ export default function TemperRecord() {
     setIdDesc(description)
     const newTemperRecord = {
       ...tempRecord,
-      // get the coordinate value in MemberData according to option.text
       profileId: values[0] as number,
     }
     setTempRecord(newTemperRecord)
@@ -87,7 +74,6 @@ export default function TemperRecord() {
     setNoteValue(value)
   }
 
-  // TODO: coordinate with the APIs to be implemented by the backend
   const handleSubmission = async () => {
     console.log('temperature:', tempRecord) // for debug
     if (tempRecord && tempRecord.profileId !== undefined && tempRecord.profileId >= 0) {
@@ -185,7 +171,7 @@ export default function TemperRecord() {
         </Cell.Group>
       </>
       <Cell title='TextArea' className='col-span-full px-8' style={{ borderRadius: '8px' }}>
-        <TextArea placeholder='请输入备注' value={noteValue} onChange={(value) => onNoteChange(value)} />
+        <TextArea placeholder='请输入备注' value={noteValue} autoSize onChange={(value) => onNoteChange(value)} />
       </Cell>
       <div className='col-span-full flex justify-center mt-4'>
         <Button className='submit_btm' formType='submit' type='primary' onClick={handleSubmission}>
