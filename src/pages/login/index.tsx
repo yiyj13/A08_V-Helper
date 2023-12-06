@@ -1,32 +1,46 @@
-import { View } from '@tarojs/components'
-import { Button } from '@nutui/nutui-react-taro'
+import clsx from 'clsx'
+import { useRequest } from 'taro-hooks'
 
 import { useUserStore } from '../../models'
-
-// import api from '../../api'
+import { getToken } from '../../api/methods'
 
 export default function Index() {
   const setToken = useUserStore.use.setToken()
 
-  const handleLogin = () => {
-    // api
-    //   .request({
-    //     url: '/api/login',
-    //     method: 'POST',
-    //   })
-    //   .then((res) => {
-    //     setToken(res.data.token)
-    //     goIndex()
-    //   })
-    setToken('tokenForTest')
-  }
+  const { error, loading, runAsync } = useRequest(getToken, { manual: true })
+
+  const handleLogin = () => runAsync().then((token) => setToken(token))
 
   return (
-    <View className='grid place-items-center h-screen w-3/5 m-auto'>
-      <View className='text-3xl font-bold'>V-Helper</View>
-      <Button type='primary' className='mt-4 text-lg font-bold shadow-xl' onClick={handleLogin} size='large'>
-        Login
-      </Button>
-    </View>
+    <>
+      <Alert show={!!error}></Alert>
+      <div className='grid place-items-center h-screen w-3/5 m-auto'>
+        <div className='text-3xl font-bold'>V-Helper</div>
+        <a
+          className={clsx(
+            'group inline-block rounded-full p-[2px]',
+            'bg-gradient-to-r from-brand/80 via-teal-500 to-cyan-500',
+            {
+              'animate-pulse': loading,
+            }
+          )}
+          onClick={handleLogin}
+        >
+          <span className='block rounded-full bg-white px-8 py-3 text-sm font-medium'>微信一键登录</span>
+        </a>
+      </div>
+    </>
+  )
+}
+
+function Alert({ show }) {
+  return (
+    <div className={clsx('fixed w-auto inset-0 max-w-5xl px-4 md:px-8', { hidden: !show })}>
+      <div className='flex justify-between p-4 rounded-md bg-red-50 border border-red-300'>
+        <div className='flex gap-3 sm:items-center'>
+          <p className='text-red-600 sm:text-sm'>微信一键登录失败</p>
+        </div>
+      </div>
+    </div>
   )
 }
