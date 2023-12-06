@@ -72,21 +72,6 @@ export default {
       '1.接种者应在接种后30分钟内留在接种单位观察，以防发生严重过敏反应。\n2.接种者应在接种后3天内避免剧烈运动，以免影响疫苗效果。\n3.接种者应在接种后7天内避免饮酒，以免影响疫苗效果。\n4.接种者应在接种后7天内避免接种其他疫苗，以免影响疫苗效果。\n5.接种者应在接种后7天内避免接触犬、猫等动物，以免影响疫苗效果。\n6.接种者应在接种后7天内避免接触动物尸体，以免影响疫苗效果。\n7.接种者应在接种后7天内避免接触动物的粪便，以免影响疫苗效果。\n8.接种者应在接种后7天内避免接触动物的尿液',
   },
 
-  // 'GET /api/member': [
-  //   {
-  //     id: 0,
-  //     name: '本人',
-  //   },
-  //   {
-  //     id: 1,
-  //     name: '父亲',
-  //   },
-  //   {
-  //     id: 2,
-  //     name: '女儿',
-  //   },
-  // ],
-
   'POST /api/vaccination-records': (req, res) => {
     res.status(200).json({
       message: 'Vaccination record submitted successfully',
@@ -101,11 +86,11 @@ export default {
         remindDate: req.body.remindDate,
         voucher: req.body.voucher,
         note: req.body.note,
-      }
+      },
     })
   },
-  
-  'POST /api/temperature-records': (req,res) => {
+
+  'POST /api/temperature-records': (req, res) => {
     res.status(200).json({
       message: 'Temperature record submitted successfully',
       success: true,
@@ -114,11 +99,68 @@ export default {
         time: req.body.time,
         value: req.body.val,
         note: req.body.note,
-      }
+      },
     })
   },
 
-  'POST /api/profiles': (req,res) => {
+  'GET /api/profiles': [
+    {
+      id: 1,
+      avatar: 'https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png',
+      name: '张三',
+      relationship: '本人',
+      gender: '男',
+      birthday: '1990/11/01',
+      note: '青霉素过敏',
+    },
+    {
+      id: 2,
+      avatar: 'https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png',
+      name: '王二',
+      relationship: '父亲',
+      gender: '男',
+      birthday: '1960/11/01',
+      note: '高血压高血脂',
+    },
+    {
+      id: 3,
+      avatar: 'https://img.yzcdn.cn/vant/cat.jpeg',
+      name: '李四',
+      relationship: '女儿',
+      gender: '女',
+      birthday: '2020/11/01',
+      note: '蛋白过敏',
+    },
+  ],
+
+  'GET /api/profiles/1': {
+    avatar: 'https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png',
+    name: '张三',
+    relationship: '本人',
+    gender: '男',
+    birthday: '1990/11/01',
+    note: '青霉素过敏',
+  },
+
+  'GET /api/profiles/2': {
+    avatar: 'https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png',
+    name: '王二',
+    relationship: '父亲',
+    gender: '男',
+    birthday: '1960/11/01',
+    note: '高血压高血脂',
+  },
+
+  'GET /api/profiles/3': {
+    avatar: 'https://img.yzcdn.cn/vant/cat.jpeg',
+    name: '李四',
+    relationship: '女儿',
+    gender: '女',
+    birthday: '2020/11/01',
+    note: '蛋白过敏',
+  },
+
+  'POST /api/profiles': (req, res) => {
     res.status(200).json({
       message: 'New memeber added successfully',
       success: true,
@@ -129,31 +171,61 @@ export default {
         Relationship: req.body.relationship,
         avatar: req.body.avatar,
         note: req.body.note,
-      }
+      },
     })
   },
-  
+
+  'PUT /api/profiles': (req, res) => {
+    res.status(200).json({
+      message: 'Memeber edited successfully',
+      success: true,
+      data: {
+        Fullname: req.body.name,
+        Gender: req.body.gender,
+        DateOfBirth: req.body.birthday,
+        Relationship: req.body.relationship,
+        avatar: req.body.avatar,
+        note: req.body.note,
+      },
+    })
+  },
+
+  'PUT /api/profiles/1': (req, res) => {
+    res.status(200).json({
+      message: 'Memeber edited successfully',
+      success: true,
+      data: {
+        Fullname: req.body.name,
+        Gender: req.body.gender,
+        DateOfBirth: req.body.birthday,
+        Relationship: req.body.relationship,
+        avatar: req.body.avatar,
+        note: req.body.note,
+      },
+    })
+  },
+
   'GET /api/notices': [
     {
       ID: 1,
-      profile: "张三",
-      vaccine: "新冠疫苗",
-      type: "第一针",
-      date: "2023-01-01",
+      profile: '张三',
+      vaccine: '新冠疫苗',
+      type: '第一针',
+      date: '2023-01-01',
     },
     {
       ID: 2,
-      profile: "张三",
-      vaccine: "新冠疫苗",
-      type: "第二针",
-      date: "2023-02-01",
+      profile: '张三',
+      vaccine: '新冠疫苗',
+      type: '第二针',
+      date: '2023-02-01',
     },
     {
       ID: 3,
-      profile: "张三",
-      vaccine: "新冠疫苗",
-      type: "第三针",
-      date: "2023-03-01",
+      profile: '张三',
+      vaccine: '新冠疫苗',
+      type: '第三针',
+      date: '2023-03-01',
     },
   ],
 }

@@ -1,50 +1,53 @@
 /* TODO: 
-    1. Coordinate with the backend APIs (implemented) to get the MemberData
+    1. Replace VirtualList with ElevatorList
     2. Navigate with the MemberData to fill in the form if the user clicks on the member
 */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { VirtualList, Button } from '@nutui/nutui-react-taro'
 import { IconFont, Edit } from '@nutui/icons-react-taro'
-import Taro from '@tarojs/taro'
+import Taro, { useDidShow } from '@tarojs/taro'
 
-type MemberData = {
-  avatar: string // 头像
-  relationship: string // 与本人关系
-  name: string // 成员姓名
-  gender: string // 性别
-  birthday: string // 出生日期
-}
+import api from '../../api'
 
-export default function member() {
-  const [memberDataList, setMemberDataList] = useState<MemberData[]>([])
+import { Profile } from '../../api/methods'
+
+export default function Member() {
+  const [memberDataList, setMemberDataList] = useState<Profile[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
-  const getData = useCallback(() => {
-    const data = [
-      {
-        avatar: 'https://img.yzcdn.cn/vant/cat.jpeg',
-        relationship: '本人',
-        name: '张三',
-        gender: '男',
-        birthday: '1990/11/01',
-      },
-      {
-        avatar: 'https://img.yzcdn.cn/vant/cat.jpeg',
-        relationship: '母亲',
-        name: '王二',
-        gender: '女',
-        birthday: '1970/11/01',
-      },
-    ]
-    setMemberDataList((list) => [...list, ...data])
-  }, [])
+  useDidShow(() => {
+    api.request({ url: '/api/profiles' }).then((res) => {
+      const result = res.data as Profile[]
+      setMemberDataList(result)
+    })
+  })
 
-  useEffect(() => {
-    getData()
-  }, [getData])
+  // tobefixed: 不必用到virtuallist
+  const onScroll = () => {
+    if (isLoading) return
+    setIsLoading(true)
+    setTimeout(() => {
+      // api.request({ url: '/api/profiles' }).then((res) => {
+      //   const result = res.data as MemberData[]
+      //   setMemberDataList(result)
+      // })
+      setIsLoading(false)
+    }, 30)
+  }
 
-  const itemRender = (data: MemberData, dataIndex: number) => {
+  const handleAddMember = () => {
+    Taro.navigateTo({ url: '/pages/addMember/index' })
+  }
+
+  const handleEditMember = (memberData: Profile) => {
+    Taro.navigateTo({
+      // url: `/pages/addMember/index?avatar=${memberData.avatar}&relationship=${memberData.relationship}&name=${memberData.name}&gender=${memberData.gender}&birthday=${memberData.birthday}`,
+      url: `/pages/addMember/index?id=` + memberData.ID,
+    })
+  }
+
+  const itemRender = (data: Profile, dataIndex: number) => {
     return (
       <div
         key={dataIndex}
@@ -58,35 +61,21 @@ export default function member() {
               <span className='font-bold' style={{ color: '#4796A1' }}>
                 {data.relationship}
               </span>
-              <span className='font-bold text-lg'>{data.name}</span>
+              <span className='font-bold text-lg'>{data.fullName}</span>
             </div>
           </div>
-          {/* 问题：如何在跳转链接时把该成员的现有数据一起带过去 */}
-          <Edit className='cursor-pointer' onClick={() => Taro.navigateTo({ url: '/pages/addMember/index' })} />
+          <Edit className='cursor-pointer' onClick={() => handleEditMember(data)} />
         </div>
         <div className='flex justify-between mt-2'>
           <div className='text-gray-500'>
             性别 <b className='text-black font-bold'>{data.gender}</b>
           </div>
           <div className='text-gray-500'>
-            出生日期 <b className='text-black font-bold'>{data.birthday}</b>
+            出生日期 <b className='text-black font-bold'>{data.dateOfBirth}</b>
           </div>
         </div>
       </div>
     )
-  }
-
-  const onScroll = () => {
-    if (isLoading) return
-    setIsLoading(true)
-    setTimeout(() => {
-      getData()
-      setIsLoading(false)
-    }, 30)
-  }
-
-  const handleAddMember = () => {
-    Taro.navigateTo({ url: '/pages/addMember/index' })
   }
 
   return (

@@ -12,38 +12,26 @@ import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker
 
 import ComboBox from '../../components/combobox'
 import api from '../../api'
-
-// TODO: remind部分三个变量，设计不够优雅
-type RecordData = {
-  id: number // 接种人
-  name: number // 疫苗名称
-  type: number // 接种类型
-  date: string // 接种时间
-  valid: number // 有效期
-  reminder: boolean // 接种提醒
-  remindValue: number // 提醒时间数值
-  remindUnit: string // 提醒单位
-  remindDate: number //根据提醒时间数值和单位计算出的提醒时间（多少天前）
-  voucher: string // 接种凭证
-  note: string // 备注
-}
+import { Vaccine, Profile, RecordData } from '../../api/methods'
 
 export default function VaccineRecord() {
-  const MemberData = [
-    [
-      { value: 0, text: '本人' },
-      { value: 1, text: '父亲' },
-      { value: 2, text: '女儿' },
-    ],
-  ]
+  let VaccineData: PickerOption[] = []
+  api.get('/api/vaccines').then((res) => {
+    let vacData = res.data as Vaccine[]
+    vacData.forEach((item) => {
+      VaccineData.push({ value: item.ID, text: item.name })
+    })
+    console.log(VaccineData)
+  })
 
-  const VaccineData = [
-    [
-      { value: 0, text: '九价HPV疫苗' },
-      { value: 1, text: '流感疫苗' },
-      { value: 2, text: '水痘疫苗' },
-    ],
-  ]
+  let MemberData: PickerOption[] = []
+  api.get('/api/profiles').then((res) => {
+    let memData = res.data as Profile[]
+    memData.forEach((item) => {
+      MemberData.push({ value: item.ID, text: item.relationship })
+    })
+    console.log(MemberData)
+  })
 
   const TypeData = [
     [
@@ -75,11 +63,8 @@ export default function VaccineRecord() {
     ],
   ]
 
-  const [record, setRecord] = useState<RecordData>({
-    id: -1,
-    name: -1,
-    type: -1,
-    date: '',
+  const [record, setRecord] = useState<Partial<RecordData>>({
+    vaccinationDate: '',
     valid: 0,
     reminder: false,
     remindValue: 0,
@@ -99,7 +84,7 @@ export default function VaccineRecord() {
     setIdDesc(description)
     setRecord({
       ...record,
-      id: values[0] as number,
+      profileId: values[0] as number,
     })
   }
 
@@ -113,7 +98,7 @@ export default function VaccineRecord() {
     setNameDesc(description)
     setRecord({
       ...record,
-      name: values[0] as number,
+      vaccineId: values[0] as number,
     })
   }
 
@@ -140,7 +125,7 @@ export default function VaccineRecord() {
     setDateDesc(`${date}`)
     setRecord({
       ...record,
-      date: date,
+      vaccinationDate: date,
     })
   }
 
@@ -186,18 +171,22 @@ export default function VaccineRecord() {
     setRemindUnit(option)
   }
 
-  const onTextChange = (value: string) => {
+  const [noteValue, setNoteValue] = useState('')
+  const onNoteChange = (value: string) => {
     setRecord({
       ...record,
       note: value,
     })
+    setNoteValue(value)
   }
+
   useEffect(() => {
     console.log('record:', record)
   }, [record])
 
   const calculateRemindDate = () => {
-    if (!isNaN(record.remindValue)) {
+    if (record.remindValue !== undefined && !isNaN(record.remindValue)) {
+
       const unitMultiplier = {
         日: 1,
         周: 7,
@@ -218,7 +207,20 @@ export default function VaccineRecord() {
 
   const handleSubmission = async () => {
     calculateRemindDate()
-    if (record && record.id >= 0 && record.name >= 0 && record.type >= 0 && record.date && record.remindDate >= 0) {
+    if (
+      record &&
+      record.profileId !== undefined &&
+      record.profileId >= 0 &&
+      record.vaccineId !== undefined &&
+      record.vaccineId >= 0 &&
+      record.type !== undefined &&
+      record.type >= 0 &&
+      record.valid !== undefined &&
+      record.valid >= 0 &&
+      record.vaccinationDate &&
+      record.remindDate !== undefined &&
+      record.remindDate >= 0
+    ) {
       try {
         const res = await api.request({ url: '/api/vaccination-records', method: 'POST', data: record })
         console.log(res.data) // for debug
@@ -237,10 +239,10 @@ export default function VaccineRecord() {
 
   const handleReset = () => {
     setRecord({
-      id: -1,
-      name: -1,
+      profileId: -1,
+      vaccineId: -1,
       type: -1,
-      date: '',
+      vaccinationDate: '',
       valid: 0,
       reminder: false,
       remindValue: 0,
@@ -363,7 +365,7 @@ export default function VaccineRecord() {
         />
       </div>
       <Cell title='TextArea' className='col-span-full px-8' style={{ borderRadius: '8px' }}>
-        <TextArea placeholder='请输入备注' autoSize onChange={(value) => onTextChange(value)} />
+        <TextArea placeholder='请输入备注' value={noteValue} onChange={(value) => onNoteChange(value)} />
       </Cell>
       <div className='col-span-full flex justify-center mt-4'>
         <Button className='submit_btm' formType='submit' type='primary' onClick={handleSubmission}>

@@ -30,7 +30,7 @@ export type Reply = GinBase & {
   userId: number
 }
 
-export type VaccineRecord = GinBase & {
+export type VaccinationRecord = GinBase & {
   profileId: number
   vaccineId: number
   vaccine: Vaccine
@@ -38,8 +38,40 @@ export type VaccineRecord = GinBase & {
   voucher: string
   vaccinationLocation: string
   reminder: boolean
+  remindDate: string
   nextVaccinationDate: string
   note: string
+}
+
+export type TemperatureRecord = GinBase & {
+  profileId: number
+  date: string // 测温时间
+  temperature: number // 体温值
+  note: string // 备注
+}
+
+// to be renamed
+export type RecordData = GinBase & {
+  profileId: number // 接种人
+  vaccineId: number // 疫苗名称
+  type: number // 接种类型
+  vaccinationDate: string // 接种时间
+  valid: number // 有效期
+  reminder: boolean // 接种提醒
+  remindValue: number // 提醒时间数值
+  remindUnit: string // 提醒单位
+  remindDate: number //根据提醒时间数值和单位计算出的提醒时间（多少天前）
+  voucher: string // 接种凭证
+  note: string // 备注
+}
+
+export type Profile = GinBase & {
+  avatar: string // 头像
+  relationship: string // 与本人关系
+  fullName: string // 成员姓名
+  gender: string // 性别
+  dateOfBirth: string // 出生日期
+  note: string // 备注
 }
 
 export async function getVaccineList(): Promise<Vaccine[]> {
@@ -47,12 +79,12 @@ export async function getVaccineList(): Promise<Vaccine[]> {
   return response.data
 }
 
-export async function getVaccineRecordList(): Promise<VaccineRecord[]> {
+export async function getVaccineRecordList(): Promise<VaccinationRecord[]> {
   const response = await api.get('/api/vaccination-records')
   return response.data
 }
 
-export async function postVaccineRecord(data: Partial<VaccineRecord>): Promise<VaccineRecord> {
+export async function postVaccineRecord(data: Partial<VaccinationRecord>): Promise<VaccinationRecord> {
   const response = await api.post('/api/vaccination-records', data)
   return response.data
 }
