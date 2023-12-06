@@ -1,17 +1,12 @@
 [
     {
-        "name": "Pfizer",
-        "description": "A vaccine for Covid-19",
-        "targetDisease": "Covid-19",
-        "sideEffects": "Fever",
-        "precautions": "none"
-    },
-    {
-        "name": "Sinovac",
-        "description": "A vaccine for Covid-19",
-        "targetDisease": "Covid-19",
-        "sideEffects": "Fever",
-        "precautions": "none"
+        "name": "新冠疫苗",
+        "description": "用于新型冠状病毒的疫苗。",
+        "targetDisease": "新型冠状病毒",
+        "sideEffects": "接种补位疼痛，头痛，疲乏。",
+        "precautions": "对疫苗成分过敏者禁用。",
+        "validPeriod": 7300, 
+        "type": "常规疫苗"
     },
     {
         "name": "乙肝疫苗",
