@@ -55,9 +55,9 @@ type VaccinationRecord struct {
 // TempertureRecord 体温记录模型
 type TempertureRecord struct {
 	gorm.Model
-	ProfileID  uint    `json:"profileId"`
-	Date       string  `json:"date"` // 包含日期和时间，例如"2021-07-01 12:00"
-	Temperture float32 `json:"temperture"`
+	ProfileID   uint    `json:"profileId"`
+	Date        string  `json:"date"` // 包含日期和时间，例如"2021-07-01 12:00"
+	Temperature float32 `json:"temperature"`
 }
 
 // VaccinationAppointment 预约接种模型，可以取消预约，也可以在接种后转换为接种记录
