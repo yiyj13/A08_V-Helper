@@ -17,7 +17,8 @@
   - [ ] 体温记录
 - [ ] 消息提醒的发送
 - [ ] 接种记录加字段
-- [ ] 图片
+- [ ] 图床
+- [ ] 更新文档中相关API
 
 
 # API 设计
@@ -28,8 +29,42 @@
 
 登录(通过微信接口而无需密码)，修改个人信息
 
+| 方法 | 路由 | 功能 |
+| ---- | ---- | ---- |
+| GET | /api/users/login?code=xxx | 通过微信接口登录，第一次登录时会自动注册 |
+| GET | /api/users | 获取全部用户信息 |
+| PUT | /api/users/:id | 更新指定 id 的用户信息 |
+
+Put 时的 json样例：
+```json
+{
+   "openId": "1234567890",
+   "userName": "张三",
+   "email": "123@mails.tsinghua.edu.cm",
+   "phone": "1234567890"
+}
+
 ## 身份
 
+| 方法 | 路由 | 功能 |
+| ---- | ---- | ---- |
+| POST | /api/profiles | 添加身份 |
+| GET | /api/profiles | 获取全部身份信息 |
+| GET | /api/profiles/:id | 获取指定 id 的身份信息 |
+| GET | /api/profiles/user/:id | 获取指定 id 的用户管理的所有身份信息 |
+| PUT | /api/profiles/:id | 更新指定 id 的身份信息 |
+| DELETE | /api/profiles/:id | 删除指定 id 的身份 |
+
+Post 时的json样例
+```json
+{
+   "userId": 1,
+   "fullName": "张三",
+   "Gender": "男",
+   "dateOfBirth": "1999-01-01",
+   "relationship": "本人"
+}
+```
 
 
 ## 接种记录
@@ -43,17 +78,17 @@
 | PUT | /api/vaccination-records/:id | 更新指定 id 的疫苗信息 |
 | DELETE | /api/vaccination-records/:id | 删除指定 id 的疫苗信息 |
 
-json样例：
+Post 时的json样例：
 ```json
 {
-   "profileId": 1,
-   "vaccineId": 2,
-   "vaccinationDate": "2021-07-01",
-   "voucher": "Voucher123",
+   "profileId": 1, // 接种者的id, 必填
+   "vaccineId": 2, // 疫苗的id, 必填
+   "vaccinationDate": "2021-07-01", // 接种日期, 必填
+   "voucher": "Voucher123", // 接种凭证, 选填
    "vaccinationLocation": "本地社区医院",
-   "reminder": true,
-   "nextVaccinationDate": "2022-07-01",
-   "note": "无明显不适反应",
+   "reminder": true, // 是否提醒, 默认为false
+   "nextVaccinationDate": "2022-07-01", // 下次接种日期, 选填
+   "note": "无明显不适反应" // 备注, 选填
 }
 ```
 

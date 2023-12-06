@@ -45,12 +45,12 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 
 	tempertureRecordService := service.NewTempertureRecordService(db)
 	tempertureRecordHandler := NewTempertureRecordHandler(tempertureRecordService)
-	router.POST("/temperture-records", tempertureRecordHandler.HandleCreateTempertureRecord)
-	router.GET("/temperture-records", tempertureRecordHandler.HandleGetAllTempertureRecords)
-	router.GET("/temperture-records/:id", tempertureRecordHandler.HandleGetTempertureRecordByID)
-	router.GET("/temperture-records/profile/:profileID", tempertureRecordHandler.HandleGetTempertureRecordsByProfileID)
-	router.PUT("/temperture-records/:id", tempertureRecordHandler.HandleUpdateTempertureRecordByID)
-	router.DELETE("/temperture-records/:id", tempertureRecordHandler.HandleDeleteTempertureRecordByID)
+	router.POST("/temperature-records", tempertureRecordHandler.HandleCreateTempertureRecord)
+	router.GET("/temperature-records", tempertureRecordHandler.HandleGetAllTempertureRecords)
+	router.GET("/temperature-records/:id", tempertureRecordHandler.HandleGetTempertureRecordByID)
+	router.GET("/temperature-records/profile/:profileID", tempertureRecordHandler.HandleGetTempertureRecordsByProfileID)
+	router.PUT("/temperature-records/:id", tempertureRecordHandler.HandleUpdateTempertureRecordByID)
+	router.DELETE("/temperature-records/:id", tempertureRecordHandler.HandleDeleteTempertureRecordByID)
 
 	// 帖子
 	articleService := service.NewArticleService(db)
