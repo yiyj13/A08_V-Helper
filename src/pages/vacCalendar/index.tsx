@@ -3,21 +3,25 @@
 // ( Data fetching state management library )
 
 import { ScrollView } from '@tarojs/components'
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 import dayjs from 'dayjs'
 import { useRequest } from 'taro-hooks'
 
 import { getVaccineRecordList } from '../../api/methods'
 
-import { MergeItems, VacCalendarItemExpire, VacCalendarItem, VacCalendarData } from './vacCalendarItem'
-import { NetworkError } from "../../components/errors"
+import { MergeItems, VacCalendarItemExpire, VacCalendarItem } from './vacCalendarItem'
+import { NetworkError } from '../../components/errors'
 
 // TODO: implement interaction of date picker and scroll view
 export default function Index() {
   const [selectedDate, setSelectedDate] = useState<string>('')
-  const [mergedItems, setMergedItems] = useState<VacCalendarData[] | null>(null)
 
   const { data, error } = useRequest(getVaccineRecordList, { cacheKey: 'vacCalendar', staleTime: 5000 })
+
+  const mergedItems = useMemo(
+    () => (data ? MergeItems(data).sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf()) : null),
+    [data]
+  )
 
   const handleDateChange = (newDate: string) => {
     setSelectedDate(newDate)
@@ -35,10 +39,6 @@ export default function Index() {
       handleDateChange(newDate)
     }
   }
-
-  useEffect(() => {
-    if (data) setMergedItems(MergeItems(data).sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf()))
-  }, [data])
 
   if (error) {
     return (

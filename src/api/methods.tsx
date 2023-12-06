@@ -1,3 +1,4 @@
+import Taro from '@tarojs/taro'
 import api from './index'
 
 export type GinBase = {
@@ -72,6 +73,12 @@ export type Profile = GinBase & {
   gender: string // 性别
   dateOfBirth: string // 出生日期
   note: string // 备注
+}
+
+export async function getToken(): Promise<string> {
+  const responseLogin = await Taro.login()
+  const response = await api.get('/api/users/login', { code: responseLogin.code })
+  return response.data.openId
 }
 
 export async function getVaccineList(): Promise<Vaccine[]> {

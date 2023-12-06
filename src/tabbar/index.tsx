@@ -1,5 +1,5 @@
 import { Tabbar, Button } from '@nutui/nutui-react-taro'
-import { Home, Location2, Uploader, Date, My } from '@nutui/icons-react-taro'
+import { Home, Search, Find, Uploader, My } from '@nutui/icons-react-taro'
 import { useEffect } from 'react'
 
 import './index.css'
@@ -18,14 +18,14 @@ function CustomTabBar() {
     <>
       <Tabbar className='customtabbar' fixed safeArea onSwitch={(index) => setTabIndex(index)} value={tabIndex}>
         <Tabbar.Item title='首页' icon={<Home width={18} height={18} />} />
-        <Tabbar.Item title='地图' icon={<Location2 width={18} height={18} />} />
+        <Tabbar.Item title='查询' icon={<Search width={18} height={18} />} />
         <Button
           className='add-btn'
           icon={<Uploader width={18} height={18} />}
           type='primary'
           onClick={() => setIsVisible(true)}
         />
-        <Tabbar.Item title='日程' icon={<Date width={18} height={18} />} />
+        <Tabbar.Item title='社区' icon={<Find width={18} height={18} />} />
         <Tabbar.Item title='我的' icon={<My width={18} height={18} />} />
       </Tabbar>
       <ButtonActionSheet />

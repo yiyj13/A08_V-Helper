@@ -6,7 +6,7 @@ export default defineAppConfig({
     'pages/sendpost/index',
     'pages/vacDetails/index',
     'pages/blank/index',
-    'pages/enquiry/index',
+    'pages/map/index',
     'pages/record/index',
     'pages/temper/index',
     'pages/my/about/index',
@@ -14,6 +14,7 @@ export default defineAppConfig({
     'pages/my/feedback/index',
     'pages/member/index',
     'pages/addMember/index',
+    'pages/reference/index',
   ],
   window: {
     backgroundTextStyle: 'light',
