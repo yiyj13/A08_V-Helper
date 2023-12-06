@@ -2,7 +2,7 @@ import { useState, PropsWithChildren } from 'react'
 import { useTabStore, useUserStore } from '../models'
 
 import HomePage from '../pages/home'
-import MapPage from '../pages/map'
+import EnquiryPage from '../pages/enquiry'
 import DatePage from '../pages/date'
 import ProfilePage from '../pages/my'
 import CustomTabBar from '../tabbar'
@@ -16,7 +16,7 @@ export default function Index() {
 
   return (
     <div>
-      {[HomePage, MapPage, DatePage, ProfilePage].map((Content, index) => (
+      {[HomePage, EnquiryPage, DatePage, ProfilePage].map((Content, index) => (
         <LazyLoadTab tabIndex={index > 1 ? index + 1 : index} key={index}>
           <Content />
         </LazyLoadTab>

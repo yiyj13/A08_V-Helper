@@ -15,15 +15,15 @@ module.exports = {
         // add our brand color to the palette
         brand: '#176b87',
       },
-    },
-    animation: {
-      'fade-in': 'fadeIn 0.3s ease-in-out',
-    },
-    keyframes: () => ({
-      fadeIn: {
-        '0%': { opacity: 0 },
-        '100%': { opacity: 1 },
+      animation: {
+        'fade-in': 'fadeIn 0.3s ease-in-out',
       },
-    }),
+      keyframes: () => ({
+        fadeIn: {
+          '0%': { opacity: 0 },
+          '100%': { opacity: 1 },
+        },
+      }),
+    },
   },
 }

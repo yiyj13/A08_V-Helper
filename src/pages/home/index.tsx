@@ -6,18 +6,16 @@ import VacPNG from '../../assets/home/vac.png'
 import DoctorPNG from '../../assets/home/doctor.png'
 import TemperaturePNG from '../../assets/home/temp.png'
 import { MiniCalendar } from '../vacCalendar/miniCalendar'
-import { useTabStore } from '../../models'
 
 import './index.css'
 
 export default function HomePage() {
-  const setTabIndex = useTabStore((state) => state.setTabIndex)
   return (
     <div className='flex h-screen flex-col'>
       <div className='grid_'>
-        <BigButton text='疫苗查询' src={VacPNG} onClick={() => Taro.navigateTo({ url: '/pages/enquiry/index' })} />
+        <BigButton text='疫苗地图' src={VacPNG} onClick={() => Taro.navigateTo({ url: '/pages/map/index' })} />
         <BigButton text='接种记录' src={VacPNG} onClick={() => Taro.navigateTo({ url: '/pages/record/index' })} />
-        <BigButton text='预约提醒' src={DoctorPNG} onClick={() => setTabIndex(3)} />
+        <BigButton text='接种参考' src={DoctorPNG} />
         <BigButton
           text='体温记录'
           src={TemperaturePNG}

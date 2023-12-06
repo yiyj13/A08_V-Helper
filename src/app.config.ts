@@ -6,7 +6,7 @@ export default defineAppConfig({
     'pages/sendpost/index',
     'pages/vacDetails/index',
     'pages/blank/index',
-    'pages/enquiry/index',
+    'pages/map/index',
     'pages/record/index',
     'pages/temper/index',
     'pages/my/about/index',
