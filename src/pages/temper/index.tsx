@@ -5,7 +5,8 @@
     4. Gradient color for the slider 
 */
 
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
+import useSWR from 'swr'
 import Taro from '@tarojs/taro'
 import { Text } from '@tarojs/components'
 import { Picker, Range, DatePicker, Cell, Button, TextArea } from '@nutui/nutui-react-taro'
@@ -13,17 +14,15 @@ import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker
 
 import api from '../../api'
 // import {ComboBox} from 'src/components/combobox';
-import { TemperatureRecord, Profile } from '../../api/methods'
+import { TemperatureRecord, getProfiles } from '../../api/methods'
 
 export default function TemperRecord() {
-  const [MemberData, setMemberData] = useState<PickerOption[]>([])
+  const { data: profiles } = useSWR('getProfiles', getProfiles)
 
-  useEffect(() => {
-    api.get('/api/profiles').then((res) => {
-      let memData = res.data as Profile[]
-      setMemberData(memData.map((item) => ({ value: item.ID, text: item.relationship })))
-    })
-  }, [])
+  const MemberData = useMemo(
+    () => (profiles ? profiles.map((item) => ({ value: item.ID, text: item.relationship })) : []),
+    [profiles]
+  )
 
   const [tempRecord, setTempRecord] = useState<Partial<TemperatureRecord>>({
     date: '',

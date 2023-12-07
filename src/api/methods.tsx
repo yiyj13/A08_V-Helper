@@ -11,7 +11,7 @@ export type GinBase = {
 export type Vaccine = GinBase & {
   name: string
   description: string
-  targetDisease: number
+  targetDisease: string
   sideEffects: string
   precautions: string
   validPeriod: number
@@ -87,6 +87,11 @@ export async function getVaccineList(): Promise<Vaccine[]> {
   return response.data
 }
 
+export async function getVaccineByID(id: string): Promise<Vaccine> {
+  const response = await api.get('/api/vaccines/' + id)
+  return response.data
+}
+
 export async function getVaccineRecordList(): Promise<VaccinationRecord[]> {
   const response = await api.get('/api/vaccination-records')
   return response.data
@@ -96,3 +101,9 @@ export async function postVaccineRecord(data: Partial<VaccinationRecord>): Promi
   const response = await api.post('/api/vaccination-records', data)
   return response.data
 }
+
+export async function getProfiles(): Promise<Profile[]> {
+  const response = await api.get('/api/profiles')
+  return response.data
+}
+

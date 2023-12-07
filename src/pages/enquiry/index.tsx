@@ -1,18 +1,9 @@
-import { Elevator, Loading } from '@nutui/nutui-react-taro'
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
+import useSWR from 'swr'
 import Taro from '@tarojs/taro'
+import { Elevator, Loading } from '@nutui/nutui-react-taro'
 
-import api from '../../api'
-
-type TVaccine = {
-  ID: number
-  name: string
-  type: string
-  description: string
-  status: number
-  createdAt: string
-  updatedAt: string
-}
+import { getVaccineList, Vaccine } from '../../api/methods'
 
 type TElevatorItem = {
   name: string
@@ -25,20 +16,9 @@ type TElevatorGroup = {
 }
 
 export default function VaccineEnquiry() {
-  const [vaccineList, setVaccineList] = useState<TVaccine[] | null>()
+  const { data: vaccineList, isLoading } = useSWR('vaccineList', getVaccineList)
 
-  useEffect(() => {
-    api.request({ url: '/api/vaccines' }).then((res) => {
-      const result = res.data as TVaccine[]
-      setVaccineList(result)
-    })
-  }, [])
-
-  if (!vaccineList) {
-    return <Loading className='h-screen w-screen' />
-  }
-
-  const getRenderList = (data: TVaccine[]) => {
+  const getRenderList = (data: Vaccine[]) => {
     const list: TElevatorGroup[] = []
     data.forEach((item) => {
       const firstChar = item.name.charAt(0)
@@ -64,13 +44,21 @@ export default function VaccineEnquiry() {
     return list
   }
 
+  const renderlist = useMemo(() => vaccineList && getRenderList(vaccineList), [vaccineList])
+
   const onItemClick = (_key: string, item: TElevatorItem) => {
     Taro.navigateTo({ url: '/pages/vacDetails/index?id=' + item.id })
   }
 
   return (
-    <div className='flex flex-col p-2 h-without-tab'>
-      <Elevator list={getRenderList(vaccineList)} height='100%' onItemClick={onItemClick}></Elevator>
-    </div>
+    <>
+      {isLoading ? (
+        <Loading className='h-screen w-screen' />
+      ) : (
+        <div className='flex flex-col p-2 h-without-tab'>
+          <Elevator list={renderlist} height='100%' onItemClick={onItemClick}></Elevator>
+        </div>
+      )}
+    </>
   )
 }
