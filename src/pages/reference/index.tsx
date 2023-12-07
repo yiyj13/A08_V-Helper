@@ -1,408 +1,89 @@
-import { useState } from "react";
-import { Table, Tabs } from '@nutui/nutui-react-taro';
-import { TableColumnProps } from '@nutui/nutui-react-taro/dist/types/packages/table/types';
+import { useState } from 'react'
+import clsx from 'clsx'
+import data1 from './data1.json'
+import data2 from './data2.json'
+
+type ChildVaccine = {
+  age: string
+  vaccine: string
+  dose: string
+}
 
 export default function App() {
-  const [tabValue, setTabValue] = useState<string | number>('0');
-
-  const [columns, setColumns] = useState<Array<TableColumnProps>>([
-    {
-      title: '年龄',
-      key: 'age',
-    },
-    {
-      title: '疫苗',
-      key: 'vaccine',
-    },
-    {
-      title: '剂次',
-      key: 'dose',
-    },
-  ])
-
-  const [data1, setData1] = useState([
-    {
-      age: '出生',
-      vaccine: '乙肝疫苗',
-      dose: '1',
-    },
-    {
-      vaccine: '卡介苗',
-      dose: '1',
-    },
-    {
-      age: '1月龄',
-      vaccine: '乙肝疫苗',
-      dose: '2',
-    },
-    {
-      age: '2月龄',
-      vaccine: '脊灰灭活疫苗',
-      dose: '1',
-    },
-    {
-      age: '3月龄',
-      vaccine: '脊灰灭活疫苗',
-      dose: '2',
-    },
-    {
-      vaccine: '百白破疫苗',
-      dose: '1',
-    },
-    {
-      age: '4月龄',
-      vaccine: '百白破疫苗',
-      dose: '2',
-    },
-    {
-      vaccine: '二价脊灰疫苗',
-      dose: '1',
-    },
-    {
-      age: '5月龄',
-      vaccine: '百白破疫苗',
-      dose: '3',
-    },
-    {
-      age: '6月龄',
-      vaccine: '乙肝疫苗',
-      dose: '3',
-    },
-    {
-      vaccine: 'A群流脑疫苗',
-      dose: '1',
-    },
-    {
-      age: '8月龄',
-      vaccine: '乙脑减毒活疫苗',
-      dose: '1',
-    },
-    {
-      vaccine: '麻腮风疫苗',
-      dose: '1',
-    },
-    {
-      age: '9月龄',
-      vaccine: 'A群流脑疫苗',
-      dose: '2',
-    },
-    {
-      age: '18月龄',
-      vaccine: '麻腮风疫苗',
-      dose: '2',
-    },
-    {
-      vaccine: '甲肝减毒活疫苗',
-      dose: '1',
-    },
-    {
-      vaccine: '百白破疫苗',
-      dose: '4',
-    },
-    {
-      age: '2周岁',
-      vaccine: '乙脑减毒活疫苗',
-      dose: '2',
-    },
-    {
-      age: '3周岁',
-      vaccine: 'A+C群流脑疫苗',
-      dose: '1',
-    },
-    {
-      age: '4周岁',
-      vaccine: '二价脊灰疫苗',
-      dose: '2',
-    },
-    {
-      age: '6周岁',
-      vaccine: 'A+C群流脑疫苗',
-      dose: '2',
-    },
-    {
-      vaccine: '白破疫苗',
-      dose: '1',
-    },
-  ])
-
-  const [data2, setData2] = useState([
-    {
-      age: '1月15天',
-      vaccine: '13价肺炎多糖结合疫苗',
-      dose: '1',
-    },
-    {
-      age: '',
-      vaccine: '五价轮状病毒疫苗',
-      dose: '1',
-    },
-    {
-      age: '2月龄',
-      vaccine: '百白破IPV和Hib五联疫苗',
-      dose: '1',
-    },
-    {
-      age: '',
-      vaccine: 'b型流感嗜血杆菌疫苗',
-      dose: '1',
-    },
-    {
-      age: '',
-      vaccine: '轮状病毒疫苗',
-      dose: '1',
-    },
-    {
-      age: '2月15天',
-      vaccine: '五价轮状病毒疫苗',
-      dose: '2',
-    },
-    {
-      age: '3月龄',
-      vaccine: 'b型流感嗜血杆菌疫苗',
-      dose: '2',
-    },
-    {
-      age: '',
-      vaccine: '四联疫苗',
-      dose: '1',
-    },
-    {
-      age: '',
-      vaccine: 'A群C群流脑结合疫苗',
-      dose: '1',
-    },
-    {
-      age: '',
-      vaccine: 'ACYW群流脑多糖结合疫苗',
-      dose: '1',
-    },
-    {
-      age: '',
-      vaccine: 'A+C流脑疫苗（结合）',
-      dose: '1',
-    },
-    {
-      age: '',
-      vaccine: '百白破IPV和Hib五联疫苗',
-      dose: '2',
-    },
-    {
-      age: '3月15日',
-      vaccine: '五价轮状病毒疫苗',
-      dose: '3',
-    },
-    {
-      age: '',
-      vaccine: '13价肺炎多糖结合疫苗',
-      dose: '2',
-    },
-    {
-      age: '4月龄',
-      vaccine: 'A+C流脑疫苗（结合）',
-      dose: '2',
-    },
-    {
-      age: '',
-      vaccine: 'A群C群流脑结合疫苗',
-      dose: '2',
-    },
-    {
-      age: '',
-      vaccine: '四联疫苗',
-      dose: '2',
-    },
-    {
-      age: '',
-      vaccine: 'ACYW群流脑多糖结合疫苗',
-      dose: '2',
-    },
-    {
-      age: '',
-      vaccine: '百白破IPV和Hib五联疫苗',
-      dose: '3',
-    },
-    {
-      age: '',
-      vaccine: '脊灰灭活疫苗',
-      dose: '3',
-    },
-    {
-      age: '',
-      vaccine: 'b型流感嗜血杆菌疫苗',
-      dose: '3',
-    },
-    {
-      age: '5月龄',
-      vaccine: '四联疫苗',
-      dose: '3',
-    },
-    {
-      age: '',
-      vaccine: 'A+C流脑疫苗（结合）',
-      dose: '3',
-    },
-    {
-      age: '',
-      vaccine: 'ACYW群流脑多糖结合疫苗',
-      dose: '3',
-    },
-    {
-      age: '5月15天',
-      vaccine: '13价肺炎多糖结合疫苗',
-      dose: '3',
-    },
-    {
-      age: '6月龄',
-      vaccine: '三价流感疫苗 （6-35月龄）',
-      dose: '1',
-    },
-    {
-      age: '',
-      vaccine: '肠道病毒71型灭活疫苗',
-      dose: '1',
-    },
-    {
-      age: '7月龄',
-      vaccine: '肠道病毒71型灭活疫苗',
-      dose: '2',
-    },
-    {
-      age: '8月龄',
-      vaccine: '腮腺炎疫苗',
-      dose: '1',
-    },
-    {
-      age: '',
-      vaccine: '乙脑灭活疫苗 （Vero）',
-      dose: '1',
-    },
-    {
-      age: '8月7天',
-      vaccine: '乙脑灭活疫苗 （Vero）',
-      dose: '2',
-    },
-    {
-      age: '12月龄',
-      vaccine: '13价肺炎多糖结合疫苗',
-      dose: '4',
-    },
-    {
-      age: '',
-      vaccine: '甲肝灭活疫苗',
-      dose: '1',
-    },
-    {
-      age: '',
-      vaccine: 'ACYW群流脑多糖结合疫苗',
-      dose: '4',
-    },
-    {
-      age: '',
-      vaccine: '水痘减毒活疫苗',
-      dose: '1',
-    },
-    {
-      age: '14月龄',
-      vaccine: '轮状病毒疫苗',
-      dose: '2',
-    },
-    {
-      age: '18月龄',
-      vaccine: '脊灰灭活疫苗',
-      dose: '4',
-    },
-    {
-      age: '',
-      vaccine: '百白破IPV和Hib五联疫苗',
-      dose: '4',
-    },
-    {
-      age: '',
-      vaccine: '甲肝灭活疫苗',
-      dose: '2',
-    },
-    {
-      age: '',
-      vaccine: 'b型流感嗜血杆菌疫苗',
-      dose: '4',
-    },
-    {
-      age: '',
-      vaccine: '四联疫苗',
-      dose: '4',
-    },
-    {
-      age: '',
-      vaccine: '三价流感疫苗 （6-35月龄）',
-      dose: '2',
-    },
-    {
-      age: '2周岁',
-      vaccine: 'ACYW群流脑多糖疫苗',
-      dose: '1',
-    },
-    {
-      age: '',
-      vaccine: '乙脑灭活疫苗 （Vero）',
-      dose: '3',
-    },
-    {
-      age: '',
-      vaccine: '23价肺炎球菌疫苗',
-      dose: '1',
-    },
-    {
-      age: '',
-      vaccine: '轮状病毒疫苗',
-      dose: '3',
-    },
-    {
-      age: '3周岁',
-      vaccine: '四价流感疫苗',
-      dose: '1',
-    },
-    {
-      age: '',
-      vaccine: '新冠肺炎疫苗 （Vero）',
-      dose: '1',
-    },
-    {
-      age: '3周岁21天',
-      vaccine: '新冠肺炎疫苗（Vero）',
-      dose: '2',
-    },
-    {
-      age: '4周岁',
-      vaccine: '水痘减毒活疫苗',
-      dose: '2',
-    },
-    {
-      age: '5周岁',
-      vaccine: 'ACYW群流脑多糖疫苗',
-      dose: '2',
-    },
-    {
-      age: '6周岁',
-      vaccine: '乙脑灭活疫苗 （Vero）',
-      dose: '4',
-    },
-    {
-      age: '9周岁',
-      vaccine: '二价宫颈癌疫苗',
-      dose: '1',
-    },
-  ])
+  const [tabValue, setTabValue] = useState<number>(0)
+  const dataClassOne = data1 as ChildVaccine[]
+  const dataClassTwo = data2 as ChildVaccine[]
 
   return (
-    <Tabs value={tabValue} onChange={(value) => {
-      setTabValue(value)
-    }}>
-      <Tabs.TabPane title="一类疫苗">
-        <Table columns={columns} data={data1} bordered={false} />
-      </Tabs.TabPane>
-      <Tabs.TabPane title="二类疫苗">
-        <Table columns={columns} data={data2} bordered={false} />
-      </Tabs.TabPane>
-    </Tabs>
-  ) 
-};
+    <>
+      <div className='px-2 mt-32 pb-10'>
+        {(tabValue === 0 ? dataClassOne : dataClassTwo).map((item, index) => {
+          return <ChildrenVaccineItem item={item} key={index} />
+        })}
+      </div>
+      <div className={clsx('fixed top-0 h-30 w-full backdrop-blur-md z-10', 'bg-gradient-to-b from-white to-white/70')}>
+        <header className='flex justify-between items-center px-4 h-14'>
+          <h1 className='text-xl font-semibold'>儿童疫苗接种参考</h1>
+        </header>
+        <Tab titles={['一类疫苗', '二类疫苗']} value={tabValue} setValue={setTabValue} />
+      </div>
+    </>
+  )
+}
+
+function ChildrenVaccineItem({ item }: { item: ChildVaccine }) {
+  return (
+    <>
+      <div className='ps-2 my-2 first:mt-0'>
+        <h3 className='text-xs font-medium uppercase text-gray-500'>{item.age}</h3>
+      </div>
+      <div className='flex gap-x-3'>
+        <div className='relative last:after:hidden after:absolute after:top-7 after:bottom-0 after:start-3.5 after:w-px after:-translate-x-[0.5px] after:bg-gray-200'>
+          <div className='relative z-10 w-7 h-7 flex justify-center items-center'>
+            <div className='w-2 h-2 rounded-full bg-gray-200'></div>
+          </div>
+        </div>
+        <div
+          className={clsx(
+            'grow pt-2 px-4 pb-4 mr-4 rounded-2xl bg-slate-100',
+            'active:scale-105 active:shadow-md transition'
+          )}
+        >
+          <h3 className='flex gap-x-1.5 font-semibold'>{item.vaccine}</h3>
+          <p className='mt-1 text-sm text-gray-600'>Description of ChildrenVaccineItem</p>
+          <span
+            className={clsx(
+              'mt-1 -ms-1 p-1 inline-flex items-center gap-x-2 text-xs rounded-full border text-brand border-brand',
+              item.dose === '1' ? 'hidden' : 'visible'
+            )}
+          >
+            第{item.dose}剂
+          </span>
+        </div>
+      </div>
+    </>
+  )
+}
+
+interface TabProps {
+  titles: string[]
+  value: number
+  setValue: (index: number) => void
+}
+function Tab({ titles: tabs, value, setValue }: TabProps) {
+  return (
+    <div className='flex flex-row p-2'>
+      {tabs.map((tab, index) => (
+        <div
+          key={index}
+          className={`${
+            index === value ? 'border-b-2 border-solid border-b-brand text-brand' : 'text-gray-700'
+          } py-2 px-1 mx-2 text-sm focus:outline-none transition ease-in-out delay-150`}
+          onClick={() => setValue(index)}
+        >
+          {tab}
+        </div>
+      ))}
+    </div>
+  )
+}

@@ -15,7 +15,7 @@ export default function HomePage() {
       <div className='grid_'>
         <BigButton text='疫苗地图' src={VacPNG} onClick={() => Taro.navigateTo({ url: '/pages/map/index' })} />
         <BigButton text='接种记录' src={VacPNG} onClick={() => Taro.navigateTo({ url: '/pages/record/index' })} />
-        <BigButton text='接种参考' src={DoctorPNG} />
+        <BigButton text='接种参考' src={DoctorPNG} onClick={() => Taro.navigateTo({ url: '/pages/reference/index' })} />
         <BigButton
           text='体温记录'
           src={TemperaturePNG}

@@ -14,7 +14,7 @@ import { NetworkError } from '../../components/errors'
 
 // TODO: implement interaction of date picker and scroll view
 export default function Index() {
-  const [selectedDate, setSelectedDate] = useState<string>('')
+  const [selectedDate, setSelectedDate] = useState<string>('日期')
 
   const { data, error } = useRequest(getVaccineRecordList, { cacheKey: 'vacCalendar', staleTime: 5000 })
 
@@ -50,12 +50,12 @@ export default function Index() {
 
   return (
     <div className='flex flex-col h-screen'>
-      <div className='h-12 p-4 bg-gray-200 flex flex-row items-center'>
+      <div className='h-12 p-4 bg-white flex flex-row items-center'>
         <input
           type='date'
           value={selectedDate}
           onChange={(e) => handleDateChange(e.target.value)}
-          className='w-full p-2 border border-gray-300'
+          className='w-full p-2 border font-semibold border-gray-300'
         />
       </div>
 
