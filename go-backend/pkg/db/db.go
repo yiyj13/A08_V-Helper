@@ -64,18 +64,14 @@ func AddVaxInfo(db *gorm.DB) error {
 	for _, vaccine := range slice_vaccine {
 		// 查询数据库中是否已经存在相同名称的疫苗
 		var existingVaccine model.Vaccine
-		result := db.Where("name = ?", vaccine.Name).First(&existingVaccine)
+		err := db.Where("name = ?", vaccine.Name).First(&existingVaccine).Error
 
-		if result.Error == gorm.ErrRecordNotFound {
-			// 数据库中不存在该疫苗，添加到数据库
-			if err := db.Create(&vaccine).Error; err != nil {
-				log.Fatalf("Error creating vaccine info: %v", err)
-				return err
-			}
-		} else if result.Error != nil {
-			// 查询时发生其他错误
-			log.Fatalf("Error checking vaccine existence: %v", result.Error)
-			return result.Error
+		// 数据库中不存在该疫苗，添加到数据库
+		// 如果已经存在，则更新数据库中的疫苗信息
+		if err != nil {
+			db.Create(&vaccine)
+		} else {
+			db.Model(&existingVaccine).Updates(vaccine)
 		}
 	}
 
