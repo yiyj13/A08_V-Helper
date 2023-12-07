@@ -69,9 +69,8 @@ export default function VaccineEnquiry() {
   }
 
   return (
-    <div className='flex flex-col p-2'>
-      <Elevator list={getRenderList(vaccineList)} height='auto' onItemClick={onItemClick}></Elevator>
-      <div className='h-44'></div>
+    <div className='flex flex-col p-2 h-without-tab'>
+      <Elevator list={getRenderList(vaccineList)} height='100%' onItemClick={onItemClick}></Elevator>
     </div>
   )
 }
