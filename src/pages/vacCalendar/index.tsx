@@ -16,7 +16,7 @@ import { NetworkError } from '../../components/errors'
 export default function Index() {
   const [selectedDate, setSelectedDate] = useState<string>('日期')
 
-  const { data, error } = useRequest(getVaccineRecordList, { cacheKey: 'vacCalendar', staleTime: 5000 })
+  const { data, error } = useRequest(getVaccineRecordList, { cacheKey: 'vacCalendar' })
 
   const mergedItems = useMemo(
     () => (data ? MergeItems(data).sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf()) : null),

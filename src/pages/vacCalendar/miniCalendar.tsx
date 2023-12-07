@@ -3,16 +3,23 @@ import { Text } from '@tarojs/components'
 import { useRequest } from 'taro-hooks'
 import { Skeleton } from '@nutui/nutui-react-taro'
 import dayjs from 'dayjs'
+import { useEffect } from 'react'
 
 import { getVaccineRecordList } from '../../api/methods'
 import { MergeItems, VacCalendarItemExpire, VacCalendarItem } from './vacCalendarItem'
 import { NetworkError } from "../../components/errors"
+import { useTabStore } from '../../models'
 
 export function MiniCalendar() {
+  const tabIndex = useTabStore((state) => state.tabIndex)
   const { data, loading, error, refresh } = useRequest(getVaccineRecordList, {
     cacheKey: 'vacCalendar',
-    staleTime: 5000,
+    manual: true
   })
+
+  useEffect(() => {
+    tabIndex === 0 && refresh()
+  }, [tabIndex, refresh])
 
   return (
     <>
