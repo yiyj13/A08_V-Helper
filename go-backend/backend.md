@@ -113,6 +113,29 @@ json样例：
 }
 ```
 
+## 帖子
+
+| 方法 | 路由 | 功能 |
+| ---- | ---- | ---- |
+| POST | /api/articles | 发布帖子 |
+| GET | /api/articles?size=10&page=1 | 获取全部帖子，分页 |
+| GET | /api/articles/:id | 获取指定 id 的帖子 |
+| GET | /api/articles/user/:userId | 获取指定 userId 的用户发布的所有帖子 |
+| PUT | /api/articles/:id | 更新指定 id 的帖子 |
+| DELETE | /api/articles/:id | 删除指定 id 的帖子 |
+
+Post 时的json样例：
+```json
+{
+   "title": "疫苗接种经历",
+   "content": "今天去接种了新冠疫苗，感觉还不错",
+   "userName": "张三",
+   "userId": 1,
+   "isBind": true,
+   "vaccineId": 1
+}
+```
+
 # 模型设计
 
 通过以下数据表来支持后端的功能：
