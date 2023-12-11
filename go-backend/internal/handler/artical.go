@@ -34,10 +34,48 @@ func (h *ArticleHandler) HandleCreateArticle(c *gin.Context) {
 }
 
 func (h *ArticleHandler) HandleGetAllArticles(c *gin.Context) {
+	// 可能需要分页，page指定页数，size指定每页大小
+	var page uint64 = 1
+	var size uint64 = 0
+	var err error
+	p := c.Query("page")
+	s := c.Query("size")
+	if p != "" {
+		page, err = strconv.ParseUint(p, 10, 32)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page number"})
+			return
+		}
+	}
+	if s != "" {
+		size, err = strconv.ParseUint(s, 10, 32)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page size"})
+			return
+		}
+	}
+
 	articles, err := h.articleService.GetAllArticles()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error fetching articles"})
 		return
+	}
+
+	// log.Println("articles fetched successfully: ", articles)
+
+	// 分页
+	if size != 0 {
+		start := (page - 1) * size
+		end := page * size
+		if start > uint64(len(articles)) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page number"})
+			return
+		}
+		if end > uint64(len(articles)) {
+			end = uint64(len(articles))
+		}
+		log.Println("pagination: ", start, end)
+		articles = articles[start:end]
 	}
 
 	c.JSON(http.StatusOK, articles)
@@ -64,45 +102,10 @@ func (h *ArticleHandler) HandleGetArticlesByUserID(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
 		return
 	}
-
-	// 可能需要分页，page指定页数，size指定每页大小
-	var page uint64 = 0
-	var size uint64 = 0
-	p := c.Query("page")
-	s := c.Query("size")
-	if p != "" {
-		page, err = strconv.ParseUint(p, 10, 32)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page number"})
-			return
-		}
-	}
-	if s != "" {
-		size, err = strconv.ParseUint(s, 10, 32)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page size"})
-			return
-		}
-	}
-
 	articles, err := h.articleService.GetArticlesByUserID(uint(userID))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "error fetching articles"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
-	}
-
-	// 分页
-	if size != 0 {
-		start := (page - 1) * size
-		end := page * size
-		if start > uint64(len(articles)) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page number"})
-			return
-		}
-		if end > uint64(len(articles)) {
-			end = uint64(len(articles))
-		}
-		articles = articles[start:end]
 	}
 
 	c.JSON(http.StatusOK, articles)
