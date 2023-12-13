@@ -65,8 +65,8 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	// 帖子回复
 	replyService := service.NewReplyService(db)
 	replyHandler := NewReplyHandler(replyService)
-	router.GET("/replys", replyHandler.HandleGetReplys)
 	router.POST("/replys", replyHandler.HandleCreateReply)
+	router.GET("/replys", replyHandler.HandleGetReplys)
 	router.GET("/replys/:id", replyHandler.HandleGetReplyByID)
 	router.PUT("/replys/:id", replyHandler.HandleUpdateReplyByID)
 	router.DELETE("/replys/:id", replyHandler.HandleDeleteReplyByID)

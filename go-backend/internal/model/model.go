@@ -39,6 +39,7 @@ type Vaccine struct {
 // VaccinationRecord 接种记录模型
 // 对应一个Profile和一个Vaccine，记录接种类型、接种时间、接种凭证、备注，同时希望能看到疫苗的详细信息(名称、有效期...)
 // 地点、是否提醒、下次接种时间
+// 提醒时间：
 type VaccinationRecord struct {
 	gorm.Model
 	ProfileID           uint    `json:"profileId"`
@@ -47,9 +48,11 @@ type VaccinationRecord struct {
 	VaccinationDate     string  `json:"vaccinationDate"` // 注意用string与前端交互，例如"2021-07-01"
 	Voucher             string  `json:"voucher"`         // 接种凭证，之后实现为图片链接
 	VaccinationLocation string  `json:"vaccinationLocation"`
-	Reminder            bool    `json:"reminder"`
-	NextVaccinationDate string  `json:"nextVaccinationDate"`
-	Note                string  `json:"note"`
+
+	Reminder            bool   `json:"reminder"`
+	NextVaccinationDate string `json:"nextVaccinationDate"`
+	ReminderTime        int    `json:"reminderTime"` // 提醒时间，单位为天，例如提前一天提醒则为1
+	Note                string `json:"note"`
 }
 
 // TempertureRecord 体温记录模型
