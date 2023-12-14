@@ -1,9 +1,8 @@
 import { useMemo } from 'react'
-import useSWR from 'swr'
 import Taro from '@tarojs/taro'
 import { Elevator, Loading } from '@nutui/nutui-react-taro'
 
-import { getVaccineList, Vaccine } from '../../api/methods'
+import { useVaccines } from '../../api'
 
 type TElevatorItem = {
   name: string
@@ -16,9 +15,14 @@ type TElevatorGroup = {
 }
 
 export default function VaccineEnquiry() {
-  const { data: vaccineList, isLoading } = useSWR('vaccineList', getVaccineList)
+  const { data: vaccineList, isLoading } = useVaccines()
 
-  const getRenderList = (data: Vaccine[]) => {
+  const getRenderList = (
+    data: {
+      name: string
+      ID: number
+    }[]
+  ) => {
     const list: TElevatorGroup[] = []
     data.forEach((item) => {
       const firstChar = item.name.charAt(0)

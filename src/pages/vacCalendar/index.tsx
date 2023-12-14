@@ -12,7 +12,7 @@ import { NetworkError } from '../../components/errors'
 export default function Index() {
   const [selectedDate, setSelectedDate] = useState<string>('日期')
 
-  const { data, error } = useSWR('vacCalendar', getVaccineRecordList )
+  const { data, error } = useSWR('getVaccineRecordList', getVaccineRecordList )
 
   const mergedItems = useMemo(
     () => (data ? MergeItems(data).sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf()) : null),

@@ -11,7 +11,7 @@ import { Cell, Switch, Picker, Uploader, Button, DatePicker, TextArea, Input } f
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
 import useSWR from 'swr'
-import { RecordData, getProfiles, getVaccineList } from '../../api/methods'
+import { RecordData, getProfiles, useVaccines } from '../../api'
 
 import ComboBox from '../../components/combobox'
 
@@ -28,17 +28,14 @@ export default function VaccineRecord() {
   })
 
   const { data: profiles } = useSWR('getProfiles', getProfiles)
-  const { data: vaccines } = useSWR('getVaccineList', getVaccineList)
 
   const MemberData = useMemo(
     () => (profiles ? profiles.map((item) => ({ value: item.ID, text: item.relationship })) : []),
     [profiles]
   )
 
-  const VaccineData = useMemo(
-    () => (vaccines ? vaccines.map((item) => ({ value: item.ID, text: item.name })) : []),
-    [vaccines]
-  )
+  const { data: vaccines } = useVaccines()
+  const VaccineData = vaccines ? vaccines.map((item) => ({ value: item.ID, text: item.name })) : []
 
   const TypeData = [
     [
