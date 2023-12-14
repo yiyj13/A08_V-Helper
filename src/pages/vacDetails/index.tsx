@@ -55,7 +55,7 @@ export default function Index() {
           <DetailBlock id='detailTab3' title='大家讨论' paragraph='暂无' activeId={activeId}></DetailBlock>
           <div
             className={clsx('flex justify-center items-center rounded-2xl mx-4 py-2 bg-slate-200', 'active:scale-105')}
-            onClick={() => Taro.navigateTo({ url: '/pages/sendpost/index' })}
+            onClick={() => Taro.navigateTo({ url: '/pages/sendpost/index?vacName=' + vaccine.name })}
           >
             <Uploader className='text-brand'></Uploader>
           </div>
