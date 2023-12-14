@@ -81,7 +81,7 @@ export default function Index() {
 }
 
 const Skeletons = () => (
-  <div className='flex flex-col gap-y-12 p-10 h-screen overflow-hidden'>
+  <div className='flex flex-col gap-y-12 p-4 px-8 h-screen overflow-hidden'>
     <Skeleton animated avatar rows={2}></Skeleton>
     <Skeleton animated className='scale-y-150' rows={2}></Skeleton>
     <Skeleton animated className='mt-20' rows={3}></Skeleton>
