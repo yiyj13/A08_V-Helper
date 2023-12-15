@@ -2,6 +2,7 @@ export default defineAppConfig({
   pages: [
     //
     'pages/index',
+    'pages/community/articlepage/index',
     'pages/vacCalendar/index',
     'pages/sendpost/index',
     'pages/vacDetails/index',

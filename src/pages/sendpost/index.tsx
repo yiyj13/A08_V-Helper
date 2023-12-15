@@ -1,35 +1,45 @@
 import { Button, Divider, Uploader } from '@nutui/nutui-react-taro'
 import { useState } from 'react'
 import { useRouter } from 'taro-hooks'
+import useSWRMutation from 'swr/mutation'
+import clsx from 'clsx'
+
 import ComboBox from '../../components/combobox'
 import TextAreaCustom from './maintextarea'
 import InputCustom from './titleinput'
 
-export default function Index() {
-  const [params, { back }] = useRouter()
-  const [title, setTitle] = useState<string>(params.vacName || '')
-  const [content, setContent] = useState('')
+import { postArticle, useVaccines } from '../../api'
 
-  const vaccines = [
-    '狂犬病疫苗',
-    '流感疫苗',
-    '水痘疫苗',
-    '麻疹疫苗',
-    '百白破疫苗',
-    '脊灰疫苗',
-    '乙肝疫苗',
-    '卡介苗',
-  ]
+export default function Index() {
+  const [route, { back }] = useRouter()
+  const [title, setTitle] = useState<string>('')
+  const [content, setContent] = useState('')
+  const [vaccineName, setVaccineName] = useState<string | undefined>(route.params.vacName)
+
+  const { data: vaccines, isLoading, name2id } = useVaccines()
+  const { trigger } = useSWRMutation('postArticle', () =>
+    postArticle(title, content, name2id(vaccineName))
+  )
 
   const handleSubmit = () => {
-    // TODO: put post
-    back()
+    trigger()
+      .then(back)
+      .catch((e) => console.log(e))
   }
 
   return (
     <div className='flex h-screen w-screen flex-col'>
-      <div className='mx-4 my-6'>
-        <ComboBox title='选择疫苗标签' options={vaccines} onSelect={(option) => {}} />
+      <div
+        className={clsx('mx-4 my-6', {
+          'animate-pulse duration-100': isLoading,
+        })}
+      >
+        <ComboBox
+          title={isLoading ? '加载中' : '选择疫苗标签'}
+          options={vaccines ? vaccines.map((v) => v.name) : []}
+          defaultValue={vaccineName}
+          onSelect={(option) => setVaccineName(option)}
+        />
       </div>
       <section className='flex h-full w-full flex-col rounded-3xl bg-slate-100 p-4'>
         <InputCustom label='帖子标题' value={title} onInput={(val) => setTitle(val.detail.value)} />

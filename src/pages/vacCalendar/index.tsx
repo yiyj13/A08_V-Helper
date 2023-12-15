@@ -1,11 +1,7 @@
-// NOTE:
-// we may migrate 'taro-hooks/useRequest' to 'swr' in the future
-// ( Data fetching state management library )
-
 import { ScrollView } from '@tarojs/components'
 import { useMemo, useState } from 'react'
 import dayjs from 'dayjs'
-import { useRequest } from 'taro-hooks'
+import useSWR from 'swr'
 
 import { getVaccineRecordList } from '../../api/methods'
 
@@ -16,7 +12,7 @@ import { NetworkError } from '../../components/errors'
 export default function Index() {
   const [selectedDate, setSelectedDate] = useState<string>('日期')
 
-  const { data, error } = useRequest(getVaccineRecordList, { cacheKey: 'vacCalendar' })
+  const { data, error } = useSWR('getVaccineRecordList', getVaccineRecordList )
 
   const mergedItems = useMemo(
     () => (data ? MergeItems(data).sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf()) : null),

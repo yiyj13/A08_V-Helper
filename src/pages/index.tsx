@@ -3,7 +3,7 @@ import { useTabStore, useUserStore } from '../models'
 
 import HomePage from '../pages/home'
 import EnquiryPage from '../pages/enquiry'
-import DatePage from '../pages/date'
+import CommunityPage from '../pages/community'
 import ProfilePage from '../pages/my'
 import CustomTabBar from '../tabbar'
 
@@ -16,7 +16,7 @@ export default function Index() {
 
   return (
     <div>
-      {[HomePage, EnquiryPage, DatePage, ProfilePage].map((Content, index) => (
+      {[HomePage, EnquiryPage, CommunityPage, ProfilePage].map((Content, index) => (
         <LazyLoadTab tabIndex={index > 1 ? index + 1 : index} key={index}>
           <Content />
         </LazyLoadTab>

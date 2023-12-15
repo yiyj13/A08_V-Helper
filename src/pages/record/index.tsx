@@ -4,13 +4,14 @@
 */
 
 import Taro from '@tarojs/taro'
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { Cell, Switch, Picker, Uploader, Button, DatePicker, TextArea, Input } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
+import useSWR from 'swr'
+import { RecordData, getProfiles, useVaccines } from '../../api'
+
 import ComboBox from '../../components/combobox'
-import api from '../../api'
-import { Vaccine, Profile, RecordData } from '../../api/methods'
 
 export default function VaccineRecord() {
   const [record, setRecord] = useState<Partial<RecordData>>({
@@ -23,20 +24,15 @@ export default function VaccineRecord() {
     note: '',
   })
 
-  const [VaccineData, setVaccineData] = useState<PickerOption[]>([])
-  const [MemberData, setMemberData] = useState<PickerOption[]>([])
+  const { data: profiles } = useSWR('getProfiles', getProfiles)
 
-  useEffect(() => {
-    api.get('/api/vaccines').then((res) => {
-      let vacData = res.data as Vaccine[]
-      setVaccineData(vacData.map((item) => ({ value: item.ID, text: item.name })))
-    })
+  const MemberData = useMemo(
+    () => (profiles ? profiles.map((item) => ({ value: item.ID, text: item.relationship })) : []),
+    [profiles]
+  )
 
-    api.get('/api/profiles').then((res) => {
-      let memData = res.data as Profile[]
-      setMemberData(memData.map((item) => ({ value: item.ID, text: item.relationship })))
-    })
-  }, [record])
+  const { data: vaccines } = useVaccines()
+  const VaccineData = vaccines ? vaccines.map((item) => ({ value: item.ID, text: item.name })) : []
 
   const TypeData = [
     [

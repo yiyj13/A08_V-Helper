@@ -1,25 +1,15 @@
 import Taro from '@tarojs/taro'
 import { Text } from '@tarojs/components'
-import { useRequest } from 'taro-hooks'
+import useSWR from 'swr'
 import { Skeleton } from '@nutui/nutui-react-taro'
 import dayjs from 'dayjs'
-import { useEffect } from 'react'
 
 import { getVaccineRecordList } from '../../api/methods'
 import { MergeItems, VacCalendarItemExpire, VacCalendarItem } from './vacCalendarItem'
 import { NetworkError } from "../../components/errors"
-import { useTabStore } from '../../models'
 
 export function MiniCalendar() {
-  const tabIndex = useTabStore((state) => state.tabIndex)
-  const { data, loading, error, refresh } = useRequest(getVaccineRecordList, {
-    cacheKey: 'vacCalendar',
-    manual: true
-  })
-
-  useEffect(() => {
-    tabIndex === 0 && refresh()
-  }, [tabIndex, refresh])
+  const { data, isLoading, error } = useSWR('getVaccineRecordList', getVaccineRecordList)
 
   return (
     <>
@@ -35,10 +25,10 @@ export function MiniCalendar() {
 
       <div className='mx-2 mt-2 flex h-full flex-col overflow-y-scroll'>
         <div className='mx-4 w-auto rounded-2xl'>
-          {loading ? (
-            <Skeleton animated rows={3} visible={!loading} />
+          {isLoading ? (
+            <Skeleton animated rows={3} visible={!isLoading} />
           ) : error ? (
-            <NetworkError refresh={refresh} />
+            <NetworkError />
           ) : (
             <ol className='mt-2 space-y-4 text-sm leading-6'>
               {data &&
