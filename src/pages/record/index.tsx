@@ -9,19 +9,13 @@ import { Cell, Switch, Picker, Uploader, Button, DatePicker, TextArea, Input } f
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
 import useSWR from 'swr'
-import { RecordData, getProfiles, useVaccines } from '../../api'
+import api, { RecordData, getProfiles, useVaccines } from '../../api'
 
 import ComboBox from '../../components/combobox'
 
 export default function VaccineRecord() {
   const [record, setRecord] = useState<Partial<RecordData>>({
-    vaccinationDate: '',
-    type: '',
     reminder: false,
-    remindDate: '',
-    nextVaccinationDate: '',
-    voucher: '',
-    note: '',
   })
 
   const { data: profiles } = useSWR('getProfiles', getProfiles)
@@ -118,45 +112,36 @@ export default function VaccineRecord() {
       ...record,
       vaccinationDate: date,
     })
-    console.log(record.vaccinationDate)
   }
 
   const [validVisible, setValidVisible] = useState(false)
   const [validDesc, setValidDesc] = useState('')
 
-  const calculateNextVacDate = () => {
-    if (record.vaccinationDate !== undefined) {
-      const vacDate = record.vaccinationDate
-      console.log('vacDate:', vacDate)
-      console.log('validDesc:', validDesc)
-      const nextVacDate = addDays(vacDate, validDesc)
-      console.log('nextVacDate:', nextVacDate)
-      setRecord({
-        ...record,
-        nextVaccinationDate: nextVacDate,
-      })
+  const addDays = (dateString: string | undefined, days: string) => {
+    if (dateString === undefined) {
+      return 'Error' // for debug
+    } else {
+      const dateArray = dateString.split('-')
+      const year = parseInt(dateArray[0], 10)
+      const month = parseInt(dateArray[1], 10)
+      const day = parseInt(dateArray[2], 10)
+      if (days.slice(-1) === '月') {
+        const addMonth = parseInt(days.slice(0, -1), 10)
+        const newMonth = month + addMonth
+        return `${year}-${newMonth}-${day}`
+      } else if (days.slice(-1) === '年') {
+        const addYear = parseInt(days.slice(0, -1), 10)
+        const newYear = year + addYear
+        return `${newYear}-${month}-${day}`
+      } else if (days.slice(-1) === '终') {
+        return '终身有效'
+      } else {
+        return 'Error' // for debug
+      }
     }
   }
 
-  const addDays = (dateString: string, days: string) => {
-    const dateArray = dateString.split('-')
-    const year = parseInt(dateArray[0], 10)
-    const month = parseInt(dateArray[1], 10)
-    const day = parseInt(dateArray[2], 10)
-    if (days.slice(-1) === '月') {
-      const addMonth = parseInt(days.slice(0, -1), 10)
-      const newMonth = month + addMonth
-      return `${year}-${newMonth}-${day}`
-    } else if (days.slice(-1) === '年') {
-      const addYear = parseInt(days.slice(0, -1), 10)
-      const newYear = year + addYear
-      return `${newYear}-${month}-${day}`
-    } else if (days.slice(-1) === '终') {
-      return '终身有效'
-    } else {
-      return 'Error' // for debug
-    }
-  }
+  const nextVaccinationDate = addDays(record.vaccinationDate, validDesc)
 
   const confirmValid = (options: PickerOption[], _values: (string | number)[]) => {
     let description = ''
@@ -164,9 +149,6 @@ export default function VaccineRecord() {
       description += option.text
     })
     setValidDesc(description)
-    console.log('Valid description:', description)
-    console.log('valid desc:', validDesc)
-    calculateNextVacDate()
   }
 
   const [remindSwitch, setRemindSwitch] = useState(false)
@@ -189,8 +171,6 @@ export default function VaccineRecord() {
 
   const onRemindUnitSet = (option: string) => {
     setRemindUnit(option)
-
-    calculateRemindDate()
   }
 
   const [noteValue, setNoteValue] = useState('')
@@ -202,76 +182,59 @@ export default function VaccineRecord() {
     setNoteValue(value)
   }
 
-  const subtractDays = (dateString: string, days: string) => {
-    const dateArray = dateString.split('-')
-    const year = parseInt(dateArray[0], 10)
-    const month = parseInt(dateArray[1], 10)
-    const day = parseInt(dateArray[2], 10)
-
-    if (days.slice(-1) === '日') {
-      const subtractDay = parseInt(days.slice(0, -1), 10)
-      const newDay = day - subtractDay
-
-      if (newDay > 0) {
-        return `${year}-${month}-${newDay}`
-      } else {
-        const newMonth = month - 1
-        const daysInPreviousMonth = new Date(year, newMonth, 0).getDate()
-        const correctedDay = daysInPreviousMonth + newDay
-        return `${year}-${newMonth}-${correctedDay}`
-      }
-    } else if (days.slice(-1) === '周') {
-      const subtractWeek = parseInt(days.slice(0, -1), 10)
-      const newDay = day - subtractWeek * 7
-
-      if (newDay > 0) {
-        return `${year}-${month}-${newDay}`
-      } else {
-        const newMonth = month - 1
-        const daysInPreviousMonth = new Date(year, newMonth, 0).getDate()
-        const correctedDay = daysInPreviousMonth + newDay
-        return `${year}-${newMonth}-${correctedDay}`
-      }
-    } else if (days.slice(-1) === '月') {
-      const subtractMonth = parseInt(days.slice(0, -1), 10)
-      const newMonth = month - subtractMonth
-
-      if (newMonth > 0) {
-        return `${year}-${newMonth}-${day}`
-      } else {
-        const newYear = year - 1
-        const correctedMonth = 12 + newMonth
-        return `${newYear}-${correctedMonth}-${day}`
-      }
+  const subtractDays = (dateString: string | undefined, days: string) => {
+    if (dateString === undefined) {
+      return ' '
     } else {
-      return 'Error' // for debug
+      const dateArray = dateString.split('-')
+      const year = parseInt(dateArray[0], 10)
+      const month = parseInt(dateArray[1], 10)
+      const day = parseInt(dateArray[2], 10)
+
+      if (days.slice(-1) === '日') {
+        const subtractDay = parseInt(days.slice(0, -1), 10)
+        const newDay = day - subtractDay
+
+        if (newDay > 0) {
+          return `${year}-${month}-${newDay}`
+        } else {
+          const newMonth = month - 1
+          const daysInPreviousMonth = new Date(year, newMonth, 0).getDate()
+          const correctedDay = daysInPreviousMonth + newDay
+          return `${year}-${newMonth}-${correctedDay}`
+        }
+      } else if (days.slice(-1) === '周') {
+        const subtractWeek = parseInt(days.slice(0, -1), 10)
+        const newDay = day - subtractWeek * 7
+
+        if (newDay > 0) {
+          return `${year}-${month}-${newDay}`
+        } else {
+          const newMonth = month - 1
+          const daysInPreviousMonth = new Date(year, newMonth, 0).getDate()
+          const correctedDay = daysInPreviousMonth + newDay
+          return `${year}-${newMonth}-${correctedDay}`
+        }
+      } else if (days.slice(-1) === '月') {
+        const subtractMonth = parseInt(days.slice(0, -1), 10)
+        const newMonth = month - subtractMonth
+
+        if (newMonth > 0) {
+          return `${year}-${newMonth}-${day}`
+        } else {
+          const newYear = year - 1
+          const correctedMonth = 12 + newMonth
+          return `${newYear}-${correctedMonth}-${day}`
+        }
+      } else {
+        return ' '
+      }
     }
   }
 
-  const calculateRemindDate = () => {
-    if (
-      remindValue !== undefined &&
-      !isNaN(parseInt(remindValue)) &&
-      remindUnit !== undefined &&
-      remindUnit !== '' &&
-      record.nextVaccinationDate !== undefined &&
-      record.remindDate !== undefined
-    ) {
-      const remindDate = subtractDays(record.nextVaccinationDate, remindValue + remindUnit)
-      setRecord({
-        ...record,
-        remindDate: remindDate,
-      })
-    } else {
-      setRecord({
-        ...record,
-        remindDate: '',
-      })
-    }
-  }
+  const remindDate = subtractDays(nextVaccinationDate, remindValue + remindUnit)
 
   const handleSubmission = async () => {
-    console.log(record) // for debug
     if (
       record &&
       record.profileId !== undefined &&
@@ -282,14 +245,18 @@ export default function VaccineRecord() {
       record.vaccinationDate
     ) {
       try {
-        const res = await api.request({ url: '/api/vaccination-records', method: 'POST', data: record })
+        const res = await api.request({
+          url: '/api/vaccination-records',
+          method: 'POST',
+          data: { ...record, nextVaccinationDate: nextVaccinationDate, remindDate: remindDate },
+        })
         console.log(res.data) // for debug
         Taro.showToast({ title: '提交成功', icon: 'success' })
         setTimeout(() => {
           Taro.navigateBack()
         }, 1000)
       } catch (error) {
-        console.log('Error submitting vaccination record:', error)
+        console.log('Error submitting vaccination record:', error) // for debug
         Taro.showToast({ title: '提交失败', icon: 'error' })
       }
     } else {
@@ -317,7 +284,7 @@ export default function VaccineRecord() {
     setRemindUnit('')
     setNoteValue('')
     setRemindSwitch(false)
-  
+
     setIdVisible(false)
     setNameVisible(false)
     setTypeVisible(false)
