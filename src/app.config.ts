@@ -17,6 +17,7 @@ export default defineAppConfig({
     'pages/addMember/index',
     'pages/reference/index',
     'pages/record_history/index',
+    'pages/temper_history/index',
   ],
   window: {
     backgroundTextStyle: 'light',

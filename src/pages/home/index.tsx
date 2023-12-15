@@ -24,7 +24,7 @@ export default function HomePage() {
         <BigButton
           text='体温记录'
           src={TemperaturePNG}
-          onClick={() => Taro.navigateTo({ url: '/pages/temper/index' })}
+          onClick={() => Taro.navigateTo({ url: '/pages/temper_history/index' })}
         />
       </div>
       <MiniCalendar />

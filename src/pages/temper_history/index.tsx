@@ -12,25 +12,25 @@ import Taro, { useDidShow } from '@tarojs/taro'
 
 import api from '../../api'
 
-import { Profile, VaccinationRecord } from '../../api/methods'
+import { Profile, TemperatureRecord } from '../../api/methods'
 
-export default function RecordHistory() {
-  const [vaccinationRecordList, setVaccinationRecordList] = useState<VaccinationRecord[]>([])
+export default function TemperHistory() {
+  const [temperRecordList, setTemperRecordList] = useState<TemperatureRecord[]>([])
 
   useDidShow(() => {
-    api.request({ url: '/api/vaccination-records' }).then((res) => {
-      const result = res.data as VaccinationRecord[]
-      setVaccinationRecordList(result)
+    api.request({ url: '/api/temperature-records' }).then((res) => {
+      const result = res.data as TemperatureRecord[]
+      setTemperRecordList(result)
     })
   })
 
   const handleAddRecord = () => {
-    Taro.navigateTo({ url: '/pages/record/index' })
+    Taro.navigateTo({ url: '/pages/temper/index' })
   }
 
   return (
     <div style={{ height: '100%', position: 'relative', paddingBottom: '70px' }}>
-      {vaccinationRecordList.map((item, index) => (
+      {temperRecordList.map((item, index) => (
         <ItemRender data={item} key={index} />
       ))}
       <Button
@@ -44,7 +44,7 @@ export default function RecordHistory() {
   )
 }
 
-const ItemRender = ({ data }: { data: VaccinationRecord }) => {
+const ItemRender = ({ data }: { data: TemperatureRecord }) => {
   const [profileInfo, setProfileInfo] = useState<Profile>({} as Profile)
 
   const getProfileInfo = (profileId: number) => {
@@ -61,9 +61,9 @@ const ItemRender = ({ data }: { data: VaccinationRecord }) => {
     fetchData()
   }, [])
 
-  const handleEditRecord = (recordData: VaccinationRecord) => {
+  const handleEditRecord = (recordData: TemperatureRecord) => {
     Taro.navigateTo({
-      url: `/pages/record/index?id=` + recordData.ID, // 修改record的跳转逻辑
+      url: `/pages/temper/index?id=` + recordData.ID, // 修改record的跳转逻辑
     })
   }
 
@@ -86,18 +86,10 @@ const ItemRender = ({ data }: { data: VaccinationRecord }) => {
       </div>
       <div className='flex justify-between mt-2'>
         <div className='text-gray-500'>
-          接种疫苗 <b className='text-black font-bold'>{data.vaccine.name}</b>
+          测温时间 <b className='text-black font-bold'>{data.date}</b>
         </div>
         <div className='text-gray-500'>
-          接种类型 <b className='text-black font-bold'>{data.vaccine.type}</b>
-        </div>
-      </div>
-      <div className='flex justify-between mt-2'>
-        <div className='text-gray-500'>
-          接种日期 <b className='text-black font-bold'>{data.vaccinationDate}</b>
-        </div>
-        <div className='text-gray-500'>
-          到期时间 <b className='text-black font-bold'>{data.nextVaccinationDate}</b>
+          体温值 <b className='text-black font-bold'>{data.temperature}</b>
         </div>
       </div>
     </div>
