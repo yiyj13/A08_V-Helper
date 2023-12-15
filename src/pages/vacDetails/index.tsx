@@ -1,36 +1,22 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'taro-hooks'
 import { ScrollView, Text } from '@tarojs/components'
 import { Follow, Uploader } from '@nutui/icons-react-taro'
 import { Loading } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
 import clsx from 'clsx'
-import api from '../../api'
+import useSWR from 'swr'
 
 import Tab from './tab'
-
-type Vaccine = {
-  id: string
-  name: string
-  description: string
-  targetDisease: string
-  sideEffects: string
-  precautions: string
-}
+import { getVaccineByID } from '../../api/methods'
 
 export default function Index() {
-  const [vaccine, setVaccine] = useState<Vaccine>()
   const [route] = useRouter()
   const { id } = route.params
 
   const [tabIdx, setTabIdx] = useState(0)
 
-  useEffect(() => {
-    api.request({ url: '/api/vaccines/' + id }).then((res) => {
-      const result = res.data as Vaccine
-      setVaccine(result)
-    })
-  }, [id])
+  const {data: vaccine} = useSWR('/api/vaccines/' + id, () => getVaccineByID(id))
 
   if (!vaccine) return <Loading className='w-screen h-screen'></Loading>
 
@@ -69,7 +55,7 @@ export default function Index() {
           <DetailBlock id='detailTab3' title='大家讨论' paragraph='暂无' activeId={activeId}></DetailBlock>
           <div
             className={clsx('flex justify-center items-center rounded-2xl mx-4 py-2 bg-slate-200', 'active:scale-105')}
-            onClick={() => Taro.navigateTo({ url: '/pages/sendpost/index' })}
+            onClick={() => Taro.navigateTo({ url: '/pages/sendpost/index?vacName=' + vaccine.name })}
           >
             <Uploader className='text-brand'></Uploader>
           </div>
@@ -78,9 +64,6 @@ export default function Index() {
     </div>
   )
 }
-
-const LOREM =
-  'Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis.'
 
 type BlockProps = {
   id: string
@@ -98,7 +81,7 @@ function DetailBlock(props: BlockProps) {
       >
         {props.title}
       </header>
-      <Text className='text-base'>{props.paragraph !== '' ? props.paragraph : LOREM}</Text>
+      <Text className='text-base'>{props.paragraph}</Text>
     </div>
   )
 }

@@ -6,10 +6,11 @@ type ComboBoxProps = ViewProps & {
   title: string
   options: string[]
   onSelect?: (option: string) => void
+  defaultValue?: string
 }
 
-const ComboBox = ({ title, options, onSelect }: ComboBoxProps) => {
-  const [selectedOption, setSelectedOption] = useState('')
+const ComboBox = ({ title, options, onSelect, defaultValue }: ComboBoxProps) => {
+  const [selectedOption, setSelectedOption] = useState(defaultValue || '')
   const [isOpen, setIsOpen] = useState(false)
 
   const toggleComboBox = () => {

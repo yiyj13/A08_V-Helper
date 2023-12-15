@@ -1,15 +1,14 @@
 import clsx from 'clsx'
-import { useRequest } from 'taro-hooks'
-
+import useSWRMutation from 'swr/mutation'
 import { useUserStore } from '../../models'
 import { getToken } from '../../api/methods'
 
 export default function Index() {
   const setToken = useUserStore.use.setToken()
 
-  const { error, loading, runAsync } = useRequest(getToken, { manual: true })
+  const { error, trigger, isMutating } = useSWRMutation('getToken', getToken)
 
-  const handleLogin = () => runAsync().then((token) => setToken(token))
+  const handleLogin = () => trigger().then((token) => setToken(token))
 
   return (
     <>
@@ -21,7 +20,7 @@ export default function Index() {
             'group inline-block rounded-full p-[2px]',
             'bg-gradient-to-r from-brand/80 via-teal-500 to-cyan-500',
             {
-              'animate-pulse': loading,
+              'animate-pulse': isMutating,
             }
           )}
           onClick={handleLogin}
