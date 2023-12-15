@@ -1,6 +1,5 @@
 /* TODO: 
     1. Replace VirtualList with ElevatorList
-    2. Navigate with the MemberData to fill in the form if the user clicks on the member
 */
 
 import { useState } from 'react'

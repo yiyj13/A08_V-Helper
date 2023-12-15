@@ -15,6 +15,7 @@ export default defineAppConfig({
     'pages/member/index',
     'pages/addMember/index',
     'pages/reference/index',
+    'pages/record_history/index',
   ],
   window: {
     backgroundTextStyle: 'light',

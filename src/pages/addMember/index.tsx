@@ -11,7 +11,7 @@ import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker
 
 // import {ComboBox} from 'src/components/combobox';
 import api from '../../api'
-import { MemberData } from '../../api/methods'
+import { Profile } from '../../api/methods'
 
 export default function AddMember() {
   const relationshipOptions: PickerOption[] = [
@@ -24,7 +24,7 @@ export default function AddMember() {
     { value: 6, text: '其他' },
   ]
 
-  const [member, setMember] = useState<Partial<MemberData>>({
+  const [member, setMember] = useState<Partial<Profile>>({
     fullName: '',
     relationship: '',
     gender: '',
@@ -123,7 +123,7 @@ export default function AddMember() {
       if (router && router.params && router.params.id !== undefined) {
         try {
           const res = await api.get('/api/profiles/' + router.params.id)
-          const result = res.data as MemberData
+          const result = res.data as Profile
           setMember(result)
           setNameValue(result.fullName || '')
           setRelationDesc(result.relationship || '')

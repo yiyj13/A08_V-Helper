@@ -51,18 +51,15 @@ export type TemperatureRecord = GinBase & {
   note: string // 备注
 }
 
-// to be renamed
+// TODO: to be merged into VaccinationRecord
 export type RecordData = GinBase & {
   profileId: number // 接种人
   vaccineId: number // 疫苗名称
-  type: number // 接种类型
+  type: string // 接种类型
   vaccinationDate: string // 接种时间
-  valid: number // 有效期
   reminder: boolean // 接种提醒
-  remindValue: number // 提醒时间数值
-  remindUnit: string // 提醒单位
-  remindDate: number //根据提醒时间数值和单位计算出的提醒时间（多少天前）
   nextVaccinationDate: string // 下次接种时间
+  remindDate: string // 提醒时间
   voucher: string // 接种凭证
   note: string // 备注
 }
