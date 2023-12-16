@@ -18,6 +18,8 @@ export default defineAppConfig({
     'pages/reference/index',
     'pages/record_history/index',
     'pages/temper_history/index',
+    'pages/document/index',
+
   ],
   window: {
     backgroundTextStyle: 'light',
