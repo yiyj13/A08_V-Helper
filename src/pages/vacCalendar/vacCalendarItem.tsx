@@ -3,20 +3,20 @@ import { RectRight } from '@nutui/icons-react-taro'
 
 import InjectSVG from '../../assets/home/injection.svg'
 
-import { VaccineRecord } from '../../api/methods'
+import { VaccinationRecord } from '../../api/methods'
 
 export type VacCalendarData = {
   date: string
-  record: VaccineRecord
+  record: VaccinationRecord
   expireDate: boolean
 }
 
 type VacCalendarItemProps = {
   key: number
-  record: VaccineRecord
+  record: VaccinationRecord
 }
 
-export function MergeItems(raw: VaccineRecord[]) {
+export function MergeItems(raw: VaccinationRecord[]) {
   const vacCalendar = raw?.map((record) => ({
     date: record.vaccinationDate,
     record,

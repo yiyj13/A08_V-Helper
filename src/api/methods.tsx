@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro'
-import api from './index'
+import api from './http'
 
 export type GinBase = {
   ID: number
@@ -11,17 +11,20 @@ export type GinBase = {
 export type Vaccine = GinBase & {
   name: string
   description: string
-  targetDisease: number
+  targetDisease: string
   sideEffects: string
   precautions: string
   validPeriod: number
   type: string
 }
 
-export type Post = GinBase & {
+export type Article = GinBase & {
   title: string
   content: string
-  creatorName: string
+  userName: string
+  userId: string
+  isBind: boolean
+  vaccineId: number
 }
 
 export type Reply = GinBase & {
@@ -29,6 +32,10 @@ export type Reply = GinBase & {
   content: string
   userName: string
   userId: number
+}
+
+export type ArticleFull = Article & {
+  replies: Reply[]
 }
 
 export type VaccinationRecord = GinBase & {
@@ -51,18 +58,15 @@ export type TemperatureRecord = GinBase & {
   note: string // 备注
 }
 
-// to be renamed
+// TODO: to be merged into VaccinationRecord
 export type RecordData = GinBase & {
   profileId: number // 接种人
   vaccineId: number // 疫苗名称
-  type: number // 接种类型
+  type: string // 接种类型
   vaccinationDate: string // 接种时间
-  valid: number // 有效期
   reminder: boolean // 接种提醒
-  remindValue: number // 提醒时间数值
-  remindUnit: string // 提醒单位
-  remindDate: number //根据提醒时间数值和单位计算出的提醒时间（多少天前）
   nextVaccinationDate: string // 下次接种时间
+  remindDate: string // 提醒时间
   voucher: string // 接种凭证
   note: string // 备注
 }
@@ -87,6 +91,11 @@ export async function getVaccineList(): Promise<Vaccine[]> {
   return response.data
 }
 
+export async function getVaccineByID(id: string): Promise<Vaccine> {
+  const response = await api.get('/api/vaccines/' + id)
+  return response.data
+}
+
 export async function getVaccineRecordList(): Promise<VaccinationRecord[]> {
   const response = await api.get('/api/vaccination-records')
   return response.data
@@ -94,5 +103,51 @@ export async function getVaccineRecordList(): Promise<VaccinationRecord[]> {
 
 export async function postVaccineRecord(data: Partial<VaccinationRecord>): Promise<VaccinationRecord> {
   const response = await api.post('/api/vaccination-records', data)
+  return response.data
+}
+
+export async function getProfiles(): Promise<Profile[]> {
+  const response = await api.get('/api/profiles')
+  return response.data
+}
+
+export async function getArticles(
+  page: number, // 页码
+  size: number, // 每页大小
+  vaccineid?: number // 疫苗id (可选)
+): Promise<Article[]> {
+  const response = await api.get('/api/articles', { page, size, vaccineid })
+  return response.data
+}
+
+export async function postArticle(
+  title: string, // 标题
+  content: string, // 内容
+  vaccineid?: number
+): // 疫苗id (可选)
+Promise<Article> {
+  const response = await api.post('/api/articles', { title, content, vaccineid, isbind: vaccineid ? true : false })
+  return response.data
+}
+
+export async function getArticleFullByID(id?: string): Promise<ArticleFull> {
+  if (!id) return Promise.reject('id is empty')
+  const article = (await api.get('/api/articles/' + id)).data
+  const replies = (await api.get('/api/replys', { articleId: id })).data
+  return { ...article, replies }
+}
+
+export async function getArticleByID(id: number): Promise<Article> {
+  const response = await api.get('/api/articles/' + id)
+  return response.data
+}
+
+export async function getReplys(articleId: number): Promise<Reply[]> {
+  const response = await api.get('/api/replys', { articleId })
+  return response.data
+}
+
+export async function postReply(articleId: number, content: string): Promise<Reply> {
+  const response = await api.post('/api/replys', { articleId, content })
   return response.data
 }

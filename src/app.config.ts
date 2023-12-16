@@ -2,6 +2,7 @@ export default defineAppConfig({
   pages: [
     //
     'pages/index',
+    'pages/community/articlepage/index',
     'pages/vacCalendar/index',
     'pages/sendpost/index',
     'pages/vacDetails/index',
@@ -15,6 +16,10 @@ export default defineAppConfig({
     'pages/member/index',
     'pages/addMember/index',
     'pages/reference/index',
+    'pages/record_history/index',
+    'pages/temper_history/index',
+    'pages/document/index',
+
   ],
   window: {
     backgroundTextStyle: 'light',
