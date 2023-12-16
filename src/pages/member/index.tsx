@@ -16,7 +16,7 @@ export default function Member() {
       setMemberDataList(result)
     })
   })
-  
+
   const handleAddMember = () => {
     Taro.navigateTo({ url: '/pages/addMember/index' })
   }
@@ -31,13 +31,13 @@ export default function Member() {
         onClick={handleAddMember}
         style={{ width: '90%', position: 'fixed', bottom: '10px', marginLeft: '5%', marginRight: '5%', zIndex: 999 }}
       >
-        新增记录
+        新增成员
       </Button>
     </div>
   )
 }
 
-const ItemRender = ({ data }: { data: Profile}) => {
+const ItemRender = ({ data }: { data: Profile }) => {
   const handleEditMember = (memberData: Profile) => {
     Taro.navigateTo({
       url: '/pages/addMember/index?id=' + memberData.ID,
@@ -47,7 +47,6 @@ const ItemRender = ({ data }: { data: Profile}) => {
   const handleDocument = (memberData: Profile) => {
     Taro.navigateTo({
       url: `/pages/document/index?id=` + memberData.ID,
-      // url: '/pages/document/index',
     })
   }
 
@@ -66,8 +65,10 @@ const ItemRender = ({ data }: { data: Profile}) => {
             <span className='font-bold text-lg'>{data.fullName}</span>
           </div>
         </div>
-        <Eye className='cursor-pointer' onClick={() => handleDocument(data)} />
-        <Edit className='cursor-pointer' onClick={() => handleEditMember(data)} />
+        <div className='flex items-center'>
+          <Eye className='cursor-pointer' onClick={() => handleDocument(data)} style={{ marginRight: '10px' }} />
+          <Edit className='cursor-pointer' onClick={() => handleEditMember(data)} />
+        </div>
       </div>
       <div className='flex justify-between mt-2'>
         <div className='text-gray-500'>
