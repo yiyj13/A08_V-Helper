@@ -44,6 +44,23 @@ func (s *UserService) DeleteUserByID(id uint) error {
 	return s.db.Where("id = ?", id).Delete(&model.User{}).Error
 }
 
+// GetUserByOpenID 根据 OpenID 获取用户
+func (s *UserService) GetUserByOpenID(openID string) (model.User, error) {
+	var user model.User
+	// 尝试根据 OpenID 获取用户
+	if err := s.db.Where("open_id = ?", openID).First(&user).Error; err != nil {
+		// 如果没有找到对应的用户，创建一个新用户
+		if err == gorm.ErrRecordNotFound {
+			user.OpenID = openID
+			if err := s.db.Create(&user).Error; err != nil {
+				return user, err
+			}
+			return user, nil
+		}
+	}
+	return user, nil
+}
+
 // Register 新用户注册
 func (s *UserService) Register(user model.User) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)

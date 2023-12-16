@@ -15,14 +15,14 @@ export default function MapPage() {
   const iconWidth = 40
   const iconHeight = 40
   // 使用定位总是只能定位到海淀区政府，暂时用清华大学坐标替代
-  const initLatitude = 40.0011
-  const initLongitude = 116.3265
+  const [originLatitude, setOriginLatitude] = useState(40.0011)
+  const [originLongitude, setOriginLongitude] = useState(116.3265)
   const [searchValue, setSearchValue] = useState('')
   const focusLocation = {
     id: 1,
     title: "目标地点",
-    latitude: initLatitude,
-    longitude: initLongitude,
+    latitude: originLatitude,
+    longitude: originLongitude,
     distance: 0,
     iconPath: FocusPositionIconPath,
     width: iconWidth,
@@ -47,7 +47,7 @@ export default function MapPage() {
     const params = new URLSearchParams();
     params.append('key', 'UBDBZ-OVCCL-AG2P4-EUKGA-OTBAV-CAFX3');
     params.append('keyword', searchValue);
-    params.append('boundary', `nearby(${initLatitude},${initLongitude},1000,1)`);
+    params.append('boundary', `nearby(${originLatitude},${originLongitude},1000,1)`);
     const getMarkersURL = `${mapServiceURL}?${params.toString()}`
 
     Taro.request({
@@ -80,8 +80,8 @@ export default function MapPage() {
         <Map
           className='w-full h-full'
           scale={15}
-          longitude={initLongitude}
-          latitude={initLatitude}
+          longitude={originLongitude}
+          latitude={originLatitude}
           // longitude={location.longitude}
           // latitude={location.latitude}
           markers={markers}
@@ -94,7 +94,7 @@ export default function MapPage() {
           onSearch={(value) => getMarkers(value)}
           onChange={(value) => setSearchValue(value)}
           right={
-            <Button type='success' onClick={() => getMarkers(searchValue)}>搜索</Button>
+            <Button type='primary' onClick={() => getMarkers(searchValue)}>搜索</Button>
           }
       />
       <div className='h-2/4 overflow-auto'>
@@ -117,6 +117,8 @@ export default function MapPage() {
                       }
                     }
                     setMarkers(updatedMarkers)
+                    setOriginLatitude(item.latitude)
+                    setOriginLongitude(item.longitude)
                   }}
                 />
               )
