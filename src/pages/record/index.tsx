@@ -1,6 +1,5 @@
 /* TODO: 
-    1. Delay in data update after a picker is checked
-    2. CSS style for the menu and the buttons
+    1. CSS style for the menu and the buttons
 */
 
 import Taro from '@tarojs/taro'
@@ -9,12 +8,14 @@ import { Cell, Switch, Picker, Uploader, Button, DatePicker, TextArea, Input } f
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
 import useSWR from 'swr'
-import api, { RecordData, getProfiles, useVaccines } from '../../api'
+import api, { VaccinationRecord, getProfiles, useVaccines } from '../../api'
+
+// import { getVaccineByID } from '../../api/methods'
 
 import ComboBox from '../../components/combobox'
 
 export default function VaccineRecord() {
-  const [record, setRecord] = useState<Partial<RecordData>>({
+  const [record, setRecord] = useState<Partial<VaccinationRecord>>({
     reminder: false,
   })
 
@@ -81,6 +82,9 @@ export default function VaccineRecord() {
       description += option.text
     })
     setNameDesc(description)
+    // const { data: vaccine } = useSWR(('/api/vaccines/' + values[0]) as string, () =>
+    //   getVaccineByID(values[0] as string)
+    // )
     setRecord({
       ...record,
       vaccineId: values[0] as number,
@@ -97,7 +101,7 @@ export default function VaccineRecord() {
     setTypeDesc(description)
     setRecord({
       ...record,
-      type: description,
+      vaccineType: description,
     })
   }
 
@@ -241,8 +245,9 @@ export default function VaccineRecord() {
       record.profileId >= 0 &&
       record.vaccineId !== undefined &&
       record.vaccineId >= 0 &&
-      record.type !== undefined &&
-      record.vaccinationDate
+      record.vaccineType !== undefined &&
+      record.vaccinationDate !== undefined &&
+      record.vaccinationDate !== ''
     ) {
       try {
         const res = await api.request({
@@ -267,7 +272,7 @@ export default function VaccineRecord() {
   const handleReset = () => {
     setRecord({
       vaccinationDate: '',
-      type: '',
+      vaccineType: '',
       reminder: false,
       remindDate: '',
       nextVaccinationDate: '',
@@ -364,8 +369,8 @@ export default function VaccineRecord() {
         onConfirm={(list, values) => confirmValid(list, values)}
         onClose={() => setValidVisible(false)}
       />
-      <div className='col-span-full flex-content flex items-center '>
-        <span className='text-sm ml-2 '>接种提醒</span>
+      <div className='col-span-full flex-content flex items-center mt-2 mb-2'>
+        <span className='text-sm ml-2' style={{ height:'30px'}}>接种提醒</span>
         <Switch className=' ml-2' checked={remindSwitch} onChange={(value) => onSwitchChange(value)} />
         {remindVisible && (
           <div className='ml-2 flex items-center'>
@@ -375,12 +380,14 @@ export default function VaccineRecord() {
               value={remindValue}
               onChange={(value) => onRemindValueChange(value)}
               className='mr-2 border border-gray-200 rounded p-1'
+              style={{ height:'30px', width: '50px' }}
             />
             <ComboBox
               title={''}
               options={['日', '周', '月']}
               onSelect={(option) => onRemindUnitSet(option)}
-              className='mr-2'
+              className='mr-2 mt-2'
+              style={{ height:'30px', width: '50px' }}
             />
             <span className='text-sm ml-2'>前提醒</span>
           </div>
