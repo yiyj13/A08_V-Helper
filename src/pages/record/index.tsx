@@ -1,8 +1,6 @@
 /* TODO: 
-    1. Coordinate with the backend APIs (implemented) -- Done in mockjs (?)
-    2. Add a ComboBox component to replace the Picker component
-    3. Simplify the code
-    4. CSS style for the menu and the buttons
+    1. Delay in data update after a picker is checked
+    2. CSS style for the menu and the buttons
 */
 
 import Taro from '@tarojs/taro'
@@ -11,20 +9,13 @@ import { Cell, Switch, Picker, Uploader, Button, DatePicker, TextArea, Input } f
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
 import useSWR from 'swr'
-import { RecordData, getProfiles, useVaccines } from '../../api'
+import api, { RecordData, getProfiles, useVaccines } from '../../api'
 
 import ComboBox from '../../components/combobox'
 
 export default function VaccineRecord() {
   const [record, setRecord] = useState<Partial<RecordData>>({
-    vaccinationDate: '',
-    valid: 0,
     reminder: false,
-    remindValue: 0,
-    remindUnit: '',
-    remindDate: 0,
-    voucher: '',
-    note: '',
   })
 
   const { data: profiles } = useSWR('getProfiles', getProfiles)
@@ -98,7 +89,7 @@ export default function VaccineRecord() {
 
   const [typeVisible, setTypeVisible] = useState(false)
   const [typeDesc, setTypeDesc] = useState('')
-  const confirmType = (options: PickerOption[], values: (string | number)[]) => {
+  const confirmType = (options: PickerOption[]) => {
     let description = ''
     options.forEach((option: any) => {
       description += option.text
@@ -106,7 +97,7 @@ export default function VaccineRecord() {
     setTypeDesc(description)
     setRecord({
       ...record,
-      type: values[0] as number,
+      type: description,
     })
   }
 
@@ -125,23 +116,48 @@ export default function VaccineRecord() {
 
   const [validVisible, setValidVisible] = useState(false)
   const [validDesc, setValidDesc] = useState('')
+
+  const addDays = (dateString: string | undefined, days: string) => {
+    if (dateString === undefined) {
+      return 'Error' // for debug
+    } else {
+      const dateArray = dateString.split('-')
+      const year = parseInt(dateArray[0], 10)
+      const month = parseInt(dateArray[1], 10)
+      const day = parseInt(dateArray[2], 10)
+      if (days.slice(-1) === '月') {
+        const addMonth = parseInt(days.slice(0, -1), 10)
+        const newMonth = month + addMonth
+        return `${year}-${newMonth}-${day}`
+      } else if (days.slice(-1) === '年') {
+        const addYear = parseInt(days.slice(0, -1), 10)
+        const newYear = year + addYear
+        return `${newYear}-${month}-${day}`
+      } else if (days.slice(-1) === '终') {
+        return '终身有效'
+      } else {
+        return 'Error' // for debug
+      }
+    }
+  }
+
+  const nextVaccinationDate = addDays(record.vaccinationDate, validDesc)
+
   const confirmValid = (options: PickerOption[], _values: (string | number)[]) => {
     let description = ''
     options.forEach((option: any) => {
       description += option.text
     })
     setValidDesc(description)
-    setRecord({
-      ...record,
-      valid: parseInt(description) * (description.includes('年') ? 365 : 30), // 假设只有年和月的单位
-    })
   }
 
+  const [remindSwitch, setRemindSwitch] = useState(false)
   const [remindVisible, setRemindVisible] = useState(false)
   const [remindValue, setRemindValue] = useState('')
   const [remindUnit, setRemindUnit] = useState('')
 
   const onSwitchChange = (value: boolean) => {
+    setRemindSwitch(value)
     setRecord({
       ...record,
       reminder: value,
@@ -150,18 +166,10 @@ export default function VaccineRecord() {
   }
 
   const onRemindValueChange = (value: string) => {
-    setRecord({
-      ...record,
-      remindValue: parseInt(value) || 0,
-    })
     setRemindValue(value)
   }
 
   const onRemindUnitSet = (option: string) => {
-    setRecord({
-      ...record,
-      remindUnit: option,
-    })
     setRemindUnit(option)
   }
 
@@ -174,28 +182,59 @@ export default function VaccineRecord() {
     setNoteValue(value)
   }
 
-  const calculateRemindDate = () => {
-    if (record.remindValue !== undefined && !isNaN(record.remindValue)) {
-      const unitMultiplier = {
-        日: 1,
-        周: 7,
-        月: 30,
-      }
-      setRecord({
-        ...record,
-        remindDate: record.remindValue * unitMultiplier[remindUnit],
-      })
+  const subtractDays = (dateString: string | undefined, days: string) => {
+    if (dateString === undefined) {
+      return ' '
     } else {
-      // Default to -1 if remindValue is not a valid number
-      setRecord({
-        ...record,
-        remindDate: -1,
-      })
+      const dateArray = dateString.split('-')
+      const year = parseInt(dateArray[0], 10)
+      const month = parseInt(dateArray[1], 10)
+      const day = parseInt(dateArray[2], 10)
+
+      if (days.slice(-1) === '日') {
+        const subtractDay = parseInt(days.slice(0, -1), 10)
+        const newDay = day - subtractDay
+
+        if (newDay > 0) {
+          return `${year}-${month}-${newDay}`
+        } else {
+          const newMonth = month - 1
+          const daysInPreviousMonth = new Date(year, newMonth, 0).getDate()
+          const correctedDay = daysInPreviousMonth + newDay
+          return `${year}-${newMonth}-${correctedDay}`
+        }
+      } else if (days.slice(-1) === '周') {
+        const subtractWeek = parseInt(days.slice(0, -1), 10)
+        const newDay = day - subtractWeek * 7
+
+        if (newDay > 0) {
+          return `${year}-${month}-${newDay}`
+        } else {
+          const newMonth = month - 1
+          const daysInPreviousMonth = new Date(year, newMonth, 0).getDate()
+          const correctedDay = daysInPreviousMonth + newDay
+          return `${year}-${newMonth}-${correctedDay}`
+        }
+      } else if (days.slice(-1) === '月') {
+        const subtractMonth = parseInt(days.slice(0, -1), 10)
+        const newMonth = month - subtractMonth
+
+        if (newMonth > 0) {
+          return `${year}-${newMonth}-${day}`
+        } else {
+          const newYear = year - 1
+          const correctedMonth = 12 + newMonth
+          return `${newYear}-${correctedMonth}-${day}`
+        }
+      } else {
+        return ' '
+      }
     }
   }
 
+  const remindDate = subtractDays(nextVaccinationDate, remindValue + remindUnit)
+
   const handleSubmission = async () => {
-    calculateRemindDate()
     if (
       record &&
       record.profileId !== undefined &&
@@ -203,20 +242,21 @@ export default function VaccineRecord() {
       record.vaccineId !== undefined &&
       record.vaccineId >= 0 &&
       record.type !== undefined &&
-      record.type >= 0 &&
-      record.valid !== undefined &&
-      record.valid >= 0 &&
       record.vaccinationDate
     ) {
       try {
-        const res = await api.request({ url: '/api/vaccination-records', method: 'POST', data: record })
+        const res = await api.request({
+          url: '/api/vaccination-records',
+          method: 'POST',
+          data: { ...record, nextVaccinationDate: nextVaccinationDate, remindDate: remindDate },
+        })
         console.log(res.data) // for debug
         Taro.showToast({ title: '提交成功', icon: 'success' })
         setTimeout(() => {
           Taro.navigateBack()
         }, 1000)
       } catch (error) {
-        console.log('Error submitting vaccination record:', error)
+        console.log('Error submitting vaccination record:', error) // for debug
         Taro.showToast({ title: '提交失败', icon: 'error' })
       }
     } else {
@@ -226,29 +266,32 @@ export default function VaccineRecord() {
 
   const handleReset = () => {
     setRecord({
-      profileId: -1,
-      vaccineId: -1,
-      type: -1,
       vaccinationDate: '',
-      valid: 0,
+      type: '',
       reminder: false,
-      remindValue: 0,
-      remindUnit: '',
-      remindDate: 0,
+      remindDate: '',
+      nextVaccinationDate: '',
       voucher: '',
       note: '',
     })
+
     setIdDesc('')
     setNameDesc('')
     setTypeDesc('')
     setDateDesc('')
     setValidDesc('')
+    setRemindValue('')
+    setRemindUnit('')
+    setNoteValue('')
+    setRemindSwitch(false)
 
     setIdVisible(false)
     setNameVisible(false)
     setTypeVisible(false)
     setDateVisible(false)
     setValidVisible(false)
+    setRemindVisible(false)
+
     Taro.showToast({ title: '重置成功', icon: 'success' })
   }
 
@@ -290,7 +333,7 @@ export default function VaccineRecord() {
         title='接种类型'
         visible={typeVisible}
         options={TypeData}
-        onConfirm={(list, values) => confirmType(list, values)}
+        onConfirm={(list) => confirmType(list)}
         onClose={() => setTypeVisible(false)}
       />
       <Cell
@@ -323,7 +366,7 @@ export default function VaccineRecord() {
       />
       <div className='col-span-full flex-content flex items-center '>
         <span className='text-sm ml-2 '>接种提醒</span>
-        <Switch className=' ml-2' onChange={(value) => onSwitchChange(value)} />
+        <Switch className=' ml-2' checked={remindSwitch} onChange={(value) => onSwitchChange(value)} />
         {remindVisible && (
           <div className='ml-2 flex items-center'>
             <Input
