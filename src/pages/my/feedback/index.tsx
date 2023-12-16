@@ -1,3 +1,5 @@
+import { Button } from '@nutui/nutui-react-taro'
+
 export default function() {
   return (
     <div className="flex flex-col h-screen">
@@ -9,8 +11,8 @@ export default function() {
           <textarea placeholder='内容' maxLength={1000} className='p-4'></textarea>
         </div>
         <div className='flex flex-row justify-evenly m-4'>
-          <button className='btn btn-primary w-2/6 bg-gradient-to-b from-teal-600 to-teal-400 text-white'>提交</button>
-          <button className='btn btn-default w-2/6'>取消</button>
+          <Button type='primary' className='w-2/6'>提交</Button>
+          <Button className='w-2/6'>取消</Button>
         </div>
       </div>
     </div>
