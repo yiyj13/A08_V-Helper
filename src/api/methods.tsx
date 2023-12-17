@@ -47,7 +47,7 @@ export type VaccinationRecord = GinBase & {
   voucher: string
   vaccinationLocation: string
   reminder: boolean
-  remindDate: string
+  remindTime: string
   nextVaccinationDate: string
   note: string
 }

@@ -5,7 +5,7 @@
     4. Gradient color for the slider 
 */
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import useSWR from 'swr'
 import Taro from '@tarojs/taro'
 import { Text } from '@tarojs/components'
@@ -13,7 +13,6 @@ import { Picker, Range, DatePicker, Cell, Button, TextArea } from '@nutui/nutui-
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
 import api from '../../api'
-// import {ComboBox} from 'src/components/combobox';
 import { TemperatureRecord, getProfiles } from '../../api/methods'
 
 export default function TemperRecord() {
@@ -23,6 +22,30 @@ export default function TemperRecord() {
     () => (profiles ? profiles.map((item) => ({ value: item.ID, text: item.relationship })) : []),
     [profiles]
   )
+  const router = Taro.getCurrentInstance().router
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (router && router.params && router.params.id !== undefined) {
+        try {
+          const res = await api.get('/api/temperature-records/' + router.params.id)
+          const result = res.data as TemperatureRecord
+          console.log('memberData', MemberData)
+          console.log('result', result)
+          const relation = MemberData.find((item) => item.value === result.profileId)
+          setIdDesc(relation ? relation.text : '')
+          setDateDesc(result.date)
+          setNoteValue(result.note)
+          updateTemperature(result.temperature)
+          setTempRecord(result)
+        } catch (error) {
+          console.error('Error fetching member information:', error)
+          Taro.showToast({ title: '获取信息失败', icon: 'error' })
+        }
+      }
+    }
+    fetchData()
+  }, [MemberData])
 
   const [tempRecord, setTempRecord] = useState<Partial<TemperatureRecord>>({
     date: '',
@@ -56,7 +79,7 @@ export default function TemperRecord() {
   const startDate = new Date(2020, 0, 1)
   const endDate = new Date(2050, 11, 30)
   const [dateShow, setDateShow] = useState(false)
-  const [dateDesc, setDateDesc] = useState('2022-05-10 10:10')
+  const [dateDesc, setDateDesc] = useState(new Date(Date.now()).toISOString().replace('T', ' ').slice(0, 16))
   const confirmDate = (values: (string | number)[], _options: PickerOption[]) => {
     const date = values.slice(0, 3).join('-')
     const time = values.slice(3).join(':')
@@ -80,20 +103,41 @@ export default function TemperRecord() {
 
   const handleSubmission = async () => {
     console.log('temperature:', tempRecord) // for debug
-    if (tempRecord && tempRecord.profileId !== undefined && tempRecord.profileId >= 0) {
-      try {
-        const res = await api.request({ url: '/api/temperature-records', method: 'POST', data: tempRecord })
-        console.log(res.data) // for debug
-        Taro.showToast({ title: '提交成功', icon: 'success' })
-        setTimeout(() => {
-          Taro.navigateBack()
-        }, 1000)
-      } catch (error) {
-        console.log('Error submitting vaccination record:', error)
-        Taro.showToast({ title: '提交失败', icon: 'error' })
+    if (router && router.params && router.params.id) {
+      console.log('id:', router.params) // for debug
+      const { id } = router.params
+      if (id) {
+        try {
+          const res = await api.request({ url: `/api/temperature-records/${id}`, method: 'PUT', data: tempRecord })
+          console.log(res.data) // for debug
+          Taro.showToast({ title: '提交成功', icon: 'success' })
+          setTimeout(() => {
+            Taro.navigateBack()
+          }, 1000)
+        } catch (error) {
+          console.log('Error submitting vaccination record:', error)
+          Taro.showToast({ title: '提交失败', icon: 'error' })
+        }
+      }
+      else{
+        Taro.showToast({ title: 'ID not found!', icon: 'error' })
       }
     } else {
-      Taro.showToast({ title: '请填写完整记录', icon: 'error' })
+      if (tempRecord && tempRecord.profileId !== undefined && tempRecord.profileId >= 0) {
+        try {
+          const res = await api.request({ url: '/api/temperature-records', method: 'POST', data: tempRecord })
+          console.log(res.data) // for debug
+          Taro.showToast({ title: '提交成功', icon: 'success' })
+          setTimeout(() => {
+            Taro.navigateBack()
+          }, 1000)
+        } catch (error) {
+          console.log('Error submitting vaccination record:', error)
+          Taro.showToast({ title: '提交失败', icon: 'error' })
+        }
+      } else {
+        Taro.showToast({ title: '请填写完整记录', icon: 'error' })
+      }
     }
   }
 
@@ -145,11 +189,12 @@ export default function TemperRecord() {
       <>
         <Cell.Group divider={false}>
           <Cell className='temper_val_display' style={{ textAlign: 'center', padding: '10px,18px' }}>
-            <Text id='temper_val'>{tempRecord.temperature} ℃</Text>
+            <Text id='temper_val'>{tempRecord.temperature?.toFixed(1)} ℃</Text>
           </Cell>
           <Cell className='slider' style={{ padding: '20px,18px' }}>
             <Range
               defaultValue={36.2}
+              value={tempRecord.temperature}
               maxDescription={42.0}
               minDescription={34.0}
               max={42.0}

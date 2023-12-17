@@ -10,7 +10,6 @@ import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker
 import useSWR from 'swr'
 import api, { VaccinationRecord, getProfiles, useVaccines } from '../../api'
 
-// import { getVaccineByID } from '../../api/methods'
 
 import ComboBox from '../../components/combobox'
 
@@ -82,9 +81,6 @@ export default function VaccineRecord() {
       description += option.text
     })
     setNameDesc(description)
-    // const { data: vaccine } = useSWR(('/api/vaccines/' + values[0]) as string, () =>
-    //   getVaccineByID(values[0] as string)
-    // )
     setRecord({
       ...record,
       vaccineId: values[0] as number,
@@ -236,7 +232,7 @@ export default function VaccineRecord() {
     }
   }
 
-  const remindDate = subtractDays(nextVaccinationDate, remindValue + remindUnit)
+  const remindTime = subtractDays(nextVaccinationDate, remindValue + remindUnit)
 
   const handleSubmission = async () => {
     if (
@@ -249,11 +245,12 @@ export default function VaccineRecord() {
       record.vaccinationDate !== undefined &&
       record.vaccinationDate !== ''
     ) {
+      remindTime.concat(' 10:00')// 
       try {
         const res = await api.request({
           url: '/api/vaccination-records',
           method: 'POST',
-          data: { ...record, nextVaccinationDate: nextVaccinationDate, remindDate: remindDate },
+          data: { ...record, nextVaccinationDate: nextVaccinationDate, remindTime: remindTime },
         })
         console.log(res.data) // for debug
         Taro.showToast({ title: '提交成功', icon: 'success' })
@@ -274,7 +271,7 @@ export default function VaccineRecord() {
       vaccinationDate: '',
       vaccineType: '',
       reminder: false,
-      remindDate: '',
+      remindTime: '',
       nextVaccinationDate: '',
       voucher: '',
       note: '',
