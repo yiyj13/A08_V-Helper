@@ -12,8 +12,8 @@ type User struct {
 	OpenID     string `gorm:"unique" json:"openId"`
 	UserName   string `json:"userName"`
 	Password   string `json:"-"` // 存储哈希值，JSON中忽略 -> 使用微信API，不需要密码
-	Email      string `gorm:"unique" json:"email"`
-	Phone      string `gorm:"unique" json:"phone"`
+	Email      string `json:"email"`
+	Phone      string `json:"phone"`
 	Avatar     string `json:"avatar"` // 头像链接
 }
 
@@ -42,7 +42,7 @@ type Vaccine struct {
 // VaccinationRecord 接种记录模型
 // 对应一个Profile和一个Vaccine，记录接种类型、接种时间、接种地点、接种凭证、疫苗失效时间、备注，同时希望能看到疫苗的详细信息(名称、有效期...)
 // 是否完成接种，未完成则为预约接种
-// 是否提醒，提醒时间，单位为天，例如提前一天提醒则为1
+// 是否提醒，提醒时间，用字符串存具体时间，例如"2021-07-01 12:00"
 type VaccinationRecord struct {
 	gorm.Model
 	ProfileID           uint    `json:"profileId"`
@@ -55,9 +55,9 @@ type VaccinationRecord struct {
 	NextVaccinationDate string  `json:"nextVaccinationDate"` // 疫苗失效时间
 	Note                string  `json:"note"`
 
-	IsCompleted bool `json:"isCompleted"` // 是否完成接种，未完成则为预约接种
-	Reminder    bool `json:"reminder"`    // 是否提醒
-	RemindDate  int  `json:"remindDate"`  // 提醒时间，单位为天，例如提前一天提醒则为1
+	IsCompleted bool   `json:"isCompleted"` // 是否完成接种，未完成则为预约接种
+	Reminder    bool   `json:"reminder"`    // 是否提醒
+	RemindTime  string `json:"remindTime"`  // 提醒时间，用字符串存具体时间，例如"2021-07-01 12:00"
 }
 
 // TempertureRecord 体温记录模型

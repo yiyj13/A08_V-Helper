@@ -25,7 +25,7 @@ func Init(cfg config.Config) *gorm.DB {
 	}
 
 	// 自动迁移，注意每新建一个 model 都需要在此处添加
-	db.AutoMigrate(
+	err = db.AutoMigrate(
 		&model.User{},
 		&model.Profile{},
 		&model.Vaccine{},
@@ -36,6 +36,10 @@ func Init(cfg config.Config) *gorm.DB {
 		&model.Message{},
 		&model.Clinic{},
 	)
+
+	if err != nil {
+		log.Fatalf("Error migrating database: %v", err)
+	}
 
 	AddInitInfo(db)
 	return db
