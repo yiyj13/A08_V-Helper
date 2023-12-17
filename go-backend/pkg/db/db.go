@@ -31,7 +31,6 @@ func Init(cfg config.Config) *gorm.DB {
 		&model.Vaccine{},
 		&model.VaccinationRecord{},
 		&model.TempertureRecord{},
-		&model.VaccinationAppointment{},
 		&model.Article{},
 		&model.Reply{},
 		&model.Message{},

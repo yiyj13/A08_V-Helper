@@ -80,4 +80,5 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	// router.GET("/clinics/:id", clinicHandler.HandleGetClinicByID)
 	// router.PUT("/clinics/:id", clinicHandler.HandleUpdateClinicByID)
 	router.DELETE("/clinics/:id", clinicHandler.HandleDeleteClinicByID)
+	router.GET("/foo/bar", SetSubscription)
 }

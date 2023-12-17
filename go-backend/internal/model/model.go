@@ -14,6 +14,7 @@ type User struct {
 	Password   string `json:"-"` // 存储哈希值，JSON中忽略 -> 使用微信API，不需要密码
 	Email      string `gorm:"unique" json:"email"`
 	Phone      string `gorm:"unique" json:"phone"`
+	Avatar     string `json:"avatar"` // 头像链接
 }
 
 // Profile 身份模型
@@ -39,9 +40,9 @@ type Vaccine struct {
 }
 
 // VaccinationRecord 接种记录模型
-// 对应一个Profile和一个Vaccine，记录接种类型、接种时间、接种凭证、备注，同时希望能看到疫苗的详细信息(名称、有效期...)
-// 地点、是否提醒、下次接种时间
-// 提醒时间：
+// 对应一个Profile和一个Vaccine，记录接种类型、接种时间、接种地点、接种凭证、疫苗失效时间、备注，同时希望能看到疫苗的详细信息(名称、有效期...)
+// 是否完成接种，未完成则为预约接种
+// 是否提醒，提醒时间，单位为天，例如提前一天提醒则为1
 type VaccinationRecord struct {
 	gorm.Model
 	ProfileID           uint    `json:"profileId"`
@@ -50,11 +51,13 @@ type VaccinationRecord struct {
 	VaccinationDate     string  `json:"vaccinationDate"` // 注意用string与前端交互，例如"2021-07-01"
 	Voucher             string  `json:"voucher"`         // 接种凭证，之后实现为图片链接
 	VaccinationLocation string  `json:"vaccinationLocation"`
+	VaccinationType     string  `json:"vaccinationType"`     // 接种类型，第一针、第二针、加强针
+	NextVaccinationDate string  `json:"nextVaccinationDate"` // 疫苗失效时间
+	Note                string  `json:"note"`
 
-	Reminder            bool   `json:"reminder"`
-	NextVaccinationDate string `json:"nextVaccinationDate"`
-	ReminderTime        int    `json:"reminderTime"` // 提醒时间，单位为天，例如提前一天提醒则为1
-	Note                string `json:"note"`
+	IsCompleted bool `json:"isCompleted"` // 是否完成接种，未完成则为预约接种
+	Reminder    bool `json:"reminder"`    // 是否提醒
+	RemindDate  int  `json:"remindDate"`  // 提醒时间，单位为天，例如提前一天提醒则为1
 }
 
 // TempertureRecord 体温记录模型
@@ -63,17 +66,6 @@ type TempertureRecord struct {
 	ProfileID   uint    `json:"profileId"`
 	Date        string  `json:"date"` // 包含日期和时间，例如"2021-07-01 12:00"
 	Temperature float32 `json:"temperature"`
-}
-
-// VaccinationAppointment 预约接种模型，可以取消预约，也可以在接种后转换为接种记录
-type VaccinationAppointment struct {
-	gorm.Model
-	ProfileID           uint    `json:"profileId"`
-	VaccineID           uint    `json:"vaccineId"`
-	Vaccine             Vaccine `gorm:"foreignKey:VaccineID" json:"vaccine"`
-	VaccinationDate     string  `json:"vaccinationDate"` // 注意用string与前端交互，例如"2021-07-01"
-	VaccinationLocation string  `json:"vaccinationLocation"`
-	Note                string  `json:"note"`
 }
 
 // Article 文章模型，与疫苗绑定

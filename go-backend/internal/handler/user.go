@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -184,4 +185,35 @@ func (h *UserHandler) HandleLogin(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+type Response struct {
+	AccessToken string `json:"access_token"`
+	ExpiresIn   int    `json:"expires_in"`
+}
+
+func GetAccessToken(appID, appSecret string) (string, error) {
+	if appID == "" {
+		appID = defaultAppID
+	}
+	if appSecret == "" {
+		appSecret = defaultAppSecret
+	}
+
+	url := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s", appID, appSecret)
+
+	client := resty.New()
+	resp, err := client.R().SetResult(&Response{}).Get(url)
+
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode() != 200 {
+		return "", fmt.Errorf("failed with status code: %d", resp.StatusCode())
+	}
+
+	log.Println("resp:", resp)
+	response := resp.Result().(*Response)
+	return response.AccessToken, nil
 }
