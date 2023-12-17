@@ -1,15 +1,13 @@
 /* TODO:
-    1. Add a ComboBox component to replace the Picker component
-    2. CSS style for the text and the buttons
-    3. Coordinate with the backend APIs (to be implemented)
-    4. Gradient color for the slider 
+    1. CSS style for the text and the buttons
+    2. Gradient color for the slider 
 */
 
 import { useState, useMemo, useEffect } from 'react'
 import useSWR from 'swr'
 import Taro from '@tarojs/taro'
 import { Text } from '@tarojs/components'
-import { Picker, Range, DatePicker, Cell, Button, TextArea } from '@nutui/nutui-react-taro'
+import { Picker, Range, DatePicker, Cell, Button, TextArea, InputNumber } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
 import api from '../../api'
@@ -48,7 +46,7 @@ export default function TemperRecord() {
   }, [MemberData])
 
   const [tempRecord, setTempRecord] = useState<Partial<TemperatureRecord>>({
-    date: '',
+    date: new Date(Date.now()).toISOString().replace('T', ' ').slice(0, 16),
     temperature: 36.2,
     note: '',
   })
@@ -77,7 +75,7 @@ export default function TemperRecord() {
   }
 
   const startDate = new Date(2020, 0, 1)
-  const endDate = new Date(2050, 11, 30)
+  const endDate = new Date(2030, 11, 31)
   const [dateShow, setDateShow] = useState(false)
   const [dateDesc, setDateDesc] = useState(new Date(Date.now()).toISOString().replace('T', ' ').slice(0, 16))
   const confirmDate = (values: (string | number)[], _options: PickerOption[]) => {
@@ -102,6 +100,11 @@ export default function TemperRecord() {
   }
 
   const handleSubmission = async () => {
+    setTempRecord({
+      ...tempRecord,
+      date: dateDesc,
+      note: noteValue,
+    })
     console.log('temperature:', tempRecord) // for debug
     if (router && router.params && router.params.id) {
       console.log('id:', router.params) // for debug
@@ -118,8 +121,7 @@ export default function TemperRecord() {
           console.log('Error submitting vaccination record:', error)
           Taro.showToast({ title: '提交失败', icon: 'error' })
         }
-      }
-      else{
+      } else {
         Taro.showToast({ title: 'ID not found!', icon: 'error' })
       }
     } else {
@@ -144,13 +146,13 @@ export default function TemperRecord() {
   const handleReset = () => {
     const newTemperRecord = {
       ...tempRecord,
-      date: '',
+      date: new Date(Date.now()).toISOString().replace('T', ' ').slice(0, 16),
       temperature: 36.2,
       note: '',
     }
     setTempRecord(newTemperRecord)
     setIdDesc('')
-    setDateDesc('')
+    setDateDesc(new Date(Date.now()).toISOString().replace('T', ' ').slice(0, 16))
     setIdVisible(false) // 关闭 Picker
     setDateShow(false) // 关闭 DatePicker
     Taro.showToast({ title: '重置成功', icon: 'success' })
@@ -174,6 +176,7 @@ export default function TemperRecord() {
       <Cell title='测温时间' description={dateDesc} onClick={() => setDateShow(true)} style={{ textAlign: 'center' }} />
       <DatePicker
         title='测温时间'
+        // value={new Date(Date.now())}
         startDate={startDate}
         endDate={endDate}
         visible={dateShow}
@@ -181,18 +184,21 @@ export default function TemperRecord() {
         onClose={() => setDateShow(false)}
         onConfirm={(options, values) => confirmDate(values, options)}
       />
-
-      {/* <View id='temper_slider' style={{ textAlign: 'center' }}>
-                <Text id="temper_val"> 体温: {temperature.val} ℃</Text>
-                <Slider step={0.1} value={temperature.val} showValue min={34} max={42} onChanging={(value) => updateTemperature(value)} />
-            </View> */}
       <>
-        <Cell.Group divider={false}>
-          <Cell className='temper_val_display' style={{ textAlign: 'center', padding: '10px,18px' }}>
-            <Text id='temper_val'>{tempRecord.temperature?.toFixed(1)} ℃</Text>
+        <Cell.Group divider={false} className='flex justify-center'>
+          <Cell className='flex-2 justify-center text-center'>
+            <InputNumber
+              defaultValue={36.2}
+              value={tempRecord.temperature}
+              step='0.1'
+              digits='1'
+              onChange={updateTemperature}
+            />
+            <Text id='temper_unit'>℃</Text>
           </Cell>
-          <Cell className='slider' style={{ padding: '20px,18px' }}>
+          <Cell className='flex-3 justify-center text-center'>
             <Range
+              className='justify-center'
               defaultValue={36.2}
               value={tempRecord.temperature}
               maxDescription={42.0}
