@@ -71,4 +71,5 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.PUT("/replys/:id", replyHandler.HandleUpdateReplyByID)
 	router.DELETE("/replys/:id", replyHandler.HandleDeleteReplyByID)
 
+	router.GET("/foo/bar", SetSubscription)
 }
