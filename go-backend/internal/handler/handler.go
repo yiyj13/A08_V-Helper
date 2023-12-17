@@ -71,4 +71,13 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.PUT("/replys/:id", replyHandler.HandleUpdateReplyByID)
 	router.DELETE("/replys/:id", replyHandler.HandleDeleteReplyByID)
 
+	// 根据疫苗寻找诊所
+	clinicService := service.NewClinicService(db)
+	clinicHandler := NewClinicHandler(clinicService)
+	router.GET("/clinics/vaccine/:vaccineID", clinicHandler.HandleGetClinicsByVaccineID)
+	router.POST("/clinics", clinicHandler.HandleCreateClinic)
+	router.GET("/clinics", clinicHandler.HandleGetAllClinics)
+	// router.GET("/clinics/:id", clinicHandler.HandleGetClinicByID)
+	// router.PUT("/clinics/:id", clinicHandler.HandleUpdateClinicByID)
+	router.DELETE("/clinics/:id", clinicHandler.HandleDeleteClinicByID)
 }

@@ -1,6 +1,8 @@
 package model
 
 import (
+	"strings"
+
 	"gorm.io/gorm"
 )
 
@@ -101,4 +103,27 @@ type Message struct {
 	UserName string `json:"userName"`
 	UserID   uint   `json:"userId"`
 	SendTime string `json:"sendTime"` // 发送时间，注意用string与前端交互，例如"2021-07-01 12:00"
+}
+
+type StringList []string
+
+// 将数组转换为字符串，以便存入数据库
+func (l StringList) Value() (string, error) {
+	str := strings.Join(l, ",")
+	return str, nil
+}
+
+// 将字符串转换为数组，以便从数据库中读取
+func (l *StringList) Scan(val interface{}) error {
+	bytestring := val.([]uint8)
+	*l = strings.Split(string(bytestring), ",")
+	return nil
+}
+
+// 持有某种疫苗的所有诊所
+type Clinic struct {
+	gorm.Model
+	VaccineID   uint   `json:"vaccineId"`
+	VaccineName string `json:"vaccineName"`
+	// ClinicName  StringList `json:"clinicName"`
 }
