@@ -1,13 +1,11 @@
 /* TODO: 
-    1. feat: allow editing the record
-    2. feat: show the detail of the record
-    3. feat: filtering the record by date automatically
-    4. feat: filtering the record by record type manually
+    1. feat: show the detail of the record
+    2. feat: filtering the record by record type manually
 */
 
 import { useState, useEffect } from 'react'
 import { Tabs } from '@nutui/nutui-react-taro'
-import { IconFont, Edit } from '@nutui/icons-react-taro'
+import { IconFont, Eye } from '@nutui/icons-react-taro'
 import Taro from '@tarojs/taro'
 
 import api from '../../api'
@@ -83,12 +81,17 @@ const VaccineItemRender = ({ data }: { data: VaccinationRecord }) => {
     fetchData()
   }, [])
 
-  const handleEditRecord = (recordData: VaccinationRecord) => {
+  // const handleEditRecord = (recordData: VaccinationRecord) => {
+  //   Taro.navigateTo({
+  //     url: `/pages/record/index?id=` + recordData.ID, // 修改record的跳转逻辑
+  //   })
+  // }
+  // TODO: design?
+  const handleReadDocument = (recordData: VaccinationRecord) => {
     Taro.navigateTo({
       url: `/pages/record/index?id=` + recordData.ID, // 修改record的跳转逻辑
     })
   }
-
   return (
     <div
       className='border border-gray-300 p-4 rounded-md'
@@ -104,7 +107,8 @@ const VaccineItemRender = ({ data }: { data: VaccinationRecord }) => {
             <div className='font-bold ml-2'>{profileInfo.fullName}</div>
           </div>
         </div>
-        <Edit className='cursor-pointer' onClick={() => handleEditRecord(data)} />
+        <Eye className='cursor-pointer' onClick={() => handleReadDocument(data)} style={{ marginRight: '10px' }} />
+        {/* <Edit className='cursor-pointer' onClick={() => handleEditRecord(data)} /> */}
       </div>
       <div className='flex justify-between mt-2'>
         <div className='text-gray-500'>
@@ -143,12 +147,17 @@ const TemperItemRender = ({ data }: { data: TemperatureRecord }) => {
     fetchData()
   }, [])
 
-  const handleEditRecord = (recordData: TemperatureRecord) => {
+  // const handleEditRecord = (recordData: TemperatureRecord) => {
+  //   Taro.navigateTo({
+  //     url: `/pages/temper/index?id=` + recordData.ID, // 修改record的跳转逻辑
+  //   })
+  // }
+  // TODO: design?
+  const handleReadDocument = (recordData: TemperatureRecord) => {
     Taro.navigateTo({
-      url: `/pages/record/index?id=` + recordData.ID, // 修改record的跳转逻辑
+      url: `/pages/temper/index?id=` + recordData.ID, // 修改record的跳转逻辑
     })
   }
-
   return (
     <div
       className='border border-gray-300 p-4 rounded-md'
@@ -164,7 +173,8 @@ const TemperItemRender = ({ data }: { data: TemperatureRecord }) => {
             <div className='font-bold ml-2'>{profileInfo.fullName}</div>
           </div>
         </div>
-        <Edit className='cursor-pointer' onClick={() => handleEditRecord(data)} />
+        <Eye className='cursor-pointer' onClick={() => handleReadDocument(data)} style={{ marginRight: '10px' }} />
+        {/* <Edit className='cursor-pointer' onClick={() => handleEditRecord(data)} /> */}
       </div>
       <div className='flex justify-between mt-2'>
         <div className='text-gray-500'>

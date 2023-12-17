@@ -1,6 +1,5 @@
 /* TODO:
-    1. CSS style for the text and the buttons
-    2. Gradient color for the slider 
+    1. Gradient color for the slider 
 */
 
 import { useState, useMemo, useEffect } from 'react'
