@@ -34,9 +34,9 @@ func (h *ReplyHandler) HandleCreateReply(c *gin.Context) {
 }
 
 func (h *ReplyHandler) HandleGetReplys(c *gin.Context) {
-	queryArticleID := c.Query("article_id")
+	queryArticleID := c.Query("articleId")
 
-	// 如果没有传 article_id 参数，则返回所有 reply
+	// 如果没有传 articleId 参数，则返回所有 reply
 	if queryArticleID == "" {
 		replys, err := h.replyService.GetAllReplys()
 		if err != nil {
@@ -48,7 +48,7 @@ func (h *ReplyHandler) HandleGetReplys(c *gin.Context) {
 		return
 	}
 
-	// 如果传了 article_id 参数，则返回该 article_id 下的所有 reply
+	// 如果传了 articleId 参数，则返回该 articleId 下的所有 reply
 	articleID, err := strconv.ParseUint(queryArticleID, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
