@@ -118,20 +118,146 @@ func (h *UserHandler) HandleGetUserByID(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-func (h *UserHandler) HandleUpdateUserByID(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+func (h *UserHandler) HandleGetUserWithFollowings(c *gin.Context) {
+	userID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
 		return
 	}
 
+	user, err := h.userService.GetUserWithFollowings(uint(userID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+func (h *UserHandler) HandleAddFollowingVaccine(c *gin.Context) {
+	userID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	vaccineID := c.Query("vaccine_id")
+	if vaccineID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid vaccine ID"})
+		return
+	}
+
+	vaccineIDUint, err := strconv.ParseUint(vaccineID, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid vaccine ID"})
+		return
+	}
+
+	err = h.userService.AddFollowingVaccine(uint(userID), uint(vaccineIDUint))
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "vaccine added successfully"})
+}
+
+func (h *UserHandler) HandleRemoveFollowingVaccine(c *gin.Context) {
+	userID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	vaccineID := c.Query("vaccine_id")
+	if vaccineID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid vaccine ID"})
+		return
+	}
+
+	vaccineIDUint, err := strconv.ParseUint(vaccineID, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid vaccine ID"})
+		return
+	}
+
+	err = h.userService.RemoveFollowingVaccine(uint(userID), uint(vaccineIDUint))
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "vaccine removed successfully"})
+}
+
+func (h *UserHandler) HandleAddFollowingArticle(c *gin.Context) {
+	userID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	articleID := c.Query("article_id")
+	if articleID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid article ID"})
+		return
+	}
+
+	articleIDUint, err := strconv.ParseUint(articleID, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid article ID"})
+		return
+	}
+
+	err = h.userService.AddFollowingArticle(uint(userID), uint(articleIDUint))
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "article added successfully"})
+}
+
+func (h *UserHandler) HandleRemoveFollowingArticle(c *gin.Context) {
+	userID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	articleID := c.Query("article_id")
+	if articleID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid article ID"})
+		return
+	}
+
+	articleIDUint, err := strconv.ParseUint(articleID, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid article ID"})
+		return
+	}
+
+	err = h.userService.RemoveFollowingArticle(uint(userID), uint(articleIDUint))
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "article removed successfully"})
+}
+
+func (h *UserHandler) HandleUpdateUserByID(c *gin.Context) {
 	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := h.userService.UpdateUserByID(uint(id), user); err != nil {
+	if err := h.userService.UpdateUserByID(user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
