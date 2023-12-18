@@ -9,6 +9,8 @@ import { useDeviceStore } from '../../models'
 import PositionIconPath from "../../assets/map/position.png"
 import FocusPositionIconPath from "../../assets/map/focusPosition.png"
 
+import api from '../../api'
+
 export default function MapPage() {
   const location = useDeviceStore.use.location()
   const updateLocation = useDeviceStore.use.updateLocation()
@@ -42,37 +44,67 @@ export default function MapPage() {
     return <Loading className='h-screen w-screen'>Fetching location...</Loading>
   }
 
-  // 向腾讯地图API请求附近的疫苗接种点
+  // 向腾讯地图API请求附近的疫苗接种点，并更新 markers
   const getMarkers = async (searchValue: string) => {
-    const mapServiceURL = "https://apis.map.qq.com/ws/place/v1/search"
-    const params = new URLSearchParams();
-    params.append('key', 'UBDBZ-OVCCL-AG2P4-EUKGA-OTBAV-CAFX3');
-    params.append('keyword', searchValue);
-    params.append('boundary', `nearby(${originLatitude},${originLongitude},1000,1)`);
-    const getMarkersURL = `${mapServiceURL}?${params.toString()}`
-
-    Taro.request({
-      url: getMarkersURL,
-      method: 'GET',
-      success: (res) => {
-        const searchResult = res.data.data.map(item => {
-          return {
-            id: parseInt(item.id),
-            title: item.title,
-            latitude: item.location.lat,
-            longitude: item.location.lng,
-            distance: item._distance,
-            iconPath: PositionIconPath,
-            width: iconWidth,
-            height: iconHeight
-          }
-        })
-        setMarkers([...searchResult])
-      },
-      fail: (err) => {
-        console.error('Request failed:', err)
+    const response = await api.get('/api/clinics/vaccineName/' + searchValue)
+    // 解析
+    const clinicInfo = response.data[0].clinicInfo.split(';').map((item: string) => item.split(','))
+    const clinicName = clinicInfo.map(item => item[0])
+    setMarkers(clinicInfo.map((item, index) => {
+      return {
+        id: index + 2,
+        title: item[0],
+        latitude: parseFloat(item[1]),
+        longitude: parseFloat(item[2]),
+        distance: 0,
+        iconPath: PositionIconPath,
+        width: iconWidth,
+        height: iconHeight
       }
-    })
+    }))
+    
+    // const searchResult = response.data.map(item => {
+    //   return {
+    //     id: parseInt(item.id),
+    //     title: item.name,
+    //     latitude: item.latitude,
+    //     longitude: item.longitude,
+    //     distance: item.distance,
+    //     iconPath: PositionIconPath,
+    //     width: iconWidth,
+    //     height: iconHeight
+    //   }
+    // })
+
+    // const mapServiceURL = "https://apis.map.qq.com/ws/place/v1/search"
+    // const params = new URLSearchParams();
+    // params.append('key', 'UBDBZ-OVCCL-AG2P4-EUKGA-OTBAV-CAFX3');
+    // params.append('keyword', searchValue);
+    // params.append('boundary', `nearby(${originLatitude},${originLongitude},1000,1)`);
+    // const getMarkersURL = `${mapServiceURL}?${params.toString()}`
+
+    // Taro.request({
+    //   url: getMarkersURL,
+    //   method: 'GET',
+    //   success: (res) => {
+    //     const searchResult = res.data.data.map(item => {
+    //       return {
+    //         id: parseInt(item.id),
+    //         title: item.title,
+    //         latitude: item.location.lat,
+    //         longitude: item.location.lng,
+    //         distance: item._distance,
+    //         iconPath: PositionIconPath,
+    //         width: iconWidth,
+    //         height: iconHeight
+    //       }
+    //     })
+    //     setMarkers([...searchResult])
+    //   },
+    //   fail: (err) => {
+    //     console.error('Request failed:', err)
+    //   }
+    // })
   }
 
   const vaccineList = [
@@ -80,12 +112,6 @@ export default function MapPage() {
     '乙肝疫苗',
     '狂犬疫苗'
   ]
-
-  const mapVaccineToClient = new Map([
-    ['全部疫苗', 'all'],
-    ['乙肝疫苗', 'hepatitisB'],
-    ['狂犬疫苗', 'rabies']
-  ])
 
   const vaccineOptions = vaccineList.map((item) => {
     return {text: item, value: item}
@@ -104,7 +130,7 @@ export default function MapPage() {
           markers={markers}
         />
       </div>
-      <SearchBar
+      {/* <SearchBar
           placeholder='按下回车进行搜索'
           shape='round'
           className='rounded-3xl'
@@ -113,7 +139,7 @@ export default function MapPage() {
           right={
             <Button type='primary' onClick={() => getMarkers(searchValue)}>搜索</Button>
           }
-      />
+      /> */}
       <Menu>
         <Menu.Item
           options={vaccineOptions}
@@ -121,6 +147,9 @@ export default function MapPage() {
           columns={2}
           onChange={(v) => {
             setFocusVaccine(v.value)
+            // 向后端请求疫苗接种点
+            // 更新 markers
+            getMarkers(v.value)
           }}
         />
       </Menu>
