@@ -2,9 +2,9 @@ import Taro from '@tarojs/taro'
 
 import { useState } from 'react'
 
-import { Map } from '@tarojs/components'
+import { Map as TaroMap } from '@tarojs/components'
 import { useEffect } from 'react'
-import { Loading, SearchBar, Button, Cell } from '@nutui/nutui-react-taro'
+import { Loading, SearchBar, Button, Cell, Menu } from '@nutui/nutui-react-taro'
 import { useDeviceStore } from '../../models'
 import PositionIconPath from "../../assets/map/position.png"
 import FocusPositionIconPath from "../../assets/map/focusPosition.png"
@@ -18,6 +18,7 @@ export default function MapPage() {
   const [originLatitude, setOriginLatitude] = useState(40.0011)
   const [originLongitude, setOriginLongitude] = useState(116.3265)
   const [searchValue, setSearchValue] = useState('')
+  const [foucusVaccine, setFocusVaccine] = useState('全部疫苗')
   const focusLocation = {
     id: 1,
     title: "目标地点",
@@ -74,10 +75,26 @@ export default function MapPage() {
     })
   }
 
+  const vaccineList = [
+    '全部疫苗',
+    '乙肝疫苗',
+    '狂犬疫苗'
+  ]
+
+  const mapVaccineToClient = new Map([
+    ['全部疫苗', 'all'],
+    ['乙肝疫苗', 'hepatitisB'],
+    ['狂犬疫苗', 'rabies']
+  ])
+
+  const vaccineOptions = vaccineList.map((item) => {
+    return {text: item, value: item}
+  })
+
   return (
     <div className='h-screen'>
       <div className='h-2/4'>
-        <Map
+        <TaroMap
           className='w-full h-full'
           scale={15}
           longitude={originLongitude}
@@ -97,6 +114,16 @@ export default function MapPage() {
             <Button type='primary' onClick={() => getMarkers(searchValue)}>搜索</Button>
           }
       />
+      <Menu>
+        <Menu.Item
+          options={vaccineOptions}
+          value={foucusVaccine}
+          columns={2}
+          onChange={(v) => {
+            setFocusVaccine(v.value)
+          }}
+        />
+      </Menu>
       <div className='h-2/4 overflow-auto'>
         <div>
           {markers.map((item, index) => {
