@@ -34,6 +34,14 @@ func (s *ClinicService) GetClinicsByVaccineID(vaccineID uint) ([]model.Clinic, e
 	return clinics, nil
 }
 
+func (s *ClinicService) GetClinicsByVaccineName(vaccineName string) ([]model.Clinic, error) {
+	var clinics []model.Clinic
+	if err := s.db.Where("vaccine_name = ?", vaccineName).First(&clinics).Error; err != nil {
+		return nil, err
+	}
+	return clinics, nil
+}
+
 func (s *ClinicService) GetClinicsByArticleID(articleID uint) ([]model.Clinic, error) {
 	var clinics []model.Clinic
 	if err := s.db.Where("article_id = ?", articleID).Find(&clinics).Error; err != nil {

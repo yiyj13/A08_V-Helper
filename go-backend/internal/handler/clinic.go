@@ -56,6 +56,23 @@ func (h *ClinicHandler) HandleGetClinicsByVaccineID(c *gin.Context) {
 	c.JSON(http.StatusOK, clinics)
 }
 
+func (h *ClinicHandler) HandleGetClinicsByVaccineName(c *gin.Context) {
+	queryVaccineName := c.Param("vaccineName")
+
+	if queryVaccineName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "vaccineName is required"})
+		return
+	}
+
+	clinics, err := h.clinicService.GetClinicsByVaccineName(queryVaccineName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, clinics)
+}
+
 func (h *ClinicHandler) HandleGetAllClinics(c *gin.Context) {
 	clinics, err := h.clinicService.GetAllClinics()
 	if err != nil {

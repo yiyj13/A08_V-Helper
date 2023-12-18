@@ -81,6 +81,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	clinicService := service.NewClinicService(db)
 	clinicHandler := NewClinicHandler(clinicService)
 	router.GET("/clinics/vaccine/:vaccineID", clinicHandler.HandleGetClinicsByVaccineID)
+	router.GET("/clinics/vaccineName/:vaccineName", clinicHandler.HandleGetClinicsByVaccineName)
 	router.POST("/clinics", clinicHandler.HandleCreateClinic)
 	router.GET("/clinics", clinicHandler.HandleGetAllClinics)
 	// router.GET("/clinics/:id", clinicHandler.HandleGetClinicByID)
