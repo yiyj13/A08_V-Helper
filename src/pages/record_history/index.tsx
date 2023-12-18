@@ -1,8 +1,7 @@
 /* TODO: 
     1. feat: allow editing the record
     2. feat: show the detail of the record
-    3. feat: filtering the record by date automatically
-    4. feat: filtering the record by profile manually
+    3. feat: filtering the record by profile manually
 */
 
 import { useState, useEffect } from 'react'
@@ -63,7 +62,7 @@ const ItemRender = ({ data }: { data: VaccinationRecord }) => {
 
   const handleEditRecord = (recordData: VaccinationRecord) => {
     Taro.navigateTo({
-      url: `/pages/record/index?id=` + recordData.ID, // 修改record的跳转逻辑
+      url: `/pages/record/index?id=` + recordData.ID,
     })
   }
 

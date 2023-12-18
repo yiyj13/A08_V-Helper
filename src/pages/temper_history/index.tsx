@@ -1,8 +1,7 @@
 /* TODO: 
     1. feat: allow editing the record
     2. feat: show the detail of the record
-    3. feat: filtering the record by date automatically
-    4. feat: filtering the record by profile manually
+    3. feat: filtering the record by profile manually
 */
 
 import { useState, useEffect } from 'react'
@@ -20,6 +19,9 @@ export default function TemperHistory() {
   useDidShow(() => {
     api.request({ url: '/api/temperature-records' }).then((res) => {
       const result = res.data as TemperatureRecord[]
+      result.sort((a, b) => {
+        return new Date(a.date).getTime() - new Date(b.date).getTime()
+      })
       setTemperRecordList(result)
     })
   })
@@ -63,7 +65,7 @@ const ItemRender = ({ data }: { data: TemperatureRecord }) => {
 
   const handleEditRecord = (recordData: TemperatureRecord) => {
     Taro.navigateTo({
-      url: `/pages/temper/index?id=` + recordData.ID, // 修改record的跳转逻辑
+      url: `/pages/temper/index?id=` + recordData.ID,
     })
   }
 
@@ -89,7 +91,7 @@ const ItemRender = ({ data }: { data: TemperatureRecord }) => {
           测温时间 <b className='text-black font-bold'>{data.date}</b>
         </div>
         <div className='text-gray-500'>
-          体温值 <b className='text-black font-bold'>{data.temperature}</b>
+          体温值 <b className='text-black font-bold'>{data.temperature.toFixed(1)}</b>
         </div>
       </div>
     </div>

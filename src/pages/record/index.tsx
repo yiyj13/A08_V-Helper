@@ -1,20 +1,21 @@
 /* TODO: 
-    1. Delay in data update after a picker is checked
-    2. CSS style for the menu and the buttons
+    1. CSS style for the menu and the buttons
 */
 
 import Taro from '@tarojs/taro'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Cell, Switch, Picker, Uploader, Button, DatePicker, TextArea, Input } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
 import useSWR from 'swr'
-import api, { RecordData, getProfiles, useVaccines } from '../../api'
+import api, { VaccinationRecord, getProfiles, useVaccines } from '../../api'
 
 import ComboBox from '../../components/combobox'
 
 export default function VaccineRecord() {
-  const [record, setRecord] = useState<Partial<RecordData>>({
+  const router = Taro.getCurrentInstance().router
+
+  const [record, setRecord] = useState<Partial<VaccinationRecord>>({
     reminder: false,
   })
 
@@ -24,6 +25,36 @@ export default function VaccineRecord() {
     () => (profiles ? profiles.map((item) => ({ value: item.ID, text: item.relationship })) : []),
     [profiles]
   )
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (router && router.params && router.params.id !== undefined) {
+        try {
+          const res = await api.get('/api/vaccination-records/' + router.params.id)
+          const result = res.data as VaccinationRecord
+          console.log('memberData', MemberData)
+          console.log('result', result)
+          const relation = MemberData.find((item) => item.value === result.profileId)
+          setIdDesc(relation ? relation.text : '')
+          setNameDesc(result.vaccine.name)
+          setTypeDesc(result.vaccineType)
+          setDateDesc(result.vaccinationDate)
+          // setValidDesc(result.valid)
+          setRemindSwitch(result.reminder)
+          if (result.reminder) {
+            // setRemindValue(result.remindTime)
+            // setRemindUnit(result.remindTime.slice(-1))
+          }
+          setNoteValue(result.note)
+          setRecord(result)
+        } catch (error) {
+          console.error('Error fetching member information:', error)
+          Taro.showToast({ title: '获取信息失败', icon: 'error' })
+        }
+      }
+    }
+    fetchData()
+  }, [MemberData])
 
   const { data: vaccines } = useVaccines()
   const VaccineData = vaccines ? vaccines.map((item) => ({ value: item.ID, text: item.name })) : []
@@ -97,14 +128,14 @@ export default function VaccineRecord() {
     setTypeDesc(description)
     setRecord({
       ...record,
-      type: description,
+      vaccineType: description,
     })
   }
 
   const startDate = new Date(2000, 0, 1)
   const endDate = new Date(2025, 11, 30)
   const [dateVisible, setDateVisible] = useState(false)
-  const [dateDesc, setDateDesc] = useState('')
+  const [dateDesc, setDateDesc] = useState(new Date(Date.now()).toISOString().replace('T', ' ').slice(0, 16))
   const confirmDate = (values: (string | number)[], _options: PickerOption[]) => {
     const date = values.slice(0, 3).join('-')
     setDateDesc(`${date}`)
@@ -117,6 +148,10 @@ export default function VaccineRecord() {
   const [validVisible, setValidVisible] = useState(false)
   const [validDesc, setValidDesc] = useState('')
 
+  const padZero = (value: number) => {
+    return value < 10 ? `0${value}` : value.toString()
+  }
+
   const addDays = (dateString: string | undefined, days: string) => {
     if (dateString === undefined) {
       return 'Error' // for debug
@@ -128,11 +163,17 @@ export default function VaccineRecord() {
       if (days.slice(-1) === '月') {
         const addMonth = parseInt(days.slice(0, -1), 10)
         const newMonth = month + addMonth
-        return `${year}-${newMonth}-${day}`
+        if (newMonth <= 12) {
+          return `${year}-${padZero(newMonth)}-${padZero(day)}`
+        } else {
+          const newYear = year + 1
+          const correctedMonth = newMonth - 12
+          return `${newYear}-${padZero(correctedMonth)}-${padZero(day)}`
+        }
       } else if (days.slice(-1) === '年') {
         const addYear = parseInt(days.slice(0, -1), 10)
         const newYear = year + addYear
-        return `${newYear}-${month}-${day}`
+        return `${newYear}-${padZero(month)}-${padZero(day)}`
       } else if (days.slice(-1) === '终') {
         return '终身有效'
       } else {
@@ -140,8 +181,6 @@ export default function VaccineRecord() {
       }
     }
   }
-
-  const nextVaccinationDate = addDays(record.vaccinationDate, validDesc)
 
   const confirmValid = (options: PickerOption[], _values: (string | number)[]) => {
     let description = ''
@@ -232,44 +271,72 @@ export default function VaccineRecord() {
     }
   }
 
-  const remindDate = subtractDays(nextVaccinationDate, remindValue + remindUnit)
-
   const handleSubmission = async () => {
-    if (
-      record &&
-      record.profileId !== undefined &&
-      record.profileId >= 0 &&
-      record.vaccineId !== undefined &&
-      record.vaccineId >= 0 &&
-      record.type !== undefined &&
-      record.vaccinationDate
-    ) {
-      try {
-        const res = await api.request({
-          url: '/api/vaccination-records',
-          method: 'POST',
-          data: { ...record, nextVaccinationDate: nextVaccinationDate, remindDate: remindDate },
-        })
-        console.log(res.data) // for debug
-        Taro.showToast({ title: '提交成功', icon: 'success' })
-        setTimeout(() => {
-          Taro.navigateBack()
-        }, 1000)
-      } catch (error) {
-        console.log('Error submitting vaccination record:', error) // for debug
-        Taro.showToast({ title: '提交失败', icon: 'error' })
+    console.log('record:', record) // for debug
+    if (router && router.params && router.params.id) {
+      console.log('id:', router.params) // for debug
+      const { id } = router.params
+      if (id) {
+        try {
+          const nextVaccinationDate = addDays(record.vaccinationDate, validDesc)
+          const remindTime = subtractDays(nextVaccinationDate, remindValue + remindUnit).concat(' 10:00') // TODO: discuss the time format
+          const res = await api.request({
+            url: `/api/vaccination-records/${id}`,
+            method: 'PUT',
+            data: { ...record, nextVaccinationDate: nextVaccinationDate, remindTime: remindTime },
+          })
+          console.log(res.data) // for debug
+          Taro.showToast({ title: '提交成功', icon: 'success' })
+          setTimeout(() => {
+            Taro.navigateBack()
+          }, 1000)
+        } catch (error) {
+          console.log('Error submitting vaccination record:', error)
+          Taro.showToast({ title: '提交失败', icon: 'error' })
+        }
+      } else {
+        Taro.showToast({ title: 'ID not found!', icon: 'error' })
       }
     } else {
-      Taro.showToast({ title: '请填写完整记录', icon: 'error' })
+      if (
+        record &&
+        record.profileId !== undefined &&
+        record.profileId >= 0 &&
+        record.vaccineId !== undefined &&
+        record.vaccineId >= 0 &&
+        record.vaccineType !== undefined &&
+        record.vaccinationDate !== undefined &&
+        record.vaccinationDate !== ''
+      ) {
+        const nextVaccinationDate = addDays(record.vaccinationDate, validDesc)
+        const remindTime = subtractDays(nextVaccinationDate, remindValue + remindUnit).concat(' 10:00') // TODO: discuss the time format
+        try {
+          const res = await api.request({
+            url: '/api/vaccination-records',
+            method: 'POST',
+            data: { ...record, nextVaccinationDate: nextVaccinationDate, remindTime: remindTime },
+          })
+          console.log(res.data) // for debug
+          Taro.showToast({ title: '提交成功', icon: 'success' })
+          setTimeout(() => {
+            Taro.navigateBack()
+          }, 1000)
+        } catch (error) {
+          console.log('Error submitting vaccination record:', error) // for debug
+          Taro.showToast({ title: '提交失败', icon: 'error' })
+        }
+      } else {
+        Taro.showToast({ title: '请填写完整记录', icon: 'error' })
+      }
     }
   }
 
   const handleReset = () => {
     setRecord({
       vaccinationDate: '',
-      type: '',
+      vaccineType: '',
       reminder: false,
-      remindDate: '',
+      remindTime: '',
       nextVaccinationDate: '',
       voucher: '',
       note: '',
@@ -364,8 +431,10 @@ export default function VaccineRecord() {
         onConfirm={(list, values) => confirmValid(list, values)}
         onClose={() => setValidVisible(false)}
       />
-      <div className='col-span-full flex-content flex items-center '>
-        <span className='text-sm ml-2 '>接种提醒</span>
+      <div className='col-span-full flex-content flex items-center mt-2 mb-2'>
+        <span className='text-sm ml-2' style={{ height: '30px' }}>
+          接种提醒
+        </span>
         <Switch className=' ml-2' checked={remindSwitch} onChange={(value) => onSwitchChange(value)} />
         {remindVisible && (
           <div className='ml-2 flex items-center'>
@@ -374,14 +443,8 @@ export default function VaccineRecord() {
               placeholder='数字'
               value={remindValue}
               onChange={(value) => onRemindValueChange(value)}
-              className='mr-2 border border-gray-200 rounded p-1'
             />
-            <ComboBox
-              title={''}
-              options={['日', '周', '月']}
-              onSelect={(option) => onRemindUnitSet(option)}
-              className='mr-2'
-            />
+            <ComboBox title={''} options={['日', '周', '月']} onSelect={(option) => onRemindUnitSet(option)} />
             <span className='text-sm ml-2'>前提醒</span>
           </div>
         )}
