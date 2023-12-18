@@ -16,11 +16,13 @@
   - [ ] 接种记录
   - [ ] 体温记录
 - [ ] 更方便地通过json数据更新数据库
-- [ ] 消息提醒的发送 (https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/subscribe-message.html)
-- [ ] 接种记录加字段
-- [ ] 图床
 - [ ] 更新文档中相关API
+- [x] 接种记录的字段完善
 - [ ] 解耦 接种记录 和 接种预约
+- [ ] 消息提醒的发送 (https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/subscribe-message.html)
+- [ ] 图床
+
+
 
 # API 设计
 

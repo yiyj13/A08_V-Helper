@@ -7,14 +7,18 @@ import (
 )
 
 // User 用户模型
+// 查询关注的疫苗和文章时，使用 Preload 方法
+// 增加和删除关注的疫苗和文章时，使用 Association 方法
 type User struct {
-	gorm.Model        //gorm.Model 包含了 CreatedAt、UpdatedAt、DeletedAt（用于软删除）以及 ID 字段
-	OpenID     string `gorm:"unique" json:"openId"`
-	UserName   string `json:"userName"`
-	Password   string `json:"-"` // 存储哈希值，JSON中忽略 -> 使用微信API，不需要密码
-	Email      string `json:"email"`
-	Phone      string `json:"phone"`
-	Avatar     string `json:"avatar"` // 头像链接
+	gorm.Model                  //gorm.Model 包含了 CreatedAt、UpdatedAt、DeletedAt（用于软删除）以及 ID 字段
+	OpenID            string    `gorm:"unique" json:"openId"`
+	UserName          string    `json:"userName"`
+	Password          string    `json:"-"` // 存储哈希值，JSON中忽略 -> 使用微信API，不需要密码
+	Email             string    `json:"email"`
+	Phone             string    `json:"phone"`
+	Avatar            string    `json:"avatar"`                                                      // 头像链接
+	FollowingVaccines []Vaccine `gorm:"many2many:user_following_vaccines;" json:"followingVaccines"` // 用户关注的疫苗
+	FollowingArticles []Article `gorm:"many2many:user_following_articles;" json:"followingArticles"` // 用户关注的文章
 }
 
 // Profile 身份模型

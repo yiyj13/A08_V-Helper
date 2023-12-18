@@ -34,6 +34,24 @@ func (s *VaccinationRecordService) GetAllVaccinationRecords() ([]model.Vaccinati
 	return records, nil
 }
 
+// 根据是否完成接种获取接种记录
+func (s *VaccinationRecordService) GetAllVaccinationRecordsByIsCompleted(isCompleted bool) ([]model.VaccinationRecord, error) {
+	var records []model.VaccinationRecord
+	if err := s.db.Where("is_completed = ?", isCompleted).Preload("Vaccine").Find(&records).Error; err != nil {
+		return nil, err
+	}
+	return records, nil
+}
+
+// 根据ProfileID和是否完成接种获取接种记录
+func (s *VaccinationRecordService) GetVaccinationRecordsByProfileIDAndIsCompleted(profileID uint, isCompleted bool) ([]model.VaccinationRecord, error) {
+	var records []model.VaccinationRecord
+	if err := s.db.Where("profile_id = ? AND is_completed = ?", profileID, isCompleted).Preload("Vaccine").Find(&records).Error; err != nil {
+		return nil, err
+	}
+	return records, nil
+}
+
 func (s *VaccinationRecordService) GetVaccinationRecordByID(id uint) (model.VaccinationRecord, error) {
 	var record model.VaccinationRecord
 	if err := s.db.Preload("Vaccine").First(&record, id).Error; err != nil {

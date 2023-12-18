@@ -61,6 +61,7 @@ func (s *UserService) GetUserByOpenID(openID string) (model.User, error) {
 	return user, nil
 }
 
+// 以下暂时不用
 // Register 新用户注册
 func (s *UserService) Register(user model.User) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)

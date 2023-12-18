@@ -39,6 +39,22 @@ func (h *VaccinationRecordHandler) HandleGetVaccinationRecordsByProfileID(c *gin
 		return
 	}
 
+	isCompleted := c.Query("isCompleted")
+	if isCompleted != "" {
+		isCompletedBool, err := strconv.ParseBool(isCompleted)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid isCompleted value"})
+			return
+		}
+		records, err := h.vaccinationRecordService.GetVaccinationRecordsByProfileIDAndIsCompleted(uint(profileID), isCompletedBool)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, records)
+		return
+	}
+
 	records, err := h.vaccinationRecordService.GetVaccinationRecordsByProfileID(uint(profileID))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -49,6 +65,22 @@ func (h *VaccinationRecordHandler) HandleGetVaccinationRecordsByProfileID(c *gin
 }
 
 func (h *VaccinationRecordHandler) HandleGetAllVaccinationRecords(c *gin.Context) {
+	isCompleted := c.Query("isCompleted")
+	if isCompleted != "" {
+		isCompletedBool, err := strconv.ParseBool(isCompleted)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid isCompleted value"})
+			return
+		}
+		records, err := h.vaccinationRecordService.GetAllVaccinationRecordsByIsCompleted(isCompletedBool)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, records)
+		return
+	}
+
 	records, err := h.vaccinationRecordService.GetAllVaccinationRecords()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

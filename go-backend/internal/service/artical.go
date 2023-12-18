@@ -42,6 +42,24 @@ func (s *ArticleService) GetArticlesByUserID(userID uint) ([]model.Article, erro
 	return articles, nil
 }
 
+// 根据疫苗 ID 获取文章
+func (s *ArticleService) GetArticlesByVaccineID(vaccineID uint) ([]model.Article, error) {
+	var articles []model.Article
+	if err := s.db.Where("vaccine_id = ?", vaccineID).Find(&articles).Error; err != nil {
+		return nil, err
+	}
+	return articles, nil
+}
+
+// 查询isBind为false的文章，即未绑定疫苗的文章
+func (s *ArticleService) GetUnbindArticles() ([]model.Article, error) {
+	var articles []model.Article
+	if err := s.db.Where("is_bind = ?", false).Find(&articles).Error; err != nil {
+		return nil, err
+	}
+	return articles, nil
+}
+
 func (s *ArticleService) UpdateArticleByID(id uint, article model.Article) error {
 	return s.db.Model(&article).Where("id = ?", id).Updates(article).Error
 }
