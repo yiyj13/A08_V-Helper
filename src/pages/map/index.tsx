@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import Taro from '@tarojs/taro'
 
 import { Map as TaroMap } from '@tarojs/components'
 import { useEffect } from 'react'
 import { Loading, Cell, Menu } from '@nutui/nutui-react-taro'
+import { MoreS } from '@nutui/icons-react-taro'
 import { useDeviceStore } from '../../models'
 import PositionIconPath from "../../assets/map/position.png"
 import FocusPositionIconPath from "../../assets/map/focusPosition.png"
@@ -41,18 +43,24 @@ export default function MapPage() {
     return <Loading className='h-screen w-screen'>Fetching location...</Loading>
   }
 
-  // 向腾讯地图API请求附近的疫苗接种点，并更新 markers
+  // 请求附近的疫苗接种点，并更新 markers
   const getMarkers = async (searchValue: string) => {
     const response = await api.get('/api/clinics/vaccineName/' + searchValue)
-    // 解析
-    const clinicInfo = response.data[0].clinicInfo.split(';').map((item: string) => item.split(','))
-    const clinicMarkers = clinicInfo.map((item, index) => {
+
+    // // 解析
+    // const clinicNames = response.data[0].clinicInfo.split(';')
+    // const clinicInfo = clinicNames.map((item: string) => {
+    //   return api.get('/api/clinics/clinicName/' + item)
+    // })
+    // // const clinicInfo = response.data[0].clinicInfo.split(';').map((item: string) => item.split(','))
+    const clinicPostion = response.data
+    const clinicMarkers = clinicPostion.map((item, index) => {
       return {
         id: index + 2,
-        title: item[0],
-        latitude: parseFloat(item[1]),
-        longitude: parseFloat(item[2]),
-        distance: Math.trunc(2 * 6378 * 1000 * Math.asin(Math.sqrt(Math.pow(Math.sin((Math.PI / 180) * (parseFloat(item[1]) - originLatitude) / 2), 2) + Math.cos((Math.PI / 180) * parseFloat(item[1])) * Math.cos((Math.PI / 180) * originLatitude) * Math.pow(Math.sin((Math.PI / 180) * (parseFloat(item[2]) - originLongitude) / 2), 2)))),
+        title: item.clinicName,
+        latitude: parseFloat(item.latitude),
+        longitude: parseFloat(item.longitude),
+        distance: Math.trunc(2 * 6378 * 1000 * Math.asin(Math.sqrt(Math.pow(Math.sin((Math.PI / 180) * (parseFloat(item.latitude) - originLatitude) / 2), 2) + Math.cos((Math.PI / 180) * parseFloat(item.latitude)) * Math.cos((Math.PI / 180) * originLatitude) * Math.pow(Math.sin((Math.PI / 180) * (parseFloat(item.longitude) - originLongitude) / 2), 2)))),
         iconPath: PositionIconPath,
         width: iconWidth,
         height: iconHeight
@@ -112,6 +120,7 @@ export default function MapPage() {
                     setOriginLatitude(item.latitude)
                     setOriginLongitude(item.longitude)
                   }}
+                  extra={<MoreS onClick={() => {Taro.navigateTo({ url: `/pages/map/clinic/index?clinicName=${item.title}` })}}/>}
                 />
               )
             } else {
