@@ -4,7 +4,7 @@ import { useUserStore } from '../../models'
 import Taro from '@tarojs/taro'
 
 export default function ProfilePage() {
-  const removeToken = useUserStore.use.removeToken()
+  const removeToken = useUserStore.use.removeUserInfo()
 
   const handleLogout = () => {
     removeToken()
