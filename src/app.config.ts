@@ -19,6 +19,7 @@ export default defineAppConfig({
     'pages/record_history/index',
     'pages/temper_history/index',
     'pages/document/index',
+    'pages/map/clinic/index',
 
   ],
   window: {
