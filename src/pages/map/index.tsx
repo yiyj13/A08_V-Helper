@@ -20,7 +20,7 @@ export default function MapPage() {
   const [originLatitude, setOriginLatitude] = useState(40.0011)
   const [originLongitude, setOriginLongitude] = useState(116.3265)
   const [searchValue, setSearchValue] = useState('')
-  const [foucusVaccine, setFocusVaccine] = useState('全部疫苗')
+  const [foucusVaccine, setFocusVaccine] = useState('无')
   const focusLocation = {
     id: 1,
     title: "目标地点",
@@ -32,7 +32,7 @@ export default function MapPage() {
     height: iconHeight
   }
   const [markers, setMarkers] = useState([focusLocation])
-  var lastClickedID = 1
+  var myPositionID = 1
 
   // 获取当前位置
   // TODO: error handling
@@ -50,31 +50,19 @@ export default function MapPage() {
     // 解析
     const clinicInfo = response.data[0].clinicInfo.split(';').map((item: string) => item.split(','))
     const clinicName = clinicInfo.map(item => item[0])
-    setMarkers(clinicInfo.map((item, index) => {
+    const clinicMarkers = clinicInfo.map((item, index) => {
       return {
         id: index + 2,
         title: item[0],
         latitude: parseFloat(item[1]),
         longitude: parseFloat(item[2]),
-        distance: 0,
+        distance: 2 * 6378 * 1000 * Math.asin(Math.sqrt(Math.pow(Math.sin((parseFloat(item[1]) - originLatitude) / 2), 2) + Math.cos(parseFloat(item[1])) * Math.cos(originLatitude) * Math.pow(Math.sin((parseFloat(item[2]) - originLongitude) / 2), 2))),
         iconPath: PositionIconPath,
         width: iconWidth,
         height: iconHeight
       }
-    }))
-    
-    // const searchResult = response.data.map(item => {
-    //   return {
-    //     id: parseInt(item.id),
-    //     title: item.name,
-    //     latitude: item.latitude,
-    //     longitude: item.longitude,
-    //     distance: item.distance,
-    //     iconPath: PositionIconPath,
-    //     width: iconWidth,
-    //     height: iconHeight
-    //   }
-    // })
+    })
+    setMarkers([focusLocation, ...clinicMarkers])
 
     // const mapServiceURL = "https://apis.map.qq.com/ws/place/v1/search"
     // const params = new URLSearchParams();
@@ -108,9 +96,9 @@ export default function MapPage() {
   }
 
   const vaccineList = [
-    '全部疫苗',
-    '乙肝疫苗',
-    '狂犬疫苗'
+    '无',
+    '狂犬疫苗',
+    'HPV疫苗',
   ]
 
   const vaccineOptions = vaccineList.map((item) => {
@@ -156,22 +144,14 @@ export default function MapPage() {
       <div className='h-2/4 overflow-auto'>
         <div>
           {markers.map((item, index) => {
-            if (item.id != lastClickedID) {
+            if (item.id != myPositionID) {
               return (
                 <Cell
                   key={index}
                   title={item.title}
                   description={item.distance + " m"}
                   onClick={() => {
-                    console.log("click")
                     const updatedMarkers = [...markers]
-                    for (let i = 0; i < markers.length; i++) {
-                      if (markers[i].id != item.id) {
-                        updatedMarkers[i].iconPath = PositionIconPath
-                      } else {
-                        updatedMarkers[i].iconPath = FocusPositionIconPath
-                      }
-                    }
                     setMarkers(updatedMarkers)
                     setOriginLatitude(item.latitude)
                     setOriginLongitude(item.longitude)
