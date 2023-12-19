@@ -9,7 +9,7 @@
   - [ ] 在model中加入新模型时，需要在init中进行迁移
   - [ ] 在service中实现对模型的增删改查
   - [ ] 在handler中实现API接口，并注册路由
-- [x] 用户登录，主要通过微信接口实现(可能考虑用JWT验证保证安全)
+- [x] 用户登录，主要通过微信接口实现
 - [ ] 对有需要的模型在获取时进行分页、排序(时间排序)和筛选(按疫苗)
   - [x] 帖子
   - [ ] 疫苗
@@ -21,6 +21,12 @@
 - [x] 根据疫苗筛选帖子
 - [ ] 消息提醒的发送 (https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/subscribe-message.html)
 - [x] 图床
+- [ ] git flow
+- [ ] token验证
+- [ ] 加密
+- [ ] 代码规范(配置文件)，注释
+- [ ] 数据库时区
+- [ ] 性能测试
 
 
 
@@ -134,7 +140,7 @@ json样例：
 | POST | /api/articles | 发布帖子 |
 | GET | /api/articles?size=10&page=1&isBind=true&vaccineId=1 | 获取全部帖子，可选参数：size(每页大小，默认获取全部)、page(页码，默认为1)、isBind(是否绑定疫苗，不绑定则归为其他类型，默认获取全部)、vaccineId(疫苗id，不指定则获取全部) |
 | GET | /api/articles/:id | 获取指定 id 的帖子 |
-| GET | /api/articles/user/:userId | 获取指定 userId 的用户发布的所有帖子 |
+| GET | /api/articles/user/:userID | 获取指定 userID 的用户发布的所有帖子 |
 | PUT | /api/articles/:id | 更新指定 id 的帖子 |
 | DELETE | /api/articles/:id | 删除指定 id 的帖子 |
 
