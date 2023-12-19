@@ -115,9 +115,19 @@ type StringList []string
 // }
 
 // 持有某种疫苗的所有诊所
-type Clinic struct {
+type VaccineClinicList struct {
 	gorm.Model
 	VaccineName string `json:"vaccineName"`
-	ClinicInfo  string `json:"clinicInfo"`
+	ClinicList  string `json:"clinicList"`
 	// ClinicName  StringList `json:"clinicName"`
+}
+
+// 诊所信息
+type Clinic struct {
+	gorm.Model
+	ClinicName  string `json:"clinicName"`
+	VaccineList string `json:"vaccineList"`
+	Latitude    string `json:"latitude"`
+	Longitude   string `json:"longitude"`
+	PhoneNumber string `json:"phoneNumber"`
 }

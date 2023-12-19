@@ -1,10 +1,30 @@
 [
   {
-    "vaccineName": "狂犬疫苗",
-    "ClinicInfo": "航天中心医院成人免疫接种门诊,39.916563,116.252366;北京大学人民医院狂犬疫苗接种门诊,39.937132,116.354416"
+    "clinicName": "航天中心医院",
+    "vaccineList": "狂犬疫苗",
+    "latitude": "39.916563",
+    "longitude": "116.252366",
+    "phoneNumber": "010-59971486"
   },
   {
-    "vaccineName": "HPV疫苗",
-    "ClinicInfo": "北京长阳妇儿门诊部,39.767431,116.164719;北京京都儿童医院,40.080219,116.357233"
+    "clinicName": "北京大学人民医院",
+    "vaccineList": "狂犬疫苗",
+    "latitude": "39.937132",
+    "longitude": "116.354416",
+    "phoneNumber": "暂无"
+  },
+  {
+    "clinicName": "北京长阳妇儿门诊部",
+    "vaccineList": "HPV疫苗",
+    "latitude": "39.767431",
+    "longitude": "116.164719",
+    "phoneNumber": "010-81388299"
+  },
+  {
+    "clinicName": "北京京都儿童医院",
+    "vaccineList": "HPV疫苗",
+    "latitude": "40.080219",
+    "longitude": "116.357233",
+    "phoneNumber": "010-69787556"
   }
 ]
