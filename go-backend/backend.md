@@ -21,7 +21,7 @@
 - [x] 根据疫苗筛选帖子
 - [ ] 消息提醒的发送 (https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/subscribe-message.html)
 - [x] 图床
-- [] github action
+- [ ] github action
 - [ ] token验证
 - [ ] 加密
 - [ ] 代码规范(配置文件)，注释
