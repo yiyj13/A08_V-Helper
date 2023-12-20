@@ -6,7 +6,7 @@ import InjectSVG from '../../assets/home/injection.svg'
 
 import { dayjs } from '../../utils'
 import { VaccinationRecord } from '../../api/methods'
-import { useProfiles, useVaccineRecordForPerson } from '../../api/hooks'
+import { useProfiles, useVaccineRecordList } from '../../api/hooks'
 import { useRecordPopup } from '../../models'
 
 export type VacCalendarData = {
@@ -81,8 +81,8 @@ export function VacCalendarItem({ key, record, hideOverlook = false }: VacCalend
 export function VacCalendarItemExpire({ key, record, hideOverlook = false }: VacCalendarItemProps) {
   const { id2name } = useProfiles()
   const showPopup = useRecordPopup.use.show()
-  const { getVaccineState } = useVaccineRecordForPerson(record.profileId)
-  const state = getVaccineState(record.vaccineId)
+  const { getVaccineState } = useVaccineRecordList()
+  const state = getVaccineState(record.profileId, record.vaccineId)
 
   if (record.isCompleted === false) return null
   const currentDate = dayjs()
