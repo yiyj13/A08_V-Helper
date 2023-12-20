@@ -162,7 +162,7 @@ export async function putVaccineRecord(id: number, data: Partial<VaccinationReco
 }
 
 export async function getProfiles(): Promise<Profile[]> {
-  const response = await api.get('/api/profiles/')
+  const response = await api.get('/api/profiles')
   // 将要替换为：
   // const response = await api.get('/api/profiles/user/' + getUserID())
   return response.data
