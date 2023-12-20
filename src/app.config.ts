@@ -13,6 +13,8 @@ export default defineAppConfig({
     'pages/my/about/index',
     'pages/my/notice/index',
     'pages/my/feedback/index',
+    'pages/my/follow/index',
+    'pages/my/myposts/index',
     'pages/member/index',
     'pages/addMember/index',
     'pages/reference/index',
