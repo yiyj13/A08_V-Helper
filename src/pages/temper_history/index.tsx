@@ -87,6 +87,16 @@ const ItemRender = ({ data, menuVal }: { data: TemperatureRecord; menuVal: numbe
     })
   }
 
+  let colorClass = ''
+
+  if (data.temperature > 38) {
+    colorClass = 'text-red-500' // 红色
+  } else if (data.temperature > 37) {
+    colorClass = 'text-orange-500' // 橙色
+  } else {
+    colorClass = 'text-black' // 默认颜色
+  }
+
   return (
     <div
       className='border border-gray-300 p-4 rounded-md'
@@ -109,7 +119,7 @@ const ItemRender = ({ data, menuVal }: { data: TemperatureRecord; menuVal: numbe
           测温时间 <b className='text-black font-bold'>{data.date}</b>
         </div>
         <div className='text-gray-500'>
-          体温值 <b className='text-black font-bold'>{data.temperature.toFixed(1)}</b>
+            体温值 <b className={`text-black font-bold ${colorClass}`}>{data.temperature.toFixed(1)}</b>
         </div>
       </div>
     </div>
