@@ -1,8 +1,10 @@
 import { Avatar, Button } from '@nutui/nutui-react-taro'
 import { Follow, Notice, People, RectRight, Comment, Ask, Tips } from '@nutui/icons-react-taro'
-import { useUserStore } from '../../models'
+import { getUserID, useUserStore } from '../../models'
 
-import { User } from '../../api/methods'
+import { Userinfo, getUserInfo, updateUserInfo } from '../../api/methods'
+
+import useSWR from 'swr'
 
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
@@ -59,7 +61,7 @@ export default function ProfilePage() {
 }
 
 function ProfileCard() {
-  const [userInfo, setUserInfo] = useState<Partial<User>>()
+  const [userInfo, setUserInfo] = useState<Partial<Userinfo>>()
   useEffect(() => {
     const handleUserAvatar = async () => {
       try {
@@ -68,9 +70,8 @@ function ProfileCard() {
         })
         setUserInfo({
           ...userInfo,
-          Avatar: res.userInfo.avatarUrl,
-          UserName: res.userInfo.nickName,
-          // OpenID: res.userInfo.openId,
+          avatar: res.userInfo.avatarUrl,
+          userName: res.userInfo.nickName,
         })
       } catch (error) {
         console.error('Error fetching user profile:', error)
@@ -84,11 +85,11 @@ function ProfileCard() {
     <div className='flex p-4 m-4 items-center justify-between active:bg-gray-100 rounded-2xl'>
       <div className='flex flex-row'>
         <div className='mr-4 flex-shrink-0'>
-          <Avatar size='64' src={userInfo?.Avatar} />
+          <Avatar size='64' src={userInfo?.avatar} />
         </div>
         <div>
-          <h4 className='text-lg font-bold'>{userInfo ? userInfo.UserName : 'Username'}</h4>
-          <p className='mt-1 text-gray-500'>{userInfo ? `ID: ${userInfo.ID}` : 'ID: 88888888'}</p>
+          <h4 className='text-lg font-bold'>{userInfo ? userInfo.userName : 'Username:'}</h4>
+          <p className='mt-1 text-gray-500'>{userInfo ? `ID: ${getUserID()}` : 'ID: '}</p>
         </div>
       </div>
       <RectRight />

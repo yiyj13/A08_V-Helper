@@ -1,6 +1,5 @@
 /* TODO: 
     1. CSS style for the menu and the buttons
-    2. When backend ready, add the logic to submit the data
 */
 
 import Taro from '@tarojs/taro'
@@ -132,8 +131,9 @@ export default function VaccineRecord() {
 
   const startDate = new Date(2000, 0, 1)
   const endDate = new Date(2025, 11, 30)
+  const todayDate = new Date(Date.now()).toISOString().replace('T', ' ').slice(0, 10)
   const [dateVisible, setDateVisible] = useState(false)
-  const [dateDesc, setDateDesc] = useState(new Date(Date.now()).toISOString().replace('T', ' ').slice(0, 10))
+  const [dateDesc, setDateDesc] = useState(todayDate)
   const confirmDate = (values: (string | number)[], _options: PickerOption[]) => {
     const date = values.slice(0, 3).join('-')
     setDateDesc(`${date}`)
@@ -280,14 +280,16 @@ export default function VaccineRecord() {
   }
 
   const handleSubmission = async () => {
-    console.log('record:', record) // for debug
+    record.valid = validDesc
+    record.vaccinationDate = dateDesc
+
     if (router && router.params && router.params.id) {
       const { id } = router.params
       if (id) {
         try {
           const nextVaccinationDate = addDays(record.vaccinationDate, validDesc)
-          const remindTime = subtractDays(nextVaccinationDate, remindValue + remindUnit).concat(' 10:00') // TODO: discuss the time format
-          const res = await api.request({
+          const remindTime = subtractDays(nextVaccinationDate, remindValue + remindUnit).concat(' 10:00')
+          await api.request({
             url: `/api/vaccination-records/${id}`,
             method: 'PUT',
             data: {
@@ -295,17 +297,13 @@ export default function VaccineRecord() {
               nextVaccinationDate: nextVaccinationDate,
               remindTime: remindTime,
               remindBefore: remindValue + remindUnit,
-              valid: validDesc,
             },
           })
-          console.log('record:', record) // for debug
-          console.log('result:', res.data) // for debug
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()
           }, 1000)
         } catch (error) {
-          console.log('Error submitting vaccination record:', error)
           Taro.showToast({ title: '提交失败', icon: 'error' })
         }
       } else {
@@ -323,14 +321,12 @@ export default function VaccineRecord() {
         record.vaccinationDate !== undefined &&
         record.vaccinationDate !== '' &&
         record.valid !== undefined &&
-        record.valid !== '' &&
-        record.nextVaccinationDate !== undefined &&
-        record.nextVaccinationDate !== 'Error'
+        record.valid !== ''
       ) {
         const nextVaccinationDate = addDays(record.vaccinationDate, validDesc)
         const remindTime = subtractDays(nextVaccinationDate, remindValue + remindUnit).concat(' 10:00')
         try {
-          const res = await api.request({
+          await api.request({
             url: '/api/vaccination-records',
             method: 'POST',
             data: {
@@ -338,17 +334,13 @@ export default function VaccineRecord() {
               nextVaccinationDate: nextVaccinationDate,
               remindTime: remindTime,
               remindBefore: remindValue + remindUnit,
-              valid: validDesc,
             },
           })
-          console.log('record:', record) // for debug
-          console.log('result:', res.data) // for debug
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()
           }, 1000)
         } catch (error) {
-          console.log('Error submitting vaccination record:', error) // for debug
           Taro.showToast({ title: '提交失败', icon: 'error' })
         }
       } else {

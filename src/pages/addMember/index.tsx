@@ -19,7 +19,6 @@ import {
 } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
-// import {ComboBox} from 'src/components/combobox';
 import api from '../../api'
 import { Profile } from '../../api/methods'
 
@@ -67,7 +66,7 @@ export default function AddMember() {
 
   const [checkbox1, setCheckbox1] = useState(false)
   const [checkbox2, setCheckbox2] = useState(false)
-  // the following two functions to be combined into onGenderChange
+  // TODO: the following two functions to be combined into onGenderChange
   const onMaleChange = (value: boolean) => {
     if (value === false) {
       setCheckbox1(false)
@@ -133,7 +132,6 @@ export default function AddMember() {
       ...member,
       avatar: avatar,
     })
-    console.log('avatar:', avatar) // for debug
   }
 
   const [noteValue, setNoteValue] = useState('')
@@ -174,21 +172,18 @@ export default function AddMember() {
   }, [])
 
   const handleSubmission = async () => {
-    console.log('member:', member) // for debug
     const router = Taro.getCurrentInstance().router
 
     if (router && router.params && router.params.id) {
       const { id } = router.params
       if (id) {
         try {
-          const res = await api.request({ url: `/api/profiles/${id}`, method: 'PUT', data: member })
-          console.log(res.data) // for debug
+          await api.request({ url: `/api/profiles/${id}`, method: 'PUT', data: member })
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()
           }, 1000)
         } catch (error) {
-          console.log('Error submitting vaccination record:', error)
           Taro.showToast({ title: '提交失败', icon: 'error' })
         }
       }
@@ -196,7 +191,6 @@ export default function AddMember() {
       if (member && member.fullName && member.relationship && member.gender && member.dateOfBirth) {
         try {
           const res = await api.post('/api/profiles', member)
-          console.log(res.data) // for debug
           setMember({
             ...member,
             ID: res.data.id,
@@ -206,8 +200,7 @@ export default function AddMember() {
             Taro.navigateBack()
           }, 1000)
         } catch (error) {
-          console.log('Error submitting vaccination record:', error)
-          Taro.showToast({ title: '提交失败', icon: 'error' })
+           Taro.showToast({ title: '提交失败', icon: 'error' })
         }
       } else {
         Taro.showToast({ title: '请填写完整记录', icon: 'error' })
@@ -222,7 +215,7 @@ export default function AddMember() {
       relationship: '',
       gender: '',
       dateOfBirth: '',
-      avatar: 'https://img.yzcdn.cn/vant/cat.jpeg',
+      avatar: '',
       note: '',
     })
     setNameValue('')

@@ -1,11 +1,11 @@
 /* TODO: 
-    1. feat: show the detail of the record
+    1. feat: show the detail of the record: HOW?
     2. feat: filtering the record by record type manually
 */
 
 import { useState, useEffect } from 'react'
 import { Tabs } from '@nutui/nutui-react-taro'
-import { IconFont, Eye } from '@nutui/icons-react-taro'
+import { IconFont } from '@nutui/icons-react-taro'
 import Taro from '@tarojs/taro'
 
 import api from '../../api'
@@ -81,21 +81,15 @@ const VaccineItemRender = ({ data }: { data: VaccinationRecord }) => {
     fetchData()
   }, [])
 
-  // const handleEditRecord = (recordData: VaccinationRecord) => {
+  // const handleReadDocument = (recordData: VaccinationRecord) => {
   //   Taro.navigateTo({
   //     url: `/pages/record/index?id=` + recordData.ID, // 修改record的跳转逻辑
   //   })
   // }
-  // TODO: design?
-  const handleReadDocument = (recordData: VaccinationRecord) => {
-    Taro.navigateTo({
-      url: `/pages/record/index?id=` + recordData.ID, // 修改record的跳转逻辑
-    })
-  }
   return (
     <div
-      className='border border-gray-300 p-4 rounded-md'
-      style={{ borderRadius: '8px', marginLeft: '10px', marginRight: '10px' }}
+      className='border border-gray-300 p-2 rounded-md'
+      style={{ borderRadius: '8px', marginLeft: '6px', marginRight: '6px' }}
     >
       <div className='flex items-center justify-between'>
         <div className='flex items-center'>
@@ -107,15 +101,14 @@ const VaccineItemRender = ({ data }: { data: VaccinationRecord }) => {
             <div className='font-bold ml-2'>{profileInfo.fullName}</div>
           </div>
         </div>
-        <Eye className='cursor-pointer' onClick={() => handleReadDocument(data)} style={{ marginRight: '10px' }} />
-        {/* <Edit className='cursor-pointer' onClick={() => handleEditRecord(data)} /> */}
+        {/* <Eye className='cursor-pointer' onClick={() => handleReadDocument(data)} style={{ marginRight: '10px' }} /> */}
       </div>
       <div className='flex justify-between mt-2'>
         <div className='text-gray-500'>
           接种疫苗 <b className='text-black font-bold'>{data.vaccine.name}</b>
         </div>
         <div className='text-gray-500'>
-          接种类型 <b className='text-black font-bold'>{data.vaccine.type}</b>
+          接种类型 <b className='text-black font-bold'>{data.vaccinationType}</b>
         </div>
       </div>
       <div className='flex justify-between mt-2'>
@@ -147,21 +140,25 @@ const TemperItemRender = ({ data }: { data: TemperatureRecord }) => {
     fetchData()
   }, [])
 
-  // const handleEditRecord = (recordData: TemperatureRecord) => {
+  // const handleReadDocument = (recordData: TemperatureRecord) => {
   //   Taro.navigateTo({
   //     url: `/pages/temper/index?id=` + recordData.ID, // 修改record的跳转逻辑
   //   })
   // }
-  // TODO: design?
-  const handleReadDocument = (recordData: TemperatureRecord) => {
-    Taro.navigateTo({
-      url: `/pages/temper/index?id=` + recordData.ID, // 修改record的跳转逻辑
-    })
+  let colorClass = ''
+
+  if (data.temperature > 38) {
+    colorClass = 'text-red-500' // 红色
+  } else if (data.temperature > 37) {
+    colorClass = 'text-orange-500' // 橙色
+  } else {
+    colorClass = 'text-black' // 默认颜色
   }
+
   return (
     <div
-      className='border border-gray-300 p-4 rounded-md'
-      style={{ borderRadius: '8px', marginLeft: '10px', marginRight: '10px' }}
+      className='border border-gray-300 p-2 rounded-md'
+      style={{ borderRadius: '8px', marginLeft: '6px', marginRight: '6px' }}
     >
       <div className='flex items-center justify-between'>
         <div className='flex items-center'>
@@ -173,15 +170,14 @@ const TemperItemRender = ({ data }: { data: TemperatureRecord }) => {
             <div className='font-bold ml-2'>{profileInfo.fullName}</div>
           </div>
         </div>
-        <Eye className='cursor-pointer' onClick={() => handleReadDocument(data)} style={{ marginRight: '10px' }} />
-        {/* <Edit className='cursor-pointer' onClick={() => handleEditRecord(data)} /> */}
+        {/* <Eye className='cursor-pointer' onClick={() => handleReadDocument(data)} style={{ marginRight: '10px' }} /> */}
       </div>
       <div className='flex justify-between mt-2'>
         <div className='text-gray-500'>
           测温时间 <b className='text-black font-bold'>{data.date}</b>
         </div>
         <div className='text-gray-500'>
-          体温值 <b className='text-black font-bold'>{data.temperature}</b>
+          体温值 <b className={`text-black font-bold ${colorClass}`}>{data.temperature.toFixed(1)}</b>
         </div>
       </div>
     </div>
