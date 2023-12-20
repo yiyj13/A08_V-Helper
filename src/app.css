@@ -11,6 +11,11 @@ page {
   /* --nutui-calendar-day-height: 40px; */
   --nutui-divider-margin: 0 4;
   --nutui-divider-text-color: #D0D5DC;
+  --nutui-picker-title-cancel-font-size: 16px;
+  --nutui-picker-title-ok-font-size: 16px;
+  --nutui-picker-item-text-font-size: 16px;
+  --nutui-cell-title-font-size: 14px;
+  --nutui-cell-description-font-size: 14px;
 }
 
 .std-box-shadow {

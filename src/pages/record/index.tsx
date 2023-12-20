@@ -1,6 +1,5 @@
 /* TODO: 
     1. CSS style for the menu and the buttons
-    2. When backend ready, add the logic to submit the data
 */
 
 import Taro from '@tarojs/taro'
@@ -323,9 +322,7 @@ export default function VaccineRecord() {
         record.vaccinationDate !== undefined &&
         record.vaccinationDate !== '' &&
         record.valid !== undefined &&
-        record.valid !== '' &&
-        record.nextVaccinationDate !== undefined &&
-        record.nextVaccinationDate !== 'Error'
+        record.valid !== '' 
       ) {
         const nextVaccinationDate = addDays(record.vaccinationDate, validDesc)
         const remindTime = subtractDays(nextVaccinationDate, remindValue + remindUnit).concat(' 10:00')
@@ -335,6 +332,7 @@ export default function VaccineRecord() {
             method: 'POST',
             data: {
               ...record,
+              vaccinationDate:dateDesc,
               nextVaccinationDate: nextVaccinationDate,
               remindTime: remindTime,
               remindBefore: remindValue + remindUnit,

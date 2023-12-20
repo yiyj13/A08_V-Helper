@@ -1,38 +1,56 @@
-/* TODO: 
-    1. feat: filtering the record by profile manually
-*/
-
-import { useState, useEffect } from 'react'
-import { Button } from '@nutui/nutui-react-taro'
+import { useState, useEffect, useMemo } from 'react'
+import { Button, Menu } from '@nutui/nutui-react-taro'
 import { IconFont, Edit } from '@nutui/icons-react-taro'
-import Taro, { useDidShow } from '@tarojs/taro'
+import Taro from '@tarojs/taro'
 
-import api from '../../api'
+import api, { getProfiles } from '../../api'
 
 import { Profile, TemperatureRecord } from '../../api/methods'
+import useSWR from 'swr'
 
 export default function TemperHistory() {
   const [temperRecordList, setTemperRecordList] = useState<TemperatureRecord[]>([])
+  const { data: profiles } = useSWR('getProfiles', getProfiles)
+  const [menuValue, setMenuValue] = useState<number>(0)
 
-  useDidShow(() => {
-    api.request({ url: '/api/temperature-records' }).then((res) => {
-      const result = res.data as TemperatureRecord[]
-      result.sort((a, b) => {
-        return new Date(a.date).getTime() - new Date(b.date).getTime()
-      })
-      setTemperRecordList(result)
-    })
-  })
+  const fetchTemperatureRecords = async () => {
+    const res = await api.get('/api/temperature-records')
+    var result = res.data as TemperatureRecord[]
+    result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    setTemperRecordList(result)
+  }
+
+  useEffect(() => {
+    fetchTemperatureRecords()
+  }, [menuValue])
 
   const handleAddRecord = () => {
     Taro.navigateTo({ url: '/pages/temper/index' })
   }
 
+  const MemberDataList = useMemo(() => {
+    const dataList = profiles ? profiles.map((item) => ({ value: item.ID, text: item.relationship })) : []
+    dataList.unshift({ value: 0, text: '所有成员' })
+    return dataList
+  }, [profiles])
+
   return (
     <div style={{ height: '100%', position: 'relative', paddingBottom: '70px' }}>
-      {temperRecordList.map((item, index) => (
-        <ItemRender data={item} key={index} />
-      ))}
+      <Menu>
+        <Menu.Item
+          options={MemberDataList}
+          defaultValue={0}
+          value={menuValue}
+          onChange={(v) => {
+            setMenuValue(v.value)
+          }}
+        />
+      </Menu>
+      {temperRecordList
+        ?.filter((item) => (menuValue !== 0 ? item.profileId === menuValue : true))
+        .map((item, index) => (
+          <ItemRender data={item} key={index} menuVal={menuValue} />
+        ))}
       <Button
         type='primary'
         onClick={handleAddRecord}
@@ -44,7 +62,7 @@ export default function TemperHistory() {
   )
 }
 
-const ItemRender = ({ data }: { data: TemperatureRecord }) => {
+const ItemRender = ({ data, menuVal }: { data: TemperatureRecord; menuVal: number }) => {
   const [profileInfo, setProfileInfo] = useState<Profile>({} as Profile)
 
   const getProfileInfo = (profileId: number) => {
@@ -56,10 +74,12 @@ const ItemRender = ({ data }: { data: TemperatureRecord }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      await getProfileInfo(data.profileId)
+      if (data.profileId === menuVal || menuVal === 0) {
+        await getProfileInfo(data.profileId)
+      }
     }
     fetchData()
-  }, [])
+  }, [data.profileId, menuVal])
 
   const handleEditRecord = (recordData: TemperatureRecord) => {
     Taro.navigateTo({
