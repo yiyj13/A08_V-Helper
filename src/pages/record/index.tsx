@@ -7,7 +7,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { Cell, Switch, Picker, Uploader, Button, DatePicker, TextArea, Input, Popover } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
-import useSWR from 'swr'
+import useSWR, { useSWRConfig } from 'swr'
 import api, { VaccinationRecord, getProfiles, useVaccines } from '../../api'
 
 export default function VaccineRecord() {
@@ -17,7 +17,10 @@ export default function VaccineRecord() {
     reminder: false,
   })
 
+  const { mutate } = useSWRConfig()
+
   const { data: profiles } = useSWR('getProfiles', getProfiles)
+  const refreshRecordListCache = () => mutate('getVaccineRecordList')
 
   const MemberData = useMemo(
     () => (profiles ? profiles.map((item) => ({ value: item.ID, text: item.relationship })) : []),
@@ -299,6 +302,7 @@ export default function VaccineRecord() {
               remindBefore: remindValue + remindUnit,
             },
           })
+          refreshRecordListCache()
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()
@@ -336,6 +340,7 @@ export default function VaccineRecord() {
               remindBefore: remindValue + remindUnit,
             },
           })
+          refreshRecordListCache()
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()
