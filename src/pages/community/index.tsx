@@ -1,4 +1,3 @@
-import { memo, useState } from 'react'
 import { Skeleton } from '@nutui/nutui-react-taro'
 import { ArrowDown } from '@nutui/icons-react-taro'
 import useSWRInfinite from 'swr/infinite'
@@ -23,7 +22,7 @@ export default function Index() {
 }
 
 // TODO: virtualList optimization
-export function Community(props: { filter?: number }) {
+export function Community() {
   const filter = useCommunityStore.use.vaccineId()
 
   const { data, isLoading, size, setSize, error } = useSWRInfinite(
@@ -72,15 +71,16 @@ const Skeletons = () => (
 
 const Header = () => {
   const { data } = useVaccines()
-  const [showFilter, setShowFilter] = useState<boolean>(false)
   const filter = useCommunityStore.use.vaccineId()
+  const expand = useCommunityStore.use.expandVaccineFilter()
   const toggleFilter = useCommunityStore.use.toggleFilter()
+  const toggleExpand = useCommunityStore.use.toggleExpandFilter()
 
   return (
     <header
       className={clsx('transition-all', {
-        'h-20': !showFilter,
-        'h-32': showFilter,
+        'h-20': !expand,
+        'h-32': expand,
       })}
     >
       <nav
@@ -93,12 +93,12 @@ const Header = () => {
               <a className='flex items-center space-x-2'>
                 <span className='text-2xl font-bold'>疫苗社区</span>
               </a>
-              <div className='flex items-center' onClick={() => setShowFilter((s) => !s)}>
+              <div className='flex items-center' onClick={toggleExpand}>
                 <span className='pr-2 py-2 text-sm rounded-md'>筛选</span>
                 <ArrowDown
                   size={10}
                   className={clsx('transition-all transform', {
-                    'rotate-180': showFilter,
+                    'rotate-180': expand,
                   })}
                 />
               </div>
@@ -107,8 +107,8 @@ const Header = () => {
         </div>
         <ul
           className={clsx('flex items-center px-4 gap-4 overflow-x-scroll whitespace-nowrap transition-all', {
-            'h-0 scale-y-0': !showFilter,
-            'h-12': showFilter,
+            'h-0 scale-y-0': !expand,
+            'h-12': expand,
           })}
         >
           {data?.map((vaccine, index) => (
