@@ -27,6 +27,7 @@ type Profile struct {
 	Gender       string `json:"gender"`
 	DateOfBirth  string `json:"dateOfBirth"`
 	Relationship string `json:"relationship"`
+	Avatar       string `json:"avatar"`
 }
 
 // Vaccine 疫苗模型
