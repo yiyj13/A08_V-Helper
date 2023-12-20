@@ -18,6 +18,7 @@ export type VacCalendarData = {
 type VacCalendarItemProps = {
   key: number
   record: VaccinationRecord
+  hideOverlook?: boolean
 }
 
 export function MergeItems(raw: VaccinationRecord[]) {
@@ -36,7 +37,7 @@ export function MergeItems(raw: VaccinationRecord[]) {
   return [...vacCalendar, ...expireCalendar]
 }
 
-export function VacCalendarItem({ key, record }: VacCalendarItemProps) {
+export function VacCalendarItem({ key, record, hideOverlook = false }: VacCalendarItemProps) {
   const { id2name } = useProfiles()
   const showPopup = useRecordPopup.use.show()
 
@@ -44,12 +45,15 @@ export function VacCalendarItem({ key, record }: VacCalendarItemProps) {
   const needWarning = !record.isCompleted && dayjs(record.vaccinationDate).isBefore(dayjs())
   const timeError = record.isCompleted && dayjs(record.vaccinationDate).isAfter(dayjs())
 
+  if (hideOverlook && overlook) return null
+
   return (
     <li
       key={key}
       className={clsx(
-        'flex h-16 animate-fade-in flex-row items-center justify-between rounded-2xl bg-slate-100 px-4 transition-all active:scale-105 active:shadow-md',
+        'flex h-16 flex-row items-center justify-between rounded-2xl bg-slate-100 px-4 transition-all active:scale-105 active:shadow-md',
         {
+          'animate-fade-in': !overlook,
           'opacity-60 filter saturate-50': overlook,
           'ring-2 ring-brand': needWarning,
         }
@@ -74,7 +78,7 @@ export function VacCalendarItem({ key, record }: VacCalendarItemProps) {
   )
 }
 
-export function VacCalendarItemExpire({ key, record }: VacCalendarItemProps) {
+export function VacCalendarItemExpire({ key, record, hideOverlook = false }: VacCalendarItemProps) {
   const { id2name } = useProfiles()
   const showPopup = useRecordPopup.use.show()
   const { getVaccineState } = useVaccineRecordForPerson(record.profileId)
@@ -84,6 +88,8 @@ export function VacCalendarItemExpire({ key, record }: VacCalendarItemProps) {
   const currentDate = dayjs()
   const overlook = state.inEffect && currentDate.isAfter(dayjs(record.nextVaccinationDate))
   const needHighlight = !state.inEffect && currentDate.isAfter(dayjs(record.nextVaccinationDate))
+
+  if (hideOverlook && overlook) return null
 
   return (
     <li

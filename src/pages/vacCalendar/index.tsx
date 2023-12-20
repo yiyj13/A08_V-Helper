@@ -1,8 +1,7 @@
 import { useMemo } from 'react'
 import dayjs from 'dayjs'
-import useSWR from 'swr'
 
-import { getVaccineRecordList } from '../../api/methods'
+import { useVaccineRecordList } from '../../api'
 
 import { MergeItems, VacCalendarItemExpire, VacCalendarItem } from './vacCalendarItem'
 import { NetworkError } from '../../components/errors'
@@ -24,7 +23,7 @@ export default function Index() {
 // FIXME: if the date field of a record is in the far future, 
 // new items will be generated every time the page is refreshed
 export function VacCalendarScrollView() {
-  const { data, error } = useSWR('getVaccineRecordList', getVaccineRecordList)
+  const { data, error } = useVaccineRecordList()
 
   const mergedItems = useMemo(
     () => (data ? MergeItems(data).sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf()) : null),

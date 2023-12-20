@@ -1,3 +1,4 @@
+import Taro from '@tarojs/taro'
 import { ReactNode } from 'react'
 import clsx from 'clsx'
 import useSWR, { useSWRConfig } from 'swr'
@@ -13,6 +14,7 @@ export default function RecordPopup() {
   const recordID = useRecordPopup.use.recordId()
   const isShow = useRecordPopup.use.isShow()
   const hide = useRecordPopup.use.hide()
+  const clear = useRecordPopup.use.clear()
 
   const { data: record, mutate: refreshThisRecord } = useSWR(recordID ? [recordID, 'getVaccineRecord'] : null, ([id]) =>
     getVaccineRecord(id)
@@ -35,19 +37,23 @@ export default function RecordPopup() {
     refreshRecordList()
   }
 
+  const handleEdit = () => {
+    Taro.navigateTo({ url: `/pages/record/index?id=` + recordID })
+  }
+
   return (
     <PageContainer
       round
       show={isShow}
       overlayStyle='background-color:rgba(225,225,225,0);backdrop-filter:blur(2px);'
       position='bottom'
-      onAfterLeave={hide}
+      onLeave={clear}
     >
       <div className='flex flex-col justify-center px-4 pt-2 pb-8'>
         <Nav />
 
         <Header profileId={record?.profileId} vaccineName={record?.vaccine.name} />
-        <GrayCard text={record?.vaccineType || '类型'} />
+        <GrayCard text={record?.vaccinationType || '类型'} />
 
         <DividerLine />
 
@@ -71,7 +77,7 @@ export default function RecordPopup() {
         <DividerLine />
 
         <div className='flex justify-between gap-x-2'>
-          <GrayCardAction icon={<Edit size={16} />} text='编辑' onClick={() => {}} />
+          <GrayCardAction icon={<Edit size={16} />} text='编辑' onClick={handleEdit} />
           <GrayCardAction icon={<Del2 size={16} />} text='删除' onClick={handleDelete} />
         </div>
       </div>
@@ -129,7 +135,7 @@ function GrayCard(props: { title?: string; text?: string }) {
   )
 }
 
-function GrayCardAction(props: { icon?: ReactNode; text?: string; onClick?: () => void  }) {
+function GrayCardAction(props: { icon?: ReactNode; text?: string; onClick?: () => void }) {
   return (
     <div className='flex flex-col w-full bg-gray-100 rounded-2xl mt-2 px-4 py-2' onClick={props.onClick}>
       <div className='flex justify-center items-center gap-x-2 text-brand'>
@@ -146,10 +152,10 @@ function CompeleteCard(props: { isCompleted?: boolean; onClick?: () => void }) {
       <div
         className={clsx(
           'flex w-full justify-center items-center gap-x-2 rounded-2xl mt-2 px-4 py-2',
-          'transition-colors',
+          'transition-colors duration-500',
           {
-            'text-white bg-brand': !props.isCompleted,
-            'text-black bg-gray-100': props.isCompleted,
+            'text-white bg-brand': props.isCompleted === false,
+            'text-black bg-gray-100': typeof props.isCompleted === 'undefined' || props.isCompleted,
           }
         )}
       >

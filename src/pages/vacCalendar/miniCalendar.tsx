@@ -2,17 +2,16 @@ import Taro from '@tarojs/taro'
 import { Text } from '@tarojs/components'
 import { Skeleton } from '@nutui/nutui-react-taro'
 import { Ask } from '@nutui/icons-react-taro'
-import useSWR from 'swr'
 import dayjs from 'dayjs'
 
-import { getVaccineRecordList } from '../../api/methods'
+import { useVaccineRecordList } from '../../api'
 import { MergeItems, VacCalendarItemExpire, VacCalendarItem } from './vacCalendarItem'
 import { NetworkError } from '../../components/errors'
 import { PullDownRefresh } from '../../components/pulldownrefresh'
 import RecordPopup from './recordPopup'
 
 export function MiniCalendar() {
-  const { data, isLoading, error, mutate } = useSWR('getVaccineRecordList', getVaccineRecordList)
+  const { data, isLoading, error, mutate } = useVaccineRecordList()
   const isEmpty = !data || (data && data.length === 0)
 
   return (
@@ -40,9 +39,11 @@ export function MiniCalendar() {
               <ol className='mt-2 space-y-4 text-sm leading-6'>
                 {data &&
                   MergeItems(data)
+                    .filter(
+                      (item) => !item.record.isCompleted || (item.expireDate && dayjs(item.date).isAfter(dayjs()))
+                    )
                     .sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf())
-                    .filter((item) => dayjs(item.date).isAfter(dayjs()))
-                    .slice(0, 3)
+                    .slice(0, 4)
                     .map((item) => {
                       if (item.expireDate) {
                         return <VacCalendarItemExpire key={dayjs(item.date).valueOf()} record={item.record} />

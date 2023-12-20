@@ -10,6 +10,7 @@ interface State {
 interface Action {
   show: (id: number) => void
   hide: () => void
+  clear: () => void
 }
 
 const initialState: State = {
@@ -29,9 +30,14 @@ const popupStore = create<State & Action>()(
     hide() {
       set((state) => {
         state.isShow = false
-        state.recordId = undefined
       })
     },
+    clear() {
+      set((state) => {
+        state.recordId = undefined
+        state.isShow = false
+      })
+    }
   }))
 )
 
