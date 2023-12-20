@@ -1,38 +1,56 @@
-/* TODO: 
-    1. feat: filtering the record by profile manually
-*/
-
-import { useState, useEffect } from 'react'
-import { Button } from '@nutui/nutui-react-taro'
+import { useState, useEffect, useMemo } from 'react'
+import { Button, Menu } from '@nutui/nutui-react-taro'
 import { IconFont, Edit } from '@nutui/icons-react-taro'
-import Taro, { useDidShow } from '@tarojs/taro'
+import Taro from '@tarojs/taro'
 
-import api from '../../api'
+import api, { getProfiles } from '../../api'
 
 import { Profile, VaccinationRecord } from '../../api/methods'
+import useSWR from 'swr'
 
 export default function RecordHistory() {
   const [vaccinationRecordList, setVaccinationRecordList] = useState<VaccinationRecord[]>([])
+  const { data: profiles } = useSWR('getProfiles', getProfiles)
+  const [menuValue, setMenuValue] = useState<number>(0)
 
-  useDidShow(() => {
-    api.request({ url: '/api/vaccination-records' }).then((res) => {
-      const result = res.data as VaccinationRecord[]
-      result.sort((a, b) => {
-        return new Date(a.vaccinationDate).getTime() - new Date(b.vaccinationDate).getTime()
-      })
-      setVaccinationRecordList(result)
-    })
-  })
+  const fetchVaccinationRecords = async () => {
+    const res = await api.get('/api/vaccination-records')
+    var result = res.data as VaccinationRecord[]
+    result.sort((a, b) => new Date(a.vaccinationDate).getTime() - new Date(b.vaccinationDate).getTime())
+    setVaccinationRecordList(result)
+  }
+
+  useEffect(() => {
+    fetchVaccinationRecords()
+  }, [menuValue])
 
   const handleAddRecord = () => {
     Taro.navigateTo({ url: '/pages/record/index' })
   }
 
+  const MemberDataList = useMemo(() => {
+    const dataList = profiles ? profiles.map((item) => ({ value: item.ID, text: item.relationship })) : []
+    dataList.unshift({ value: 0, text: '所有成员' })
+    return dataList
+  }, [profiles])
+
   return (
     <div style={{ height: '100%', position: 'relative', paddingBottom: '70px' }}>
-      {vaccinationRecordList.map((item, index) => (
-        <ItemRender data={item} key={index} />
-      ))}
+      <Menu>
+        <Menu.Item
+          options={MemberDataList}
+          defaultValue={0}
+          value={menuValue}
+          onChange={(v) => {
+            setMenuValue(v.value)
+          }}
+        />
+      </Menu>
+      {vaccinationRecordList
+        ?.filter((item) => (menuValue !== 0 ? item.profileId === menuValue : true))
+        .map((item, index) => (
+          <ItemRender data={item} key={index} menuVal={menuValue} />
+        ))}
       <Button
         type='primary'
         onClick={handleAddRecord}
@@ -44,7 +62,7 @@ export default function RecordHistory() {
   )
 }
 
-const ItemRender = ({ data }: { data: VaccinationRecord }) => {
+const ItemRender = ({ data, menuVal }: { data: VaccinationRecord; menuVal: number }) => {
   const [profileInfo, setProfileInfo] = useState<Profile>({} as Profile)
 
   const getProfileInfo = (profileId: number) => {
@@ -56,10 +74,12 @@ const ItemRender = ({ data }: { data: VaccinationRecord }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      await getProfileInfo(data.profileId)
+      if (data.profileId === menuVal || menuVal === 0) {
+        await getProfileInfo(data.profileId)
+      }
     }
     fetchData()
-  }, [])
+  }, [data.profileId, menuVal])
 
   const handleEditRecord = (recordData: VaccinationRecord) => {
     Taro.navigateTo({

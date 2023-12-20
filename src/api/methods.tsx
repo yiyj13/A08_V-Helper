@@ -19,12 +19,6 @@ export type Userinfo = GinBase & {
 
 export type UserFollowing = Pick<Userinfo, 'followingArticles' | 'followingVaccines'>
 
-export type User = GinBase & {
-  OpenID: string
-  UserName: string
-  Avatar: string
-}
-
 export type Vaccine = GinBase & {
   name: string
   description: string
@@ -92,6 +86,16 @@ export async function Login(): Promise<Userinfo> {
   const responseLogin = await Taro.login()
   const response = await api.get('/api/users/login', { code: responseLogin.code })
   return response.data as Userinfo
+}
+
+export async function getUserInfo(): Promise<Userinfo> {
+  const response = await api.get('/api/users/' + getUserID())
+  return response.data as Userinfo
+}
+
+export async function updateUserInfo(data: Partial<Userinfo>): Promise<Userinfo> {
+  const response = await api.put('/api/users/' + getUserID(), data)
+  return response.data
 }
 
 export async function getUserFollowing(): Promise<UserFollowing> {
