@@ -17,6 +17,9 @@ export default function RecordHistory() {
   useDidShow(() => {
     api.request({ url: '/api/vaccination-records' }).then((res) => {
       const result = res.data as VaccinationRecord[]
+      result.sort((a, b) => {
+        return new Date(a.vaccinationDate).getTime() - new Date(b.vaccinationDate).getTime()
+      })
       setVaccinationRecordList(result)
     })
   })
@@ -86,7 +89,7 @@ const ItemRender = ({ data }: { data: VaccinationRecord }) => {
           接种疫苗 <b className='text-black font-bold'>{data.vaccine.name}</b>
         </div>
         <div className='text-gray-500'>
-          接种类型 <b className='text-black font-bold'>{data.vaccine.type}</b>
+          接种类型 <b className='text-black font-bold'>{data.vaccinationType}</b>
         </div>
       </div>
       <div className='flex justify-between mt-2'>

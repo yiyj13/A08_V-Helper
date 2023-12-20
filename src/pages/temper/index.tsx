@@ -104,14 +104,15 @@ export default function TemperRecord() {
       date: dateDesc,
       note: noteValue,
     })
-    console.log('temperature:', tempRecord) // for debug
+    if(typeof tempRecord.temperature !== 'undefined' && typeof tempRecord.temperature === 'string') {
+      tempRecord.temperature = parseFloat(tempRecord.temperature)
+    }
     if (router && router.params && router.params.id) {
-      console.log('id:', router.params) // for debug
       const { id } = router.params
       if (id) {
         try {
           const res = await api.request({ url: `/api/temperature-records/${id}`, method: 'PUT', data: tempRecord })
-          console.log(res.data) // for debug
+          console.log('result:', res.data) // for debug    
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()
