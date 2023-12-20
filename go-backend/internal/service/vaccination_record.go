@@ -18,6 +18,14 @@ func (s *VaccinationRecordService) CreateVaccinationRecord(record model.Vaccinat
 	return s.db.Create(&record).Error
 }
 
+func (s *VaccinationRecordService) GetVaccinationRecordsByUserID(userID uint) ([]model.VaccinationRecord, error) {
+	var records []model.VaccinationRecord
+	if err := s.db.Where("user_id = ?", userID).Preload("Vaccine").Find(&records).Error; err != nil {
+		return nil, err
+	}
+	return records, nil
+}
+
 func (s *VaccinationRecordService) GetVaccinationRecordsByProfileID(profileID uint) ([]model.VaccinationRecord, error) {
 	var records []model.VaccinationRecord
 	if err := s.db.Where("profile_id = ?", profileID).Preload("Vaccine").Find(&records).Error; err != nil {
@@ -29,6 +37,24 @@ func (s *VaccinationRecordService) GetVaccinationRecordsByProfileID(profileID ui
 func (s *VaccinationRecordService) GetAllVaccinationRecords() ([]model.VaccinationRecord, error) {
 	var records []model.VaccinationRecord
 	if err := s.db.Preload("Vaccine").Find(&records).Error; err != nil {
+		return nil, err
+	}
+	return records, nil
+}
+
+// 根据是否完成接种获取接种记录
+func (s *VaccinationRecordService) GetAllVaccinationRecordsByIsCompleted(isCompleted bool) ([]model.VaccinationRecord, error) {
+	var records []model.VaccinationRecord
+	if err := s.db.Where("is_completed = ?", isCompleted).Preload("Vaccine").Find(&records).Error; err != nil {
+		return nil, err
+	}
+	return records, nil
+}
+
+// 根据ProfileID和是否完成接种获取接种记录
+func (s *VaccinationRecordService) GetVaccinationRecordsByProfileIDAndIsCompleted(profileID uint, isCompleted bool) ([]model.VaccinationRecord, error) {
+	var records []model.VaccinationRecord
+	if err := s.db.Where("profile_id = ? AND is_completed = ?", profileID, isCompleted).Preload("Vaccine").Find(&records).Error; err != nil {
 		return nil, err
 	}
 	return records, nil

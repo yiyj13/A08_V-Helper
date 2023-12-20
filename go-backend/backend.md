@@ -9,17 +9,25 @@
   - [ ] 在model中加入新模型时，需要在init中进行迁移
   - [ ] 在service中实现对模型的增删改查
   - [ ] 在handler中实现API接口，并注册路由
-- [ ] 用户登录，主要通过微信接口实现(可能考虑用JWT验证保证安全)
+- [x] 用户登录，主要通过微信接口实现
 - [ ] 对有需要的模型在获取时进行分页、排序(时间排序)和筛选(按疫苗)
-  - [ ] 帖子
+  - [x] 帖子
   - [ ] 疫苗
-  - [ ] 接种记录
-  - [ ] 体温记录
-- [ ] 更方便地通过json数据更新数据库
-- [ ] 消息提醒的发送
-- [ ] 接种记录加字段
-- [ ] 图床
+- [x] 更方便地通过json数据更新数据库
 - [ ] 更新文档中相关API
+- [x] 接种记录的字段完善
+- [ ] 收藏帖子和疫苗
+- [x] 解耦 接种记录 和 接种预约
+- [x] 根据疫苗筛选帖子
+- [ ] 消息提醒的发送 (https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/subscribe-message.html)
+- [x] 图床
+- [x] github action
+- [ ] token验证
+- [ ] 加密
+- [ ] 代码规范(配置文件)，注释
+- [ ] 数据库时区更改
+- [ ] 性能测试
+
 
 
 # API 设计
@@ -35,6 +43,12 @@
 | GET | /api/users/login?code=xxx | 通过微信接口登录，第一次登录时会自动注册 |
 | GET | /api/users | 获取全部用户信息 |
 | PUT | /api/users/:id | 更新指定 id 的用户信息 |
+| GET | /api/users/:id/following | 获取指定 id 的用户关注的所有用户 |
+| GET | /api/users/addfollowingVaccine/:id?vaccine_id | 指定 id 的用户关注指定 vaccine_id 的疫苗 |
+| GET | /api/users/removefollowingVaccine/:id?vaccine_id | 指定 id 的用户取消关注指定 vaccine_id 的疫苗 |
+| GET | /api/users/addfollowingArticle/:id?article_id | 指定 id 的用户关注指定 article_id 的帖子 |
+| GET | /api/users/removefollowingArticle/:id?article_id | 指定 id 的用户取消关注指定 article_id 的帖子 |
+
 
 Put 时的 json样例：
 ```json
@@ -42,8 +56,10 @@ Put 时的 json样例：
    "openId": "1234567890",
    "userName": "张三",
    "email": "123@mails.tsinghua.edu.cm",
-   "phone": "1234567890"
+   "phone": "1234567890",
+   "avatar": "http://xxx.com/xxx.jpg"
 }
+```
 
 ## 身份
 
@@ -73,9 +89,10 @@ Post 时的json样例
 | 方法 | 路由 | 功能 |
 | ---- | ---- | ---- |
 | POST | /api/vaccination-records | 添加接种记录 |
-| GET | /api/vaccination-records | 获取全部接种记录 |
+| GET | /api/vaccination-records?isCompleted=true | 获取全部已完成接种记录(若为false则获取未完成接种记录) |
 | GET | /api/vaccination-records/:id | 获取指定 id 的接种记录 |
-| GET | /api/vaccination-records/profile/:id | 获取指定 id 的接种者的接种记录 |
+| GET | /api/vaccination-records/user/:userID | 获取指定 userID 的用户的接种记录 |
+| GET | /api/vaccination-records/profile/:profileID?isCompleted=true | 获取指定 profileID 的接种者的已完成接种记录(若为false则获取未完成接种记录) |
 | PUT | /api/vaccination-records/:id | 更新指定 id 的疫苗信息 |
 | DELETE | /api/vaccination-records/:id | 删除指定 id 的疫苗信息 |
 
@@ -84,12 +101,15 @@ Post 时的json样例：
 {
    "profileId": 1, // 接种者的id, 必填
    "vaccineId": 2, // 疫苗的id, 必填
-   "vaccinationDate": "2021-07-01", // 接种日期, 必填
    "voucher": "Voucher123", // 接种凭证, 选填
+   "vaccinationDate": "2021-07-01", // 接种日期, 必填
    "vaccinationLocation": "本地社区医院",
-   "reminder": true, // 是否提醒, 默认为false
-   "nextVaccinationDate": "2022-07-01", // 下次接种日期, 选填
-   "note": "无明显不适反应" // 备注, 选填
+   "vaccinationType": "第一针", // 接种类型, 选填
+   "nextVaccinationDate": "2021-08-01", // 下次接种日期, 选填
+   "note": "无明显不适反应", // 备注, 选填
+   "isCompleted": true, // 是否已完成接种, 选填
+   "reminder": true, // 是否提醒本次接种，仅在isCompleted为false时有效，选填
+   "remindTime": "2021-06-30 12:00" // 提醒时间，仅在isCompleted为false且reminder为true时有效，选填
 }
 ```
 
@@ -118,9 +138,9 @@ json样例：
 | 方法 | 路由 | 功能 |
 | ---- | ---- | ---- |
 | POST | /api/articles | 发布帖子 |
-| GET | /api/articles?size=10&page=1 | 获取全部帖子，分页 |
+| GET | /api/articles?size=10&page=1&isBind=true&vaccineId=1 | 获取全部帖子，可选参数：size(每页大小，默认获取全部)、page(页码，默认为1)、isBind(是否绑定疫苗，不绑定则归为其他类型，默认获取全部)、vaccineId(疫苗id，不指定则获取全部) |
 | GET | /api/articles/:id | 获取指定 id 的帖子 |
-| GET | /api/articles/user/:userId | 获取指定 userId 的用户发布的所有帖子 |
+| GET | /api/articles/user/:userID | 获取指定 userID 的用户发布的所有帖子 |
 | PUT | /api/articles/:id | 更新指定 id 的帖子 |
 | DELETE | /api/articles/:id | 删除指定 id 的帖子 |
 
@@ -136,229 +156,176 @@ Post 时的json样例：
 }
 ```
 
+## 回复
+
+| 方法 | 路由 | 功能 |
+| ---- | ---- | ---- |
+| POST | /api/replys | 发布回复 |
+| GET | /api/replys?articleId=1 | 获取指定 articleId 的帖子的所有回复，如果不指定 articleId 则获取全部回复 |
+| GET | /api/replys/:id | 获取指定 id 的回复 |
+| PUT | /api/replys/:id | 更新指定 id 的回复 |
+| DELETE | /api/replys/:id | 删除指定 id 的回复 |
+
+Post 时的json样例：
+```json
+{
+   "articleId": 1,
+   "content": "我也是",
+   "userName": "李四",
+   "userId": 2
+}
+```
+
 # 模型设计
 
 通过以下数据表来支持后端的功能：
 
 1. **用户表 (Users)**:
 
-   ```go
-   // User 用户模型
-   type User struct {
-      gorm.Model        //gorm.Model 包含了 CreatedAt、UpdatedAt、DeletedAt（用于软删除）以及 ID 字段
-      UserName   string `gorm:"unique" json:"userName"`
-      Password   string `json:"-"` // 存储哈希值，JSON中忽略
-      Email      string `gorm:"unique" json:"email"`
-      Phone      string `gorm:"unique" json:"phone"`
-   }
-   ```
+```go
+// User 用户模型
+// 查询关注的疫苗和文章时，使用 Preload 方法
+// 增加和删除关注的疫苗和文章时，使用 Association 方法
+type User struct {
+	gorm.Model                  //gorm.Model 包含了 CreatedAt、UpdatedAt、DeletedAt（用于软删除）以及 ID 字段
+	OpenID            string    `gorm:"unique" json:"openId"`
+	UserName          string    `json:"userName"`
+	Password          string    `json:"-"` // 存储哈希值，JSON中忽略 -> 使用微信API，不需要密码
+	Email             string    `json:"email"`
+	Phone             string    `json:"phone"`
+	Avatar            string    `json:"avatar"`                                                      // 头像链接
+	FollowingVaccines []Vaccine `gorm:"many2many:user_following_vaccines;" json:"followingVaccines"` // 用户关注的疫苗
+	FollowingArticles []Article `gorm:"many2many:user_following_articles;" json:"followingArticles"` // 用户关注的文章
+}
+```
 
-   | 方法 | 路由 | 功能 |
-   | ---- | ---- | ---- |
-   | GET | /users | 获取全部用户信息 |
-   | POST | /users | 添加用户 |
-   | GET | /users/:id | 获取指定 id 的用户信息 |
-   | PUT | /users/:id | 更新指定 id 的用户信息 |
-   | DELETE | /users/:id | 删除指定 id 的用户 |
 
 2. **身份表 (Profiles)**:
 
-   ```go
-   // Profile 接种者身份模型
-   type Profile struct {
-      gorm.Model
-      UserID       uint      `json:"userId"` // 软件使用者的 ID
-      FullName     string    `json:"fullName"`
-      Gender       string    `json:"gender"`
-      DateOfBirth  time.Time `json:"dateOfBirth"`
-      Relationship string    `json:"relationship"`
-   }
-   ```
+```go
+// Profile 身份模型
+type Profile struct {
+	gorm.Model
+	UserID       uint   `json:"userId"`
+	FullName     string `json:"fullName"`
+	Gender       string `json:"gender"`
+	DateOfBirth  string `json:"dateOfBirth"`
+	Relationship string `json:"relationship"`
+}
+```
 
-   | 方法 | 路由 | 功能 |
-   | ---- | ---- | ---- |
-   | GET | /profiles | 获取全部身份信息 |
-   | POST | /profiles | 添加身份 |
-   | GET | /profiles/:id | 获取指定 id 的身份信息 |
-   | GET | /profiles/user/:id | 获取指定 id 的用户管理的所有身份信息 |
-   | PUT | /profiles/:id | 更新指定 id 的身份信息 |
-   | DELETE | /profiles/:id | 删除指定 id 的身份 |
 
 3. **疫苗表 (Vaccines)**:
 
-   ```go
-   // Vaccine 疫苗模型
-   type Vaccine struct {
-      gorm.Model
-      Name          string `json:"name"`
-      Description   string `json:"description"`
-      TargetDisease string `json:"targetDisease"`
-      SideEffects   string `json:"sideEffects"`
-      Precautions   string `json:"precautions"` // 接种前注意事项
-      ValidPeriod   int    `json:"validPeriod"` // 有效期，单位为天
-      Type          string `json:"type"`        // 疫苗类型，常规疫苗、特殊疫苗、其他
-   }
-   ```
+```go
+// Vaccine 疫苗模型
+type Vaccine struct {
+	gorm.Model
+	Name          string `json:"name"`
+	Description   string `json:"description"`
+	TargetDisease string `json:"targetDisease"`
+	SideEffects   string `json:"sideEffects"`
+	Precautions   string `json:"precautions"` // 接种前注意事项
+	ValidPeriod   int    `json:"validPeriod"` // 有效期，单位为天
+	Type          string `json:"type"`        // 疫苗类型，常规疫苗、特殊疫苗、其他
+}
+```
 
-   | 方法 | 路由 | 功能 |
-   | ---- | ---- | ---- |
-   | GET | /vaccines | 获取全部疫苗信息 |
-   | POST | /vaccines | 添加疫苗 |
-   | GET | /vaccines/:id | 获取指定 id 的疫苗信息 |
-   | PUT | /vaccines/:id | 更新指定 id 的疫苗信息 |
-   | DELETE | /vaccines/:id | 删除指定 id 的疫苗信息 |
+修改数据库初始疫苗信息 `pkg/db/vaxinfo.json`
 
-   修改数据库初始疫苗信息 `pkg/db/vaxinfo.json`
 
 4. **接种记录表 (VaccinationRecords)**:
 
-   ```go
-   // VaccinationRecord 接种记录模型
-   // 对应一个Profile和一个Vaccine，记录接种类型、接种时间、接种凭证、备注，同时希望能看到疫苗的详细信息(名称、有效期...)
-   // 地点、是否提醒、下次接种时间
-   type VaccinationRecord struct {
-      gorm.Model
-      ProfileID           uint    `json:"profileId"`
-      VaccineID           uint    `json:"vaccineId"`
-      Vaccine             Vaccine `gorm:"foreignKey:VaccineID" json:"vaccine"`
-      VaccinationDate     string  `json:"vaccinationDate"` // 注意用string与前端交互，例如"2021-07-01"
-      Voucher             string  `json:"voucher"`
-      VaccinationLocation string  `json:"vaccinationLocation"`
-      Reminder            bool    `json:"reminder"`
-      NextVaccinationDate string  `json:"nextVaccinationDate"`
-      Note                string  `json:"note"`
-   }
-   ```
+```go
+// VaccinationRecord 接种记录模型
+// 对应一个Profile和一个Vaccine，记录接种类型、接种时间、接种地点、接种凭证、疫苗失效时间、备注，同时希望能看到疫苗的详细信息(名称、有效期...)
+// 是否完成接种，未完成则为预约接种
+// 是否提醒，提醒时间，用字符串存具体时间，例如"2021-07-01 12:00"
+type VaccinationRecord struct {
+	gorm.Model
+	ProfileID           uint    `json:"profileId"`
+	VaccineID           uint    `json:"vaccineId"`
+	Vaccine             Vaccine `gorm:"foreignKey:VaccineID" json:"vaccine"`
+	VaccinationDate     string  `json:"vaccinationDate"` // 注意用string与前端交互，例如"2021-07-01"
+	Voucher             string  `json:"voucher"`         // 接种凭证，之后实现为图片链接
+	VaccinationLocation string  `json:"vaccinationLocation"`
+	VaccinationType     string  `json:"vaccinationType"`     // 接种类型，第一针、第二针、加强针
+	NextVaccinationDate string  `json:"nextVaccinationDate"` // 疫苗失效时间
+	Note                string  `json:"note"`
 
-   | 方法 | 路由 | 功能 |
-   | ---- | ---- | ---- |
-   | GET | /vaccination-records | 获取全部接种记录 |
-   | POST | /vaccination-records | 添加接种记录 |
-   | GET | /vaccination-records/:id | 获取指定 id 的接种记录 |
-   | GET | /vaccination-records/profile/:id | 获取指定 id 的接种者的接种记录 |
-   | PUT | /vaccination-records/:id | 更新指定 id 的疫苗信息 |
-   | DELETE | /vaccination-records/:id | 删除指定 id 的疫苗信息 |
+	IsCompleted bool   `json:"isCompleted"` // 是否完成接种，未完成则为预约接种
+	Reminder    bool   `json:"reminder"`    // 是否提醒
+	RemindTime  string `json:"remindTime"`  // 提醒时间，用字符串存具体时间，例如"2021-07-01 12:00"
+}
+```
+
 
 5. **体温记录表 (TemperatureRecords)**:
 
-   ```go
-   // TemperatureRecord 体温记录模型
-   type TemperatureRecord struct {
-      gorm.Model
-      ProfileID uint    `json:"profileId"`
-      Date      string  `json:"date"` // 包含日期和时间，例如"2021-07-01 12:00"
-      Temperature float32 `json:"temperature"`
-   }
-   ```
+```go
+// TemperatureRecord 体温记录模型
+type TemperatureRecord struct {
+   gorm.Model
+   ProfileID uint    `json:"profileId"`
+   Date      string  `json:"date"` // 包含日期和时间，例如"2021-07-01 12:00"
+   Temperature float32 `json:"temperature"`
+}
+```
 
-   | 方法 | 路由 | 功能 |
-   | ---- | ---- | ---- |
-   | GET | /temperature-records | 获取全部体温记录 |
-   | POST | /temperature-records | 添加体温记录 |
-   | GET | /temperature-records/:id | 获取指定 id 的体温记录 |
-   | GET | /temperature-records/profile/:id | 获取指定 id 的接种者的体温记录 |
-   | PUT | /temperature-records/:id | 更新指定 id 的体温记录 |
-   | DELETE | /temperature-records/:id | 删除指定 id 的体温记录 |
 
-6. **预约表 (Appointments)**:
+6. **文章表 (Articles)**:
 
-   ```go
-   // VaccinationAppointment 预约接种模型，可以取消预约，也可以在接种后转换为接种记录
-   type VaccinationAppointment struct {
-      gorm.Model
-      ProfileID           uint    `json:"profileId"`
-      VaccineID           uint    `json:"vaccineId"`
-      Vaccine             Vaccine `gorm:"foreignKey:VaccineID" json:"vaccine"`
-      VaccinationDate     string  `json:"vaccinationDate"` // 注意用string与前端交互，例如"2021-07-01"
-      VaccinationLocation string  `json:"vaccinationLocation"`
-      Note                string  `json:"note"`
-   }
-   ```
+```go
+// Article 文章模型，与疫苗绑定
+type Article struct {
+   gorm.Model
+   Title     string `json:"title"`
+   Content   string `json:"content"`
+   UserName  string `json:"userName"`
+   UserID    uint   `json:"userId"`
+   IsBind    bool   `json:"isBind"` // 是否绑定疫苗，如果未绑定，则归为其他类型
+   VaccineID uint   `json:"vaccineId"`
+}
+```
 
-7. ** 消息提醒表 (Messages)**:
 
-   ```go
-   // Message 消息提醒模型，包含消息内容、接收者、发送者、发送时间
-   type Message struct {
-      gorm.Model
-      Content   string `json:"content"`
-      Receiver  string `json:"receiver"`
-      Sender    string `json:"sender"`
-      SendTime  string `json:"sendTime"`
-      IsRead    bool   `json:"isRead"`
-      IsDeleted bool   `json:"isDeleted"`
-   }
-   ```
+7. **回复表 (Replys)**:
 
-   | 方法 | 路由 | 功能 |
-   | ---- | ---- | ---- |
-   | GET | /messages | 获取全部消息 |
-   | POST | /messages | 发送消息 |
-   | GET | /messages/:id | 获取指定 id 的消息 |
-   | GET | /messages?receiver=x | 获取接收者为 x 的所有消息 |
-   | PUT | /messages/:id | 更新指定 id 的消息 |
-   | DELETE | /messages/:id | 删除指定 id 的消息 |
+```go
+type Reply struct {
+   gorm.Model
+   ArticleID uint   `json:"articleId"`
+   Content   string `json:"content"`
+   UserName  string `json:"userName"`
+   UserID    uint   `json:"userId"`
+}
+```
 
-8. **social media 帖子表 (Articles)**:
 
-   ```go
-   // Article 文章模型，与疫苗绑定
-   type Article struct {
-      gorm.Model
-      Title     string `json:"title"`
-      Content   string `json:"content"`
-      UserName  string `json:"userName"`
-      UserID    uint   `json:"userId"`
-      IsBind    bool   `json:"isBind"` // 是否绑定疫苗，如果未绑定，则归为其他类型
-      VaccineID uint   `json:"vaccineId"`
-   }
-   ```
+8. **消息提醒表 (Messages)**:
 
-   | 方法 | 路由 | 功能 |
-   | ---- | ---- | ---- |
-   | GET | /articles | 获取全部帖子 |
-   | POST | /articles | 发布帖子 |
-   | GET | /articles/:id | 获取指定 id 的帖子 |
-   | GET | /articles?article_id=x | 获取 id 为 x 的文章的所有 |
-   | PUT | /articles/:id | 更新指定 id 的帖子 |
-   | DELETE | /articles/:id | 删除指定 id 的帖子 |
+```go
+// Message 消息模型
+type Message struct {
+	gorm.Model
+	Content  string `json:"content"` // 消息内容，将不同字段拼接成字符串
+	UserName string `json:"userName"`
+	UserID   uint   `json:"userId"`
+	SendTime string `json:"sendTime"` // 发送时间，注意用string与前端交互，例如"2021-07-01 12:00"
+}
+```
 
-9. **社区回复表 (CommunityReplies)**:
+  **接种地点表 (VaccinationLocations)**:
 
-   ```go
-   type Reply struct {
-      gorm.Model
-      ArticleID uint   `json:"articleId"`
-      Content   string `json:"content"`
-      UserName  string `json:"userName"`
-      UserID    uint   `json:"userId"`
-   }
-   ```
+- Name
+- Address 
+- ContactNumber
+- OperatingHours
+- PositionX
+- PositionY
+- OptionalVaccine 
 
-   | 方法 | 路由 | 功能 |
-   | ---- | ---- | ---- |
-   | GET | /replys | 获取全部回复 |
-   | POST | /replys | 发布帖子 |
-   | GET | /articles/:id | 获取指定 id 的帖子 |
-   | GET | /articles?article_id=x | 获取 id 为 x 的文章的所有 |
-   | PUT | /articles/:id | 更新指定 id 的帖子 |
-   | DELETE | /articles/:id | 删除指定 id 的帖子 |
 
-10. **接种地点表 (VaccinationLocations)**:
-
-    - LocationID (主键)
-    - Name
-    - Address strin
-    - ContactNumber
-    - OperatingHours
-    - PositionX
-    - PositionY
-    - OptionalVaccine 
-
-11. **收藏表**:
-
-    - VaccineID（主键）
-    - Name
 
 ## 遇到的问题
 

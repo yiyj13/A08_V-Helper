@@ -55,12 +55,34 @@ func (h *ArticleHandler) HandleGetAllArticles(c *gin.Context) {
 		}
 	}
 
-	articles, err := h.articleService.GetAllArticles()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "error fetching articles"})
-		return
-	}
+	var articles []model.Article
 
+	isBind := c.Query("isBind")
+	vaccineID := c.Query("vaccineID")
+	if isBind != "" && isBind == "false" {
+		articles, err = h.articleService.GetUnbindArticles()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	} else if vaccineID != "" {
+		vaccineIDUint, err := strconv.ParseUint(vaccineID, 10, 32)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid vaccine ID"})
+			return
+		}
+		articles, err = h.articleService.GetArticlesByVaccineID(uint(vaccineIDUint))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	} else {
+		articles, err = h.articleService.GetAllArticles()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "error fetching articles"})
+			return
+		}
+	}
 	// log.Println("articles fetched successfully: ", articles)
 
 	// 分页

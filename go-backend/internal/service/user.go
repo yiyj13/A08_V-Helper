@@ -36,8 +36,64 @@ func (s *UserService) GetUserByID(id uint) (model.User, error) {
 	return user, nil
 }
 
-func (s *UserService) UpdateUserByID(id uint, user model.User) error {
-	return s.db.Model(&user).Where("id = ?", id).Updates(user).Error
+func (s *UserService) GetUserWithFollowings(id uint) (model.User, error) {
+	var user model.User
+	if err := s.db.Preload("FollowingVaccines").Preload("FollowingArticles").First(&user, id).Error; err != nil {
+		return user, err
+	}
+	return user, nil
+}
+
+func (s *UserService) AddFollowingVaccine(userID uint, vaccineID uint) error {
+	var user model.User
+	if err := s.db.First(&user, userID).Error; err != nil {
+		return err
+	}
+	var vaccine model.Vaccine
+	if err := s.db.First(&vaccine, vaccineID).Error; err != nil {
+		return err
+	}
+	return s.db.Model(&user).Association("FollowingVaccines").Append(&vaccine)
+}
+
+func (s *UserService) RemoveFollowingVaccine(userID uint, vaccineID uint) error {
+	var user model.User
+	if err := s.db.First(&user, userID).Error; err != nil {
+		return err
+	}
+	var vaccine model.Vaccine
+	if err := s.db.First(&vaccine, vaccineID).Error; err != nil {
+		return err
+	}
+	return s.db.Model(&user).Association("FollowingVaccines").Delete(&vaccine)
+}
+
+func (s *UserService) AddFollowingArticle(userID uint, articleID uint) error {
+	var user model.User
+	if err := s.db.First(&user, userID).Error; err != nil {
+		return err
+	}
+	var article model.Article
+	if err := s.db.First(&article, articleID).Error; err != nil {
+		return err
+	}
+	return s.db.Model(&user).Association("FollowingArticles").Append(&article)
+}
+
+func (s *UserService) RemoveFollowingArticle(userID uint, articleID uint) error {
+	var user model.User
+	if err := s.db.First(&user, userID).Error; err != nil {
+		return err
+	}
+	var article model.Article
+	if err := s.db.First(&article, articleID).Error; err != nil {
+		return err
+	}
+	return s.db.Model(&user).Association("FollowingArticles").Delete(&article)
+}
+
+func (s *UserService) UpdateUserByID(user model.User) error {
+	return s.db.Model(&user).Where("id = ?", user.ID).Updates(user).Error
 }
 
 func (s *UserService) DeleteUserByID(id uint) error {
@@ -61,6 +117,7 @@ func (s *UserService) GetUserByOpenID(openID string) (model.User, error) {
 	return user, nil
 }
 
+// 以下暂时不用
 // Register 新用户注册
 func (s *UserService) Register(user model.User) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)

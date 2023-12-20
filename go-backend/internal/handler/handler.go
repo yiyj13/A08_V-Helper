@@ -16,6 +16,11 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.PUT("/users/:id", userHandler.HandleUpdateUserByID)
 	router.DELETE("/users/:id", userHandler.HandleDeleteUserByID)
 	router.GET("/users/login", userHandler.LogInHandler)
+	router.GET("/users/:id/following", userHandler.HandleGetUserWithFollowings)
+	router.GET("/users/addfollowingVaccine/:id", userHandler.HandleAddFollowingVaccine)
+	router.GET("/users/removefollowingVaccine/:id", userHandler.HandleRemoveFollowingVaccine)
+	router.GET("/users/addfollowingArticle/:id", userHandler.HandleAddFollowingArticle)
+	router.GET("/users/removefollowingArticle/:id", userHandler.HandleRemoveFollowingArticle)
 
 	profileService := service.NewProfileService(db)
 	profileHandler := NewProfileHandler(profileService)
@@ -39,6 +44,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.POST("/vaccination-records", vaccinationRecordHandler.HandleCreateVaccinationRecord)
 	router.GET("/vaccination-records", vaccinationRecordHandler.HandleGetAllVaccinationRecords)
 	router.GET("/vaccination-records/:id", vaccinationRecordHandler.HandleGetVaccinationRecordByID)
+	router.GET("/vaccination-records/user/:userID", vaccinationRecordHandler.HandleGetVaccinationRecordsByUserID)
 	router.GET("/vaccination-records/profile/:profileID", vaccinationRecordHandler.HandleGetVaccinationRecordsByProfileID)
 	router.PUT("/vaccination-records/:id", vaccinationRecordHandler.HandleUpdateVaccinationRecordByID)
 	router.DELETE("/vaccination-records/:id", vaccinationRecordHandler.HandleDeleteVaccinationRecordByID)
@@ -65,10 +71,22 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	// 帖子回复
 	replyService := service.NewReplyService(db)
 	replyHandler := NewReplyHandler(replyService)
-	router.GET("/replys", replyHandler.HandleGetReplys)
 	router.POST("/replys", replyHandler.HandleCreateReply)
+	router.GET("/replys", replyHandler.HandleGetReplys)
 	router.GET("/replys/:id", replyHandler.HandleGetReplyByID)
 	router.PUT("/replys/:id", replyHandler.HandleUpdateReplyByID)
 	router.DELETE("/replys/:id", replyHandler.HandleDeleteReplyByID)
 
+	// 根据疫苗寻找诊所
+	clinicService := service.NewClinicService(db)
+	clinicHandler := NewClinicHandler(clinicService)
+	router.GET("/clinics/vaccine/:vaccineID", clinicHandler.HandleGetClinicsByVaccineID)
+	router.GET("/clinics/vaccineName/:vaccineName", clinicHandler.HandleGetClinicsByVaccineName)
+	router.GET("/clinics/clinicName/:clinicName", clinicHandler.HandleGetClinicsByClinicName)
+	router.POST("/clinics", clinicHandler.HandleCreateClinic)
+	router.GET("/clinics", clinicHandler.HandleGetAllClinics)
+	// router.GET("/clinics/:id", clinicHandler.HandleGetClinicByID)
+	// router.PUT("/clinics/:id", clinicHandler.HandleUpdateClinicByID)
+	router.DELETE("/clinics/:id", clinicHandler.HandleDeleteClinicByID)
+	router.GET("/foo/bar", SetSubscription)
 }
