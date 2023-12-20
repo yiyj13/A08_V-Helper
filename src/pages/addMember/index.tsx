@@ -1,12 +1,22 @@
 /* TODO: 
-    1. Coordinate with the backend APIs (implemented)
-    2. Add a ComboBox component to replace the Picker component
-    3. CSS style for the menu and the buttons
+    1. CSS style for the menu and the buttons
 */
 
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
-import { Input, Cell, Checkbox, Picker, Uploader, Button, DatePicker, TextArea } from '@nutui/nutui-react-taro'
+import {
+  Input,
+  Cell,
+  Checkbox,
+  Image,
+  Picker,
+  Radio,
+  Button,
+  DatePicker,
+  TextArea,
+  Popup,
+  Grid,
+} from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
 // import {ComboBox} from 'src/components/combobox';
@@ -107,6 +117,25 @@ export default function AddMember() {
     })
   }
 
+  const [showPopup, setShowPopup] = useState(false)
+  const [selectedAvatar, setSelectedAvatar] = useState(1) // Track the selected avatar
+  const handlePopupOpen = () => {
+    setShowPopup(true)
+  }
+  const handlePopupClose = () => {
+    setShowPopup(false)
+  }
+
+  const handleAvatarSelect = (value: number) => {
+    setSelectedAvatar(value)
+    const avatar = 'http://101.43.194.58:8081/profile_avatar/avatar' + value + '.png'
+    setMember({
+      ...member,
+      avatar: avatar,
+    })
+    console.log('avatar:', avatar) // for debug
+  }
+
   const [noteValue, setNoteValue] = useState('')
   const onNoteChange = (value: string) => {
     setMember({
@@ -149,7 +178,6 @@ export default function AddMember() {
     const router = Taro.getCurrentInstance().router
 
     if (router && router.params && router.params.id) {
-      console.log('id:', router.params) // for debug
       const { id } = router.params
       if (id) {
         try {
@@ -256,9 +284,26 @@ export default function AddMember() {
         onClose={() => setDateVisible(false)}
         onConfirm={(options, values) => confirmDate(values, options)}
       />
-      <div className='flex-content col-span-full'>
-        头像
-        <Uploader url='https://img.yzcdn.cn/vant/cat.jpeg' />
+      <div className='col-span-full flex-content flex items-center'>
+        <Button className='flex items-center' formType='submit' type='primary' onClick={handlePopupOpen}>
+          选择头像
+        </Button>
+        <Popup visible={showPopup} style={{ height: '42%' }} position='bottom' onClose={handlePopupClose}>
+          <Radio.Group value={`${selectedAvatar}`} onChange={(value) => handleAvatarSelect(Number(value))}>
+            <Grid gap={3} columns={3}>
+              {[...Array(9)].map((_, index) => (
+                <Grid.Item key={index + 1}>
+                  <Radio value={`${index + 1}`} checked={selectedAvatar === index + 1}>
+                    <Image
+                      src={`http://101.43.194.58:8081/profile_avatar/avatar${index + 1}.png`}
+                      style={{ width: '80px', height: '80px' }}
+                    />
+                  </Radio>
+                </Grid.Item>
+              ))}
+            </Grid>
+          </Radio.Group>
+        </Popup>
       </div>
       <Cell title='TextArea' className='col-span-full px-8' style={{ borderRadius: '8px' }}>
         <TextArea placeholder='请输入备注' value={noteValue} onChange={(value) => onNoteChange(value)} />

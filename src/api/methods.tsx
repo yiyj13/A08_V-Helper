@@ -8,6 +8,12 @@ export type GinBase = {
   DeletedAt: string
 }
 
+export type User = GinBase & {
+  OpenID: string
+  UserName: string
+  Avatar: string
+}
+
 export type Vaccine = GinBase & {
   name: string
   description: string
