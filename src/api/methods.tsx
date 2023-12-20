@@ -41,13 +41,15 @@ export type ArticleFull = Article & {
 export type VaccinationRecord = GinBase & {
   profileId: number
   vaccineId: number
-  vaccineType: string
+  vaccinationType: string
   vaccine: Vaccine
   vaccinationDate: string
   voucher: string
   vaccinationLocation: string
   reminder: boolean
   remindTime: string
+  valid: string // 有效期 6月 1年
+  remindBefore: string // 提前多久提醒 2天 1周 
   nextVaccinationDate: string
   note: string
 }
