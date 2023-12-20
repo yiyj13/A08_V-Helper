@@ -21,11 +21,11 @@
 - [x] 根据疫苗筛选帖子
 - [ ] 消息提醒的发送 (https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/subscribe-message.html)
 - [x] 图床
-- [ ] git flow
+- [x] github action
 - [ ] token验证
 - [ ] 加密
 - [ ] 代码规范(配置文件)，注释
-- [ ] 数据库时区
+- [ ] 数据库时区更改
 - [ ] 性能测试
 
 
