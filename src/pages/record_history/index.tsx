@@ -1,7 +1,5 @@
 /* TODO: 
-    1. feat: allow editing the record
-    2. feat: show the detail of the record
-    3. feat: filtering the record by profile manually
+    1. feat: filtering the record by profile manually
 */
 
 import { useState, useEffect } from 'react'

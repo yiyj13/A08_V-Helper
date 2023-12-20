@@ -1,16 +1,15 @@
 /* TODO: 
     1. CSS style for the menu and the buttons
+    2. When backend ready, add the logic to submit the data
 */
 
 import Taro from '@tarojs/taro'
 import { useState, useMemo, useEffect } from 'react'
-import { Cell, Switch, Picker, Uploader, Button, DatePicker, TextArea, Input } from '@nutui/nutui-react-taro'
+import { Cell, Switch, Picker, Uploader, Button, DatePicker, TextArea, Input, Popover } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
 import useSWR from 'swr'
 import api, { VaccinationRecord, getProfiles, useVaccines } from '../../api'
-
-import ComboBox from '../../components/combobox'
 
 export default function VaccineRecord() {
   const router = Taro.getCurrentInstance().router
@@ -193,8 +192,22 @@ export default function VaccineRecord() {
   const [remindSwitch, setRemindSwitch] = useState(false)
   const [remindVisible, setRemindVisible] = useState(false)
   const [remindValue, setRemindValue] = useState('')
-  const [remindUnit, setRemindUnit] = useState('')
-
+  const [remindUnit, setRemindUnit] = useState('单位')
+  const [unitVisible, setUnitVisible] = useState(false)
+  const itemList = [
+    {
+      key: '日',
+      name: '日',
+    },
+    {
+      key: '周',
+      name: '周',
+    },
+    {
+      key: '月',
+      name: '月',
+    },
+  ]
   const onSwitchChange = (value: boolean) => {
     setRemindSwitch(value)
     setRecord({
@@ -202,14 +215,6 @@ export default function VaccineRecord() {
       reminder: value,
     })
     setRemindVisible(value)
-  }
-
-  const onRemindValueChange = (value: string) => {
-    setRemindValue(value)
-  }
-
-  const onRemindUnitSet = (option: string) => {
-    setRemindUnit(option)
   }
 
   const [noteValue, setNoteValue] = useState('')
@@ -437,15 +442,25 @@ export default function VaccineRecord() {
         </span>
         <Switch className=' ml-2' checked={remindSwitch} onChange={(value) => onSwitchChange(value)} />
         {remindVisible && (
-          <div className='ml-2 flex items-center'>
-            <Input
-              type='number'
-              placeholder='数字'
-              value={remindValue}
-              onChange={(value) => onRemindValueChange(value)}
-            />
-            <ComboBox title={''} options={['日', '周', '月']} onSelect={(option) => onRemindUnitSet(option)} />
-            <span className='text-sm ml-2'>前提醒</span>
+          <div className=' flex items-center'>
+            <Input type='number' placeholder='请输入数字' maxLength={2} value={remindValue} onChange={(value) => setRemindValue(value)} />
+            <Popover
+              visible={unitVisible}
+              list={itemList}
+              location='bottom-start'
+              onClick={() => {
+                unitVisible ? setUnitVisible(false) : setUnitVisible(true)
+              }}
+              onSelect={(item) => {
+                setRemindUnit(item.name)
+                setUnitVisible(false)
+              }}
+            >
+                <Button type='primary'>
+                  {remindUnit}
+                </Button>
+            </Popover>
+            <span className='text-sm mr-2'>前提醒</span>
           </div>
         )}
       </div>
@@ -461,11 +476,11 @@ export default function VaccineRecord() {
         <TextArea placeholder='请输入备注' value={noteValue} autoSize onChange={(value) => onNoteChange(value)} />
       </Cell>
       <div className='col-span-full flex justify-center mt-4'>
-        <Button className='submit_btm' formType='submit' type='primary' onClick={handleSubmission}>
+        <Button id='submit_btm' formType='submit' type='primary' onClick={handleSubmission}>
           提交
         </Button>
         <div style={{ marginLeft: '16px' }}>
-          <Button className='reset_btm' formType='reset' onClick={handleReset}>
+          <Button id='reset_btm' formType='reset' onClick={handleReset}>
             重置
           </Button>
         </div>
