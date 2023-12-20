@@ -32,6 +32,22 @@ func (h *VaccinationRecordHandler) HandleCreateVaccinationRecord(c *gin.Context)
 	c.JSON(http.StatusCreated, record)
 }
 
+func (h *VaccinationRecordHandler) HandleGetVaccinationRecordsByUserID(c *gin.Context) {
+	userID, err := strconv.ParseUint(c.Param("userID"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	record, err := h.vaccinationRecordService.GetVaccinationRecordsByUserID(uint(userID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, record)
+}
+
 func (h *VaccinationRecordHandler) HandleGetVaccinationRecordsByProfileID(c *gin.Context) {
 	profileID, err := strconv.ParseUint(c.Param("profileID"), 10, 32)
 	if err != nil {

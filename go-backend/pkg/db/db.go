@@ -34,6 +34,7 @@ func Init(cfg config.Config) *gorm.DB {
 		&model.Article{},
 		&model.Reply{},
 		&model.Message{},
+		&model.VaccineClinicList{},
 		&model.Clinic{},
 	)
 
@@ -79,52 +80,67 @@ func AddInitInfo(db *gorm.DB) error {
 		}
 	}
 
-	// 初始化疫苗接种点信息
-	// clinics := model.Clinic{
-	// 	VaccineID:   3,
-	// 	VaccineName: "乙肝疫苗",
-	// ClinicName: model.StringList{
-	// 	"航天中心医院成人免疫接种门诊",
-	// 	"北京大学人民医院狂犬疫苗接种门诊",
-	// },
-	// }
+	// 初始化疫苗-接种点信息
+	jsonFile, err = os.Open("pkg/db/vaccine_clinic_lists.json")
+	if err != nil {
+		log.Fatalf("Error opening JSON file: %v", err)
+		return err
+	}
+	defer jsonFile.Close()
+	byteValue, _ = io.ReadAll(jsonFile)
 
-	// var existingClinics model.Clinic
-	// err = db.Where("vaccine_id = ?", 3).First(&existingClinics).Error
-	// if err != nil {
-	// 	db.Create(&clinics)
-	// } else {
-	// 	db.Model(&existingClinics).Updates(clinics)
-	// }
+	var slice_vaccine_clinic_list []model.VaccineClinicList
+	err = json.Unmarshal(byteValue, &slice_vaccine_clinic_list)
+	if err != nil {
+		log.Fatalf("Error unmarshalling JSON: %v", err)
+		return err
+	}
 
-	// jsonFile, err = os.Open("pkg/db/clinics.json")
-	// if err != nil {
-	// 	log.Fatalf("Error opening JSON file: %v", err)
-	// 	return err
-	// }
-	// defer jsonFile.Close()
-	// byteValue, _ = io.ReadAll(jsonFile)
+	// 遍历要添加的疫苗信息切片
+	for _, clinic := range slice_vaccine_clinic_list {
+		// 查询数据库中是否已经存在相同名称的疫苗
+		var existingClinic model.VaccineClinicList
+		err := db.Where("vaccine_name = ?", clinic.VaccineName).First(&existingClinic).Error
 
-	// err = json.Unmarshal(byteValue, &slice_vaccine)
-	// if err != nil {
-	// 	log.Fatalf("Error unmarshalling JSON: %v", err)
-	// 	return err
-	// }
+		// 数据库中不存在该疫苗，添加到数据库
+		// 如果已经存在，则更新数据库中的疫苗信息
+		if err != nil {
+			db.Create(&clinic)
+		} else {
+			db.Model(&existingClinic).Updates(clinic)
+		}
+	}
 
-	// // 遍历要添加的疫苗信息切片
-	// for _, vaccine := range slice_vaccine {
-	// 	// 查询数据库中是否已经存在相同名称的疫苗
-	// 	var existingVaccine model.Vaccine
-	// 	err := db.Where("name = ?", vaccine.Name).First(&existingVaccine).Error
+	// 初始化诊所信息
+	jsonFile, err = os.Open("pkg/db/clinics.json")
+	if err != nil {
+		log.Fatalf("Error opening JSON file: %v", err)
+		return err
+	}
+	defer jsonFile.Close()
+	byteValue, _ = io.ReadAll(jsonFile)
 
-	// 	// 数据库中不存在该疫苗，添加到数据库
-	// 	// 如果已经存在，则更新数据库中的疫苗信息
-	// 	if err != nil {
-	// 		db.Create(&vaccine)
-	// 	} else {
-	// 		db.Model(&existingVaccine).Updates(vaccine)
-	// 	}
-	// }
+	var slice_clinic []model.Clinic
+	err = json.Unmarshal(byteValue, &slice_clinic)
+	if err != nil {
+		log.Fatalf("Error unmarshalling JSON: %v", err)
+		return err
+	}
+
+	// 遍历要添加的疫苗信息切片
+	for _, clinic := range slice_clinic {
+		// 查询数据库中是否已经存在相同名称的疫苗
+		var existingClinic model.Clinic
+		err := db.Where("clinic_name = ?", clinic.ClinicName).First(&existingClinic).Error
+
+		// 数据库中不存在该疫苗，添加到数据库
+		// 如果已经存在，则更新数据库中的疫苗信息
+		if err != nil {
+			db.Create(&clinic)
+		} else {
+			db.Model(&existingClinic).Updates(clinic)
+		}
+	}
 
 	return nil
 }

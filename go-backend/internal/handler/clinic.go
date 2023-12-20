@@ -19,7 +19,7 @@ func NewClinicHandler(clinicService *service.ClinicService) *ClinicHandler {
 }
 
 func (h *ClinicHandler) HandleCreateClinic(c *gin.Context) {
-	var clinic model.Clinic
+	var clinic model.VaccineClinicList
 	if err := c.ShouldBindJSON(&clinic); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -56,39 +56,42 @@ func (h *ClinicHandler) HandleGetClinicsByVaccineID(c *gin.Context) {
 	c.JSON(http.StatusOK, clinics)
 }
 
-func (h *ClinicHandler) HandleGetAllClinics(c *gin.Context) {
-	clinics, err := h.clinicService.GetAllClinics()
+func (h *ClinicHandler) HandleGetClinicsByVaccineName(c *gin.Context) {
+	queryVaccineName := c.Param("vaccineName")
+
+	if queryVaccineName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "vaccineName is required"})
+		return
+	}
+
+	clinicList, err := h.clinicService.GetClinicsByVaccineName(queryVaccineName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, clinics)
+	c.JSON(http.StatusOK, clinicList)
 }
 
-func (h *ClinicHandler) HandleGetClinics(c *gin.Context) {
-	queryArticleID := c.Query("articleId")
+func (h *ClinicHandler) HandleGetClinicsByClinicName(c *gin.Context) {
+	queryClinicName := c.Param("clinicName")
 
-	// 如果没有传 articleId 参数，则返回所有 clinic
-	if queryArticleID == "" {
-		clinics, err := h.clinicService.GetAllClinics()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(http.StatusOK, clinics)
+	if queryClinicName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "clinicName is required"})
 		return
 	}
 
-	// 如果传了 articleId 参数，则返回该 articleId 下的所有 clinic
-	articleID, err := strconv.ParseUint(queryArticleID, 10, 32)
+	clinicInfo, err := h.clinicService.GetClinicsByClinicName(queryClinicName)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	clinics, err := h.clinicService.GetClinicsByArticleID(uint(articleID))
+	c.JSON(http.StatusOK, clinicInfo)
+}
+
+func (h *ClinicHandler) HandleGetAllClinics(c *gin.Context) {
+	clinics, err := h.clinicService.GetAllClinics()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -119,7 +122,7 @@ func (h *ClinicHandler) HandleUpdateClinicByID(c *gin.Context) {
 		return
 	}
 
-	var clinic model.Clinic
+	var clinic model.VaccineClinicList
 	if err := c.ShouldBindJSON(&clinic); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

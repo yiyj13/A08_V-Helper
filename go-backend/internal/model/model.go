@@ -1,8 +1,6 @@
 package model
 
 import (
-	"strings"
-
 	"gorm.io/gorm"
 )
 
@@ -59,6 +57,9 @@ type VaccinationRecord struct {
 	NextVaccinationDate string  `json:"nextVaccinationDate"` // 疫苗失效时间
 	Note                string  `json:"note"`
 
+	Vaild        string `json:"vaild"`        // 前端表单
+	RemindBefore string `json:"remindBefore"` // 前端表单
+
 	IsCompleted bool   `json:"isCompleted"` // 是否完成接种，未完成则为预约接种
 	Reminder    bool   `json:"reminder"`    // 是否提醒
 	RemindTime  string `json:"remindTime"`  // 提醒时间，用字符串存具体时间，例如"2021-07-01 12:00"
@@ -104,22 +105,33 @@ type Message struct {
 type StringList []string
 
 // 将数组转换为字符串，以便存入数据库
-func (l StringList) Value() (string, error) {
-	str := strings.Join(l, ",")
-	return str, nil
-}
+// func (l StringList) Value() (string, error) {
+// 	str := strings.Join(l, ",")
+// 	return str, nil
+// }
 
 // 将字符串转换为数组，以便从数据库中读取
-func (l *StringList) Scan(val interface{}) error {
-	bytestring := val.([]uint8)
-	*l = strings.Split(string(bytestring), ",")
-	return nil
-}
+// func (l *StringList) Scan(val interface{}) error {
+// 	bytestring := val.([]uint8)
+// 	*l = strings.Split(string(bytestring), ",")
+// 	return nil
+// }
 
 // 持有某种疫苗的所有诊所
+type VaccineClinicList struct {
+	gorm.Model
+	VaccineName string `json:"vaccineName"`
+	ClinicList  string `json:"clinicList"`
+	// ClinicName  StringList `json:"clinicName"`
+}
+
+// 诊所信息
 type Clinic struct {
 	gorm.Model
-	VaccineID   uint   `json:"vaccineId"`
-	VaccineName string `json:"vaccineName"`
-	// ClinicName  StringList `json:"clinicName"`
+	ClinicName  string `json:"clinicName"`
+	VaccineList string `json:"vaccineList"`
+	Latitude    string `json:"latitude"`
+	Longitude   string `json:"longitude"`
+	PhoneNumber string `json:"phoneNumber"`
+	Address     string `json:"address"`
 }
