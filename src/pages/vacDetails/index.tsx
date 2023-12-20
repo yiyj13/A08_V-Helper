@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { useRouter } from 'taro-hooks'
 import { ScrollView, Text } from '@tarojs/components'
-import { Follow, Uploader } from '@nutui/icons-react-taro'
+import { Follow, HeartFill1, Uploader } from '@nutui/icons-react-taro'
 import { Loading } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
 import clsx from 'clsx'
 import useSWR from 'swr'
 
 import Tab from './tab'
-import { getVaccineByID } from '../../api/methods'
+import { followVaccine, getVaccineByID, unfollowVaccine } from '../../api/methods'
+import { useUserFollowing } from '../../api/hooks'
 
 export default function Index() {
   const [route] = useRouter()
@@ -16,7 +17,7 @@ export default function Index() {
 
   const [tabIdx, setTabIdx] = useState(0)
 
-  const {data: vaccine} = useSWR('/api/vaccines/' + id, () => getVaccineByID(id))
+  const { data: vaccine } = useSWR('/api/vaccines/' + id, () => getVaccineByID(id))
 
   if (!vaccine) return <Loading className='w-screen h-screen'></Loading>
 
@@ -28,7 +29,7 @@ export default function Index() {
       <div className='flex py-8 w-full flex-row items-center justify-between'>
         <label className='ml-4 text-2xl font-bold'>{vaccine.name}</label>
         <div className='mr-4 flex flex-row'>
-          <Follow className='text-brand' width={20} height={20} />
+          <FollowButton vaccine_id={vaccine.ID} />
         </div>
       </div>
       <div className='flex h-full w-full flex-col rounded-3xl bg-slate-100'>
@@ -83,5 +84,23 @@ function DetailBlock(props: BlockProps) {
       </header>
       <Text className='text-base'>{props.paragraph}</Text>
     </div>
+  )
+}
+
+const FollowButton = (props: { vaccine_id: number }) => {
+  const { data: user, mutate } = useUserFollowing()
+  const handleFollowClick = async () => {
+    await followVaccine(props.vaccine_id)
+    mutate()
+  }
+  const handleUnfollowClick = async () => {
+    await unfollowVaccine(props.vaccine_id)
+    mutate()
+  }
+  const following = user?.followingVaccines?.find((v) => v.ID === props.vaccine_id) !== undefined
+  return following ? (
+    <HeartFill1 className='text-brand' size={16} onClick={handleUnfollowClick}></HeartFill1>
+  ) : (
+    <Follow className='text-brand' size={16} onClick={handleFollowClick}></Follow>
   )
 }

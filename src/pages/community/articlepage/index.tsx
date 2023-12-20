@@ -4,19 +4,22 @@ import useSWRMutation from 'swr/mutation'
 
 import { useState } from 'react'
 import { useRouter } from '@tarojs/taro'
-import { Follow, Comment } from '@nutui/icons-react-taro'
+import { Comment, Follow, HeartFill1 } from '@nutui/icons-react-taro'
 import { Button, Skeleton } from '@nutui/nutui-react-taro'
 
 import { FocusableTextArea } from '../../../components/focusabletextarea'
 
-import { getArticleByID, getReplys, useVaccines, postReply, Reply } from '../../../api'
+import { getArticleByID, getReplys, postReply, Reply, followArticle, unfollowArticle } from '../../../api'
+import { useVaccines, useUserFollowing } from '../../../api/hooks'
 import { getCreateTime } from '../../../utils'
 
 export default function Index() {
   const router = useRouter()
   const articleID = parseInt(router.params.id || '0')
 
-  const { data: article } = useSWR([articleID, 'getArticleByID'], ([id]) => getArticleByID(id))
+  const { data: article } = useSWR([articleID, 'getArticleByID'], ([id]) => getArticleByID(id), {
+    revalidateIfStale: false,
+  })
 
   const {
     data: replies,
@@ -52,11 +55,10 @@ export default function Index() {
 
       <section className='px-8 py-4 bg-white shadow-sm flex justify-between'>
         <div className='flex items-center gap-4'>
-          <div className='flex items-center gap-1'>
-            <Follow size={8}></Follow>
-            {/* TODO: follow number */}
-            <dd className='text-sm text-gray-500'>0</dd>
-          </div>
+          {/* <div className='flex items-center gap-1'> */}
+            {/* <Follow size={8}></Follow> */}
+            {/* <dd className='text-sm text-gray-500'>0</dd> */}
+          {/* </div> */}
 
           <div className='flex items-center gap-1'>
             <Comment size={8}></Comment>
@@ -64,10 +66,10 @@ export default function Index() {
           </div>
         </div>
 
-        <Follow className='text-brand' size={16}></Follow>
+        <FollowButton article_id={article.ID} />
       </section>
 
-      <div className='flex flex-col-reverse'>
+      <div className='flex flex-col'>
         {hasReplies ? (
           replies.map((comment, index) => <CommentBlock key={index} index={index} {...comment} />)
         ) : (
@@ -140,5 +142,23 @@ const BottomBar = (props: { article_id: number; onSubmit: any }) => {
         </Button>
       </div>
     </div>
+  )
+}
+
+const FollowButton = (props: { article_id: number }) => {
+  const { data: user, mutate } = useUserFollowing()
+  const handleFollowClick = async () => {
+    await followArticle(props.article_id)
+    mutate()
+  }
+  const handleUnfollowClick = async () => {
+    await unfollowArticle(props.article_id)
+    mutate()
+  }
+  const following = user?.followingArticles?.find((a) => a.ID === props.article_id) !== undefined
+  return following ? (
+    <HeartFill1 className='text-brand' size={16} onClick={handleUnfollowClick}></HeartFill1>
+  ) : (
+    <Follow className='text-brand' size={16} onClick={handleFollowClick}></Follow>
   )
 }

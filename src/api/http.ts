@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro'
-import { StorageSceneKey } from '../utils'
+import { useUserStore } from '../models'
 import { BASE_URL } from './config'
 import { interceptors } from './interceptor'
 
@@ -22,7 +22,7 @@ class Http {
 
     const header = {
       'content-type': params.contentType || 'application/json',
-      Authorization: Taro.getStorageSync(StorageSceneKey.USER),
+      Authorization: 'Bearer ' + useUserStore.getState().token,
     }
 
     return Taro.request({

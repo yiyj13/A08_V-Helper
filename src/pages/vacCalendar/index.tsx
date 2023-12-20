@@ -1,5 +1,4 @@
-import { ScrollView } from '@tarojs/components'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import dayjs from 'dayjs'
 import useSWR from 'swr'
 
@@ -7,34 +6,32 @@ import { getVaccineRecordList } from '../../api/methods'
 
 import { MergeItems, VacCalendarItemExpire, VacCalendarItem } from './vacCalendarItem'
 import { NetworkError } from '../../components/errors'
+import RecordPopup from './recordPopup'
+import { Header } from './header'
+import { useCalendarStore } from '../../models'
+
+export default function Index() {
+  return (
+    <>
+      <Header />
+      <VacCalendarScrollView />
+      <RecordPopup />
+    </>
+  )
+}
 
 // TODO: implement interaction of date picker and scroll view
-export default function Index() {
-  const [selectedDate, setSelectedDate] = useState<string>('日期')
-
-  const { data, error } = useSWR('getVaccineRecordList', getVaccineRecordList )
+// FIXME: if the date field of a record is in the far future, 
+// new items will be generated every time the page is refreshed
+export function VacCalendarScrollView() {
+  const { data, error } = useSWR('getVaccineRecordList', getVaccineRecordList)
 
   const mergedItems = useMemo(
     () => (data ? MergeItems(data).sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf()) : null),
     [data]
   )
 
-  const handleDateChange = (newDate: string) => {
-    setSelectedDate(newDate)
-    // TODO
-  }
-
-  const handleScroll = (e: any) => {
-    const newScrollPosition = e.currentTarget.scrollTop
-
-    const scheduleIndex = Math.floor(newScrollPosition / 86)
-
-    const newDate = mergedItems ? mergedItems[scheduleIndex].date : null
-
-    if (newDate) {
-      handleDateChange(newDate)
-    }
-  }
+  const profileIdFilter = useCalendarStore.use.profileId()
 
   if (error) {
     return (
@@ -45,30 +42,19 @@ export default function Index() {
   }
 
   return (
-    <div className='flex flex-col h-screen'>
-      <div className='h-12 p-4 bg-white flex flex-row items-center'>
-        <input
-          type='date'
-          value={selectedDate}
-          onChange={(e) => handleDateChange(e.target.value)}
-          className='w-full p-2 border font-semibold border-gray-300'
-        />
-      </div>
-
-      <div className='flex-1'>
-        <ScrollView scrollY style={{ height: 'calc(100vh - 48px)' }} onScroll={handleScroll}>
-          <div className='relative h-[200vh]'>
-            <ol className='mt-2 mx-4 space-y-4 text-sm leading-6'>
-              {mergedItems?.map((item) => {
-                if (item.expireDate) {
-                  return <VacCalendarItemExpire key={dayjs(item.date).valueOf()} record={item.record} />
-                } else {
-                  return <VacCalendarItem key={dayjs(item.date).valueOf()} record={item.record} />
-                }
-              })}
-            </ol>
-          </div>
-        </ScrollView>
+    <div className='flex-1'>
+      <div className='relative h-[100vh]'>
+        <ol className='mt-4 mx-4 space-y-4 text-sm leading-6 pb-8'>
+          {mergedItems
+            ?.filter((item) => (profileIdFilter ? item.record.profileId === profileIdFilter : true))
+            .map((item) => {
+              if (item.expireDate) {
+                return <VacCalendarItemExpire key={dayjs(item.date).valueOf()} record={item.record} />
+              } else {
+                return <VacCalendarItem key={dayjs(item.date).valueOf()} record={item.record} />
+              }
+            })}
+        </ol>
       </div>
     </div>
   )

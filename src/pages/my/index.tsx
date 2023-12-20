@@ -8,7 +8,7 @@ import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
 
 export default function ProfilePage() {
-  const removeToken = useUserStore.use.removeToken()
+  const removeToken = useUserStore.use.removeUserInfo()
 
   const handleLogout = () => {
     removeToken()
