@@ -19,6 +19,12 @@ export type Userinfo = GinBase & {
 
 export type UserFollowing = Pick<Userinfo, 'followingArticles' | 'followingVaccines'>
 
+export type User = GinBase & {
+  OpenID: string
+  UserName: string
+  Avatar: string
+}
+
 export type Vaccine = GinBase & {
   name: string
   description: string
@@ -52,13 +58,15 @@ export type ArticleFull = Article & {
 export type VaccinationRecord = GinBase & {
   profileId: number
   vaccineId: number
-  vaccineType: string
+  vaccinationType: string
   vaccine: Vaccine
   vaccinationDate: string
   voucher: string
   vaccinationLocation: string
   reminder: boolean
-  remindDate: string
+  remindTime: string
+  valid: string // 有效期 6月 1年
+  remindBefore: string // 提前多久提醒 2天 1周 
   nextVaccinationDate: string
   note: string
   isCompleted: boolean

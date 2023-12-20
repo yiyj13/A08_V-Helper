@@ -2,6 +2,8 @@ import { useState } from 'react'
 import clsx from 'clsx'
 import data1 from './data1.json'
 import data2 from './data2.json'
+import Taro from '@tarojs/taro'
+import { useVaccines } from '../../api'
 
 type ChildVaccine = {
   age: string
@@ -32,6 +34,7 @@ export default function App() {
 }
 
 function ChildrenVaccineItem({ item }: { item: ChildVaccine }) {
+  const { name2id } = useVaccines()
   return (
     <>
       <div className='ps-2 my-2 first:mt-0'>
@@ -48,6 +51,9 @@ function ChildrenVaccineItem({ item }: { item: ChildVaccine }) {
             'grow pt-2 px-4 pb-4 mr-4 rounded-2xl bg-slate-100',
             'active:scale-105 active:shadow-md transition'
           )}
+          onClick={() => {
+            Taro.navigateTo({ url: '/pages/vacDetails/index?id=' + name2id(item.vaccine) })
+          }}
         >
           <h3 className='flex gap-x-1.5 font-semibold'>{item.vaccine}</h3>
           <p className='mt-1 text-sm text-gray-600'>Description of ChildrenVaccineItem</p>

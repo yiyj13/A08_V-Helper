@@ -1,13 +1,15 @@
+import { useState } from 'react'
 import Taro from '@tarojs/taro'
 
-import { useState } from 'react'
-
-import { Map } from '@tarojs/components'
+import { Map as TaroMap } from '@tarojs/components'
 import { useEffect } from 'react'
-import { Loading, SearchBar, Button, Cell } from '@nutui/nutui-react-taro'
+import { Loading, Cell, Menu } from '@nutui/nutui-react-taro'
+import { MoreS } from '@nutui/icons-react-taro'
 import { useDeviceStore } from '../../models'
 import PositionIconPath from "../../assets/map/position.png"
 import FocusPositionIconPath from "../../assets/map/focusPosition.png"
+
+import api from '../../api'
 
 export default function MapPage() {
   const location = useDeviceStore.use.location()
@@ -17,7 +19,7 @@ export default function MapPage() {
   // 使用定位总是只能定位到海淀区政府，暂时用清华大学坐标替代
   const [originLatitude, setOriginLatitude] = useState(40.0011)
   const [originLongitude, setOriginLongitude] = useState(116.3265)
-  const [searchValue, setSearchValue] = useState('')
+  const [focusVaccine, setFocusVaccine] = useState('无')
   const focusLocation = {
     id: 1,
     title: "目标地点",
@@ -29,7 +31,7 @@ export default function MapPage() {
     height: iconHeight
   }
   const [markers, setMarkers] = useState([focusLocation])
-  var lastClickedID = 1
+  var myPositionID = 1
 
   // 获取当前位置
   // TODO: error handling
@@ -41,43 +43,46 @@ export default function MapPage() {
     return <Loading className='h-screen w-screen'>Fetching location...</Loading>
   }
 
-  // 向腾讯地图API请求附近的疫苗接种点
+  // 请求附近的疫苗接种点，并更新 markers
   const getMarkers = async (searchValue: string) => {
-    const mapServiceURL = "https://apis.map.qq.com/ws/place/v1/search"
-    const params = new URLSearchParams();
-    params.append('key', 'UBDBZ-OVCCL-AG2P4-EUKGA-OTBAV-CAFX3');
-    params.append('keyword', searchValue);
-    params.append('boundary', `nearby(${originLatitude},${originLongitude},1000,1)`);
-    const getMarkersURL = `${mapServiceURL}?${params.toString()}`
+    const response = await api.get('/api/clinics/vaccineName/' + searchValue)
 
-    Taro.request({
-      url: getMarkersURL,
-      method: 'GET',
-      success: (res) => {
-        const searchResult = res.data.data.map(item => {
-          return {
-            id: parseInt(item.id),
-            title: item.title,
-            latitude: item.location.lat,
-            longitude: item.location.lng,
-            distance: item._distance,
-            iconPath: PositionIconPath,
-            width: iconWidth,
-            height: iconHeight
-          }
-        })
-        setMarkers([...searchResult])
-      },
-      fail: (err) => {
-        console.error('Request failed:', err)
+    // // 解析
+    // const clinicNames = response.data[0].clinicInfo.split(';')
+    // const clinicInfo = clinicNames.map((item: string) => {
+    //   return api.get('/api/clinics/clinicName/' + item)
+    // })
+    // // const clinicInfo = response.data[0].clinicInfo.split(';').map((item: string) => item.split(','))
+    const clinicPostion = response.data
+    const clinicMarkers = clinicPostion.map((item, index) => {
+      return {
+        id: index + 2,
+        title: item.clinicName,
+        latitude: parseFloat(item.latitude),
+        longitude: parseFloat(item.longitude),
+        distance: Math.trunc(2 * 6378 * 1000 * Math.asin(Math.sqrt(Math.pow(Math.sin((Math.PI / 180) * (parseFloat(item.latitude) - originLatitude) / 2), 2) + Math.cos((Math.PI / 180) * parseFloat(item.latitude)) * Math.cos((Math.PI / 180) * originLatitude) * Math.pow(Math.sin((Math.PI / 180) * (parseFloat(item.longitude) - originLongitude) / 2), 2)))),
+        iconPath: PositionIconPath,
+        width: iconWidth,
+        height: iconHeight
       }
     })
+    setMarkers([focusLocation, ...clinicMarkers])
   }
+
+  const vaccineList = [
+    '无',
+    '狂犬疫苗',
+    'HPV疫苗',
+  ]
+
+  const vaccineOptions = vaccineList.map((item) => {
+    return {text: item, value: item}
+  })
 
   return (
     <div className='h-screen'>
       <div className='h-2/4'>
-        <Map
+        <TaroMap
           className='w-full h-full'
           scale={15}
           longitude={originLongitude}
@@ -87,39 +92,35 @@ export default function MapPage() {
           markers={markers}
         />
       </div>
-      <SearchBar
-          placeholder='按下回车进行搜索'
-          shape='round'
-          className='rounded-3xl'
-          onSearch={(value) => getMarkers(value)}
-          onChange={(value) => setSearchValue(value)}
-          right={
-            <Button type='primary' onClick={() => getMarkers(searchValue)}>搜索</Button>
-          }
-      />
+      <Menu>
+        <Menu.Item
+          options={vaccineOptions}
+          value={focusVaccine}
+          columns={2}
+          onChange={(v) => {
+            setFocusVaccine(v.value)
+            // 向后端请求疫苗接种点
+            // 更新 markers
+            getMarkers(v.value)
+          }}
+        />
+      </Menu>
       <div className='h-2/4 overflow-auto'>
         <div>
           {markers.map((item, index) => {
-            if (item.id != lastClickedID) {
+            if (item.id != myPositionID) {
               return (
                 <Cell
                   key={index}
                   title={item.title}
                   description={item.distance + " m"}
                   onClick={() => {
-                    console.log("click")
                     const updatedMarkers = [...markers]
-                    for (let i = 0; i < markers.length; i++) {
-                      if (markers[i].id != item.id) {
-                        updatedMarkers[i].iconPath = PositionIconPath
-                      } else {
-                        updatedMarkers[i].iconPath = FocusPositionIconPath
-                      }
-                    }
                     setMarkers(updatedMarkers)
                     setOriginLatitude(item.latitude)
                     setOriginLongitude(item.longitude)
                   }}
+                  extra={<MoreS onClick={() => {Taro.navigateTo({ url: `/pages/map/clinic/index?clinicName=${item.title}` })}}/>}
                 />
               )
             } else {
