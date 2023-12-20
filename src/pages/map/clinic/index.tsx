@@ -7,8 +7,9 @@ import api from '../../../api'
 export default function () {
   const [route] = useRouter()
   const clinicName = route.params.clinicName
-  const [phoneNumber, setPhoneNumber] = useState("114514")
-  const [vaccineList, setVaccineList] = useState([""])
+  const [phoneNumber, setPhoneNumber] = useState("TODO")
+  const [vaccineList, setVaccineList] = useState(["TODO"])
+  const [clinicAddress, setClinicAddress] = useState("TODO")
   useEffect(() => {
     const fetchClinicInfo = async () => {
       api
@@ -16,23 +17,43 @@ export default function () {
       .then((res) => {
         setVaccineList(res.data.vaccineList.split(';'))
         setPhoneNumber(res.data.phoneNumber)
+        setClinicAddress(res.data.address)
       })
     }
     fetchClinicInfo()
   }, [clinicName])
   return (
-    <div>
-      <h1>{clinicName}</h1>
-      <div>
-        {vaccineList.map((item) => {
-          return (
-            <Cell
-              title={item}
-            />
-          )
-        })}
+    <div className='flex flex-col h-screen items-center'>
+      <div className='flex flex-col h-full w-11/12 m-5 rounded-2xl std-box-shadow'>
+        <header className='flex justify-between items-center px-2 h-14'>
+          <h1 className='text-2xl font-semibold'>{clinicName}</h1>
+        </header>
+        <Cell.Group
+          title={<div className='text-base text-black font-semibold'>详细信息</div>}
+          divider={false}
+        >
+          <Cell
+            title="电话"
+            extra={phoneNumber}
+          />
+          <Cell
+            title="地址"
+            extra={clinicAddress}
+          />
+        </Cell.Group>
+        <Cell.Group
+          title={<div className='text-base text-black font-semibold'>疫苗列表</div>}
+          divider={false}
+        >
+          {vaccineList.map((item) => {
+            return (
+              <Cell
+                title={item}
+              />
+            )
+          })}
+        </Cell.Group>
       </div>
-      <div>联系电话：{phoneNumber}</div>
     </div>
   )
 }

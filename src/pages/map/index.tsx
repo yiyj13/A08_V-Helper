@@ -19,7 +19,7 @@ export default function MapPage() {
   // 使用定位总是只能定位到海淀区政府，暂时用清华大学坐标替代
   const [originLatitude, setOriginLatitude] = useState(40.0011)
   const [originLongitude, setOriginLongitude] = useState(116.3265)
-  const [foucusVaccine, setFocusVaccine] = useState('无')
+  const [focusVaccine, setFocusVaccine] = useState('无')
   const focusLocation = {
     id: 1,
     title: "目标地点",
@@ -95,7 +95,7 @@ export default function MapPage() {
       <Menu>
         <Menu.Item
           options={vaccineOptions}
-          value={foucusVaccine}
+          value={focusVaccine}
           columns={2}
           onChange={(v) => {
             setFocusVaccine(v.value)
