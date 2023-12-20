@@ -68,10 +68,10 @@ func (s *ClinicService) GetClinicsByVaccineName(vaccineName string) ([]clinicPos
 	return clinics, nil
 }
 
-func (s *ClinicService) GetClinicsByClinicName(clinicName string) ([]model.Clinic, error) {
-	var clinic []model.Clinic
+func (s *ClinicService) GetClinicsByClinicName(clinicName string) (model.Clinic, error) {
+	var clinic model.Clinic
 	if err := s.db.Where("clinic_name = ?", clinicName).First(&clinic).Error; err != nil {
-		return nil, err
+		return clinic, err
 	}
 	return clinic, nil
 }

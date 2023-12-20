@@ -81,13 +81,13 @@ func (h *ClinicHandler) HandleGetClinicsByClinicName(c *gin.Context) {
 		return
 	}
 
-	clinics, err := h.clinicService.GetClinicsByClinicName(queryClinicName)
+	clinicInfo, err := h.clinicService.GetClinicsByClinicName(queryClinicName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, clinics)
+	c.JSON(http.StatusOK, clinicInfo)
 }
 
 func (h *ClinicHandler) HandleGetAllClinics(c *gin.Context) {
