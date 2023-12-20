@@ -1,5 +1,6 @@
 import Taro from '@tarojs/taro'
 import api from './http'
+import { getUserID } from '../models'
 
 export type GinBase = {
   ID: number
@@ -7,6 +8,16 @@ export type GinBase = {
   UpdatedAt: string
   DeletedAt: string
 }
+
+export type Userinfo = GinBase & {
+  openId: string
+  userName: string
+  avatar: string
+  followingArticles: Article[]
+  followingVaccines: Vaccine[]
+}
+
+export type UserFollowing = Pick<Userinfo, 'followingArticles' | 'followingVaccines'>
 
 export type Vaccine = GinBase & {
   name: string
@@ -50,6 +61,7 @@ export type VaccinationRecord = GinBase & {
   remindDate: string
   nextVaccinationDate: string
   note: string
+  isCompleted: boolean
 }
 
 export type TemperatureRecord = GinBase & {
@@ -68,10 +80,43 @@ export type Profile = GinBase & {
   note: string // 备注
 }
 
-export async function getToken(): Promise<string> {
+export async function Login(): Promise<Userinfo> {
   const responseLogin = await Taro.login()
   const response = await api.get('/api/users/login', { code: responseLogin.code })
-  return response.data.openId
+  return response.data as Userinfo
+}
+
+export async function getUserFollowing(): Promise<UserFollowing> {
+  const response = await api.get('/api/users/' + getUserID() + '/following')
+  return response.data as UserFollowing
+}
+
+export async function followVaccine(vaccineId: number): Promise<string> {
+  const response = await api.get('/api/users/addfollowingVaccine/' + getUserID(), {
+    vaccine_id: vaccineId,
+  })
+  return response.data
+}
+
+export async function unfollowVaccine(vaccineId: number): Promise<string> {
+  const response = await api.get('/api/users/removefollowingVaccine/' + getUserID(), {
+    vaccine_id: vaccineId,
+  })
+  return response.data
+}
+
+export async function followArticle(articleId: number): Promise<string> {
+  const response = await api.get('/api/users/addfollowingArticle/' + getUserID(), {
+    article_id: articleId,
+  })
+  return response.data
+}
+
+export async function unfollowArticle(articleId: number): Promise<string> {
+  const response = await api.get('/api/users/removefollowingArticle/' + getUserID(), {
+    article_id: articleId,
+  })
+  return response.data
 }
 
 export async function getVaccineList(): Promise<Vaccine[]> {
@@ -86,6 +131,13 @@ export async function getVaccineByID(id: string): Promise<Vaccine> {
 
 export async function getVaccineRecordList(): Promise<VaccinationRecord[]> {
   const response = await api.get('/api/vaccination-records')
+  // 将要替换为：
+  // const response = await api.get('/api/vaccination-records/user/' + getUserID())
+  return response.data
+}
+
+export async function getVaccineRecordWithProfile(profileId: number): Promise<VaccinationRecord[]> {
+  const response = await api.get('/api/vaccination-records/profile/' + profileId)
   return response.data
 }
 
@@ -94,25 +146,53 @@ export async function postVaccineRecord(data: Partial<VaccinationRecord>): Promi
   return response.data
 }
 
-export async function getProfiles(): Promise<Profile[]> {
-  const response = await api.get('/api/profiles')
+export async function getVaccineRecord(id: number): Promise<VaccinationRecord> {
+  const response = await api.get('/api/vaccination-records/' + id)
   return response.data
 }
 
-export async function getArticles(
-  page: number, // 页码
-  size: number, // 每页大小
-  vaccineid?: number // 疫苗id (可选)
-): Promise<Article[]> {
-  const response = await api.get('/api/articles', { page, size, vaccineid })
+export async function deleteVaccineRecord(id: number): Promise<string> {
+  const response = await api.delete('/api/vaccination-records/' + id)
+  return response.data
+}
+
+export async function putVaccineRecord(id: number, data: Partial<VaccinationRecord>): Promise<VaccinationRecord> {
+  const response = await api.put('/api/vaccination-records/' + id, data)
+  return response.data
+}
+
+export async function getProfiles(): Promise<Profile[]> {
+  const response = await api.get('/api/profiles/')
+  // 将要替换为：
+  // const response = await api.get('/api/profiles/user/' + getUserID())
+  return response.data
+}
+
+export async function postProfile(data: Partial<Profile>): Promise<Profile> {
+  const response = await api.post('/api/profiles', data)
+  return response.data
+}
+
+export async function putProfile(data: Partial<Profile>): Promise<Profile> {
+  const response = await api.put('/api/profiles/' + data.ID, data)
+  return response.data
+}
+
+export async function deleteProfile(id: number): Promise<Profile> {
+  const response = await api.delete('/api/profiles/' + id)
+  return response.data
+}
+
+export async function getTemperatureRecordList(): Promise<TemperatureRecord[]> {
+  const response = await api.get('/api/temperature-records')
   return response.data
 }
 
 export async function postArticle(
   title: string, // 标题
   content: string, // 内容
-  vaccineid?: number
-): // 疫苗id (可选)
+  vaccineid?: number  // 疫苗id (可选)
+):
 Promise<Article> {
   const response = await api.post('/api/articles', { title, content, vaccineid, isbind: vaccineid ? true : false })
   return response.data
