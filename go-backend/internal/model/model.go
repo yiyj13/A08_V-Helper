@@ -133,4 +133,5 @@ type Clinic struct {
 	Latitude    string `json:"latitude"`
 	Longitude   string `json:"longitude"`
 	PhoneNumber string `json:"phoneNumber"`
+	Address     string `json:"address"`
 }

@@ -4,27 +4,31 @@
     "vaccineList": "狂犬疫苗",
     "latitude": "39.916563",
     "longitude": "116.252366",
-    "phoneNumber": "010-59971486"
+    "phoneNumber": "010-59971486",
+    "address": "北京市海淀区玉泉路航天中心医院住院部"
   },
   {
     "clinicName": "北京大学人民医院",
     "vaccineList": "狂犬疫苗",
     "latitude": "39.937132",
     "longitude": "116.354416",
-    "phoneNumber": "暂无"
+    "phoneNumber": "暂无",
+    "address": "北京市西城区西直门南大街11号"
   },
   {
     "clinicName": "北京长阳妇儿门诊部",
     "vaccineList": "HPV疫苗",
     "latitude": "39.767431",
     "longitude": "116.164719",
-    "phoneNumber": "010-81388299"
+    "phoneNumber": "010-81388299",
+    "address": "北京市房山区松园西路北京长阳妇儿门诊部"
   },
   {
     "clinicName": "北京京都儿童医院",
     "vaccineList": "HPV疫苗",
     "latitude": "40.080219",
     "longitude": "116.357233",
-    "phoneNumber": "010-69787556"
+    "phoneNumber": "010-69787556",
+    "address": "北京市昌平区回龙观东大街308号"
   }
 ]
