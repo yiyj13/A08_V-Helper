@@ -1,10 +1,13 @@
 package handler
 
 import (
+	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-resty/resty/v2"
@@ -14,6 +17,34 @@ const (
 	defaultTemplateID       = "ocbFMPXogCo85ZjBYlEseGnQzaPlmtvUqXUw1VrVuvQ"
 	WEIXIN_API_SEND_MESSAGE = "https://api.weixin.qq.com/cgi-bin/message/subscribe/send"
 )
+
+func checkWechatSignature(c *gin.Context, token string) bool {
+	signature := c.Query("signature")
+	timestamp := c.Query("timestamp")
+	nonce := c.Query("nonce")
+
+	strs := []string{token, timestamp, nonce}
+	sort.Strings(strs)
+	str := strings.Join(strs, "")
+
+	h := sha1.New()
+	h.Write([]byte(str))
+	sha1Str := fmt.Sprintf("%x", h.Sum(nil))
+
+	return sha1Str == signature
+}
+
+func handleWechatValidation(c *gin.Context) {
+	const token = "123" // 这里填写你的Token
+
+	if checkWechatSignature(c, token) {
+		echostr := c.Query("echostr")
+		log.Println("echostr:", echostr)
+		c.String(http.StatusOK, echostr)
+	} else {
+		c.String(http.StatusForbidden, "验证失败")
+	}
+}
 
 type SubscriptionRequest struct {
 	ToUserName   string `json:"ToUserName"`
@@ -45,7 +76,7 @@ func SetSubscription(c *gin.Context) {
 	// 订阅成功
 	log.Println("request:", request)
 
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, "success")
 }
 
 type DefaultTemplateMessage struct {
