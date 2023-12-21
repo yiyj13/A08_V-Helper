@@ -1,15 +1,24 @@
 /* TODO: 
-    1. Coordinate with the backend APIs (implemented)
-    2. Add a ComboBox component to replace the Picker component
-    3. CSS style for the menu and the buttons
+    1. CSS style for the menu and the buttons
 */
 
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
-import { Input, Cell, Checkbox, Picker, Uploader, Button, DatePicker, TextArea } from '@nutui/nutui-react-taro'
+import {
+  Input,
+  Cell,
+  Checkbox,
+  Image,
+  Picker,
+  Radio,
+  Button,
+  DatePicker,
+  TextArea,
+  Popup,
+  Grid,
+} from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
-// import {ComboBox} from 'src/components/combobox';
 import api from '../../api'
 import { Profile } from '../../api/methods'
 
@@ -57,7 +66,7 @@ export default function AddMember() {
 
   const [checkbox1, setCheckbox1] = useState(false)
   const [checkbox2, setCheckbox2] = useState(false)
-  // the following two functions to be combined into onGenderChange
+  // TODO: the following two functions to be combined into onGenderChange
   const onMaleChange = (value: boolean) => {
     if (value === false) {
       setCheckbox1(false)
@@ -107,6 +116,24 @@ export default function AddMember() {
     })
   }
 
+  const [showPopup, setShowPopup] = useState(false)
+  const [selectedAvatar, setSelectedAvatar] = useState(1) // Track the selected avatar
+  const handlePopupOpen = () => {
+    setShowPopup(true)
+  }
+  const handlePopupClose = () => {
+    setShowPopup(false)
+  }
+
+  const handleAvatarSelect = (value: number) => {
+    setSelectedAvatar(value)
+    const avatar = 'http://101.43.194.58:8081/profile_avatar/avatar' + value + '.png'
+    setMember({
+      ...member,
+      avatar: avatar,
+    })
+  }
+
   const [noteValue, setNoteValue] = useState('')
   const onNoteChange = (value: string) => {
     setMember({
@@ -145,22 +172,18 @@ export default function AddMember() {
   }, [])
 
   const handleSubmission = async () => {
-    console.log('member:', member) // for debug
     const router = Taro.getCurrentInstance().router
 
     if (router && router.params && router.params.id) {
-      console.log('id:', router.params) // for debug
       const { id } = router.params
       if (id) {
         try {
-          const res = await api.request({ url: `/api/profiles/${id}`, method: 'PUT', data: member })
-          console.log(res.data) // for debug
+          await api.request({ url: `/api/profiles/${id}`, method: 'PUT', data: member })
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()
           }, 1000)
         } catch (error) {
-          console.log('Error submitting vaccination record:', error)
           Taro.showToast({ title: '提交失败', icon: 'error' })
         }
       }
@@ -168,7 +191,6 @@ export default function AddMember() {
       if (member && member.fullName && member.relationship && member.gender && member.dateOfBirth) {
         try {
           const res = await api.post('/api/profiles', member)
-          console.log(res.data) // for debug
           setMember({
             ...member,
             ID: res.data.id,
@@ -178,8 +200,7 @@ export default function AddMember() {
             Taro.navigateBack()
           }, 1000)
         } catch (error) {
-          console.log('Error submitting vaccination record:', error)
-          Taro.showToast({ title: '提交失败', icon: 'error' })
+           Taro.showToast({ title: '提交失败', icon: 'error' })
         }
       } else {
         Taro.showToast({ title: '请填写完整记录', icon: 'error' })
@@ -194,7 +215,7 @@ export default function AddMember() {
       relationship: '',
       gender: '',
       dateOfBirth: '',
-      avatar: 'https://img.yzcdn.cn/vant/cat.jpeg',
+      avatar: '',
       note: '',
     })
     setNameValue('')
@@ -256,9 +277,26 @@ export default function AddMember() {
         onClose={() => setDateVisible(false)}
         onConfirm={(options, values) => confirmDate(values, options)}
       />
-      <div className='flex-content col-span-full'>
-        头像
-        <Uploader url='https://img.yzcdn.cn/vant/cat.jpeg' />
+      <div className='col-span-full flex-content flex items-center'>
+        <Button className='flex items-center' formType='submit' type='primary' onClick={handlePopupOpen}>
+          选择头像
+        </Button>
+        <Popup visible={showPopup} style={{ height: '42%' }} position='bottom' onClose={handlePopupClose}>
+          <Radio.Group value={`${selectedAvatar}`} onChange={(value) => handleAvatarSelect(Number(value))}>
+            <Grid gap={3} columns={3}>
+              {[...Array(9)].map((_, index) => (
+                <Grid.Item key={index + 1}>
+                  <Radio value={`${index + 1}`} checked={selectedAvatar === index + 1}>
+                    <Image
+                      src={`http://101.43.194.58:8081/profile_avatar/avatar${index + 1}.png`}
+                      style={{ width: '80px', height: '80px' }}
+                    />
+                  </Radio>
+                </Grid.Item>
+              ))}
+            </Grid>
+          </Radio.Group>
+        </Popup>
       </div>
       <Cell title='TextArea' className='col-span-full px-8' style={{ borderRadius: '8px' }}>
         <TextArea placeholder='请输入备注' value={noteValue} onChange={(value) => onNoteChange(value)} />

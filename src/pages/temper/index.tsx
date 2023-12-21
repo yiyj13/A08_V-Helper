@@ -27,8 +27,6 @@ export default function TemperRecord() {
         try {
           const res = await api.get('/api/temperature-records/' + router.params.id)
           const result = res.data as TemperatureRecord
-          console.log('memberData', MemberData)
-          console.log('result', result)
           const relation = MemberData.find((item) => item.value === result.profileId)
           setIdDesc(relation ? relation.text : '')
           setDateDesc(result.date)
@@ -104,20 +102,19 @@ export default function TemperRecord() {
       date: dateDesc,
       note: noteValue,
     })
-    console.log('temperature:', tempRecord) // for debug
+    if (typeof tempRecord.temperature !== 'undefined' && typeof tempRecord.temperature === 'string') {
+      tempRecord.temperature = parseFloat(tempRecord.temperature)
+    }
     if (router && router.params && router.params.id) {
-      console.log('id:', router.params) // for debug
       const { id } = router.params
       if (id) {
         try {
-          const res = await api.request({ url: `/api/temperature-records/${id}`, method: 'PUT', data: tempRecord })
-          console.log(res.data) // for debug
+          await api.request({ url: `/api/temperature-records/${id}`, method: 'PUT', data: tempRecord })
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()
           }, 1000)
         } catch (error) {
-          console.log('Error submitting vaccination record:', error)
           Taro.showToast({ title: '提交失败', icon: 'error' })
         }
       } else {
@@ -126,14 +123,12 @@ export default function TemperRecord() {
     } else {
       if (tempRecord && tempRecord.profileId !== undefined && tempRecord.profileId >= 0) {
         try {
-          const res = await api.request({ url: '/api/temperature-records', method: 'POST', data: tempRecord })
-          console.log(res.data) // for debug
+          await api.request({ url: '/api/temperature-records', method: 'POST', data: tempRecord })
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()
           }, 1000)
         } catch (error) {
-          console.log('Error submitting vaccination record:', error)
           Taro.showToast({ title: '提交失败', icon: 'error' })
         }
       } else {

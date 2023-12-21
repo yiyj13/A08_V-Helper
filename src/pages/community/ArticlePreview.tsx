@@ -51,19 +51,21 @@ export const ArticlePreview = memo((props: ArticlePreviewProps) => {
           <p className='max-w-[40ch] text-xs text-gray-500'>{props.content}</p>
         </div>
 
-        <div className='mt-4 flex items-center justify-between'>
-          <dl className='flex gap-4'>
-            <div className='flex items-center gap-1'>
-              <Follow size={8}></Follow>
-              <dd className='text-xs text-gray-500'>114</dd>
-            </div>
-            <div className='flex items-center gap-1'>
-              <Comment size={8}></Comment>
-              <dd className='text-xs text-gray-500'>514</dd>
-            </div>
-          </dl>
+        <div className='mt-4 flex items-center justify-end'>
+          {/* <dl className='flex gap-4'> */}
+          {/*   <div className='flex items-center gap-1'> */}
+          {/*     <Follow size={8}></Follow> */}
+          {/*     <dd className='text-xs text-gray-500'>114</dd> */}
+          {/*   </div> */}
+          {/*   <div className='flex items-center gap-1'> */}
+          {/*     <Comment size={8}></Comment> */}
+          {/*     <dd className='text-xs text-gray-500'>514</dd> */}
+          {/*   </div> */}
+          {/* </dl> */}
 
-          <label className='text-xs font-medium text-brand'>{id2name(props.vaccineId)}</label>
+          <label className='text-xs font-medium text-brand'>
+            {props.isBind ? '#' + id2name(props.vaccineId) : null}
+          </label>
         </div>
       </>
     </a>

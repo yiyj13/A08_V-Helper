@@ -1,6 +1,5 @@
 /* TODO: 
     1. CSS style for the menu and the buttons
-    2. When backend ready, add the logic to submit the data
 */
 
 import Taro from '@tarojs/taro'
@@ -31,18 +30,17 @@ export default function VaccineRecord() {
         try {
           const res = await api.get('/api/vaccination-records/' + router.params.id)
           const result = res.data as VaccinationRecord
-          console.log('memberData', MemberData)
-          console.log('result', result)
           const relation = MemberData.find((item) => item.value === result.profileId)
           setIdDesc(relation ? relation.text : '')
           setNameDesc(result.vaccine.name)
-          setTypeDesc(result.vaccineType)
+          setTypeDesc(result.vaccinationType)
           setDateDesc(result.vaccinationDate)
-          // setValidDesc(result.valid)
+          setValidDesc(result.valid)
           setRemindSwitch(result.reminder)
           if (result.reminder) {
-            // setRemindValue(result.remindTime)
-            // setRemindUnit(result.remindTime.slice(-1))
+            setRemindVisible(true)
+            setRemindValue(result.remindBefore.slice(0, -1))
+            setRemindUnit(result.remindBefore.slice(-1))
           }
           setNoteValue(result.note)
           setRecord(result)
@@ -127,14 +125,15 @@ export default function VaccineRecord() {
     setTypeDesc(description)
     setRecord({
       ...record,
-      vaccineType: description,
+      vaccinationType: description,
     })
   }
 
   const startDate = new Date(2000, 0, 1)
   const endDate = new Date(2025, 11, 30)
+  const todayDate = new Date(Date.now()).toISOString().replace('T', ' ').slice(0, 10)
   const [dateVisible, setDateVisible] = useState(false)
-  const [dateDesc, setDateDesc] = useState(new Date(Date.now()).toISOString().replace('T', ' ').slice(0, 16))
+  const [dateDesc, setDateDesc] = useState(todayDate)
   const confirmDate = (values: (string | number)[], _options: PickerOption[]) => {
     const date = values.slice(0, 3).join('-')
     setDateDesc(`${date}`)
@@ -187,6 +186,10 @@ export default function VaccineRecord() {
       description += option.text
     })
     setValidDesc(description)
+    setRecord({
+      ...record,
+      valid: description,
+    })
   }
 
   const [remindSwitch, setRemindSwitch] = useState(false)
@@ -227,7 +230,7 @@ export default function VaccineRecord() {
   }
 
   const subtractDays = (dateString: string | undefined, days: string) => {
-    if (dateString === undefined) {
+    if (record.reminder === false || dateString === undefined || days === undefined) {
       return ' '
     } else {
       const dateArray = dateString.split('-')
@@ -277,26 +280,30 @@ export default function VaccineRecord() {
   }
 
   const handleSubmission = async () => {
-    console.log('record:', record) // for debug
+    record.valid = validDesc
+    record.vaccinationDate = dateDesc
+
     if (router && router.params && router.params.id) {
-      console.log('id:', router.params) // for debug
       const { id } = router.params
       if (id) {
         try {
           const nextVaccinationDate = addDays(record.vaccinationDate, validDesc)
-          const remindTime = subtractDays(nextVaccinationDate, remindValue + remindUnit).concat(' 10:00') // TODO: discuss the time format
-          const res = await api.request({
+          const remindTime = subtractDays(nextVaccinationDate, remindValue + remindUnit).concat(' 10:00')
+          await api.request({
             url: `/api/vaccination-records/${id}`,
             method: 'PUT',
-            data: { ...record, nextVaccinationDate: nextVaccinationDate, remindTime: remindTime },
+            data: {
+              ...record,
+              nextVaccinationDate: nextVaccinationDate,
+              remindTime: remindTime,
+              remindBefore: remindValue + remindUnit,
+            },
           })
-          console.log(res.data) // for debug
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()
           }, 1000)
         } catch (error) {
-          console.log('Error submitting vaccination record:', error)
           Taro.showToast({ title: '提交失败', icon: 'error' })
         }
       } else {
@@ -309,25 +316,31 @@ export default function VaccineRecord() {
         record.profileId >= 0 &&
         record.vaccineId !== undefined &&
         record.vaccineId >= 0 &&
-        record.vaccineType !== undefined &&
+        record.vaccinationType !== undefined &&
+        record.vaccinationType !== '' &&
         record.vaccinationDate !== undefined &&
-        record.vaccinationDate !== ''
+        record.vaccinationDate !== '' &&
+        record.valid !== undefined &&
+        record.valid !== ''
       ) {
         const nextVaccinationDate = addDays(record.vaccinationDate, validDesc)
-        const remindTime = subtractDays(nextVaccinationDate, remindValue + remindUnit).concat(' 10:00') // TODO: discuss the time format
+        const remindTime = subtractDays(nextVaccinationDate, remindValue + remindUnit).concat(' 10:00')
         try {
-          const res = await api.request({
+          await api.request({
             url: '/api/vaccination-records',
             method: 'POST',
-            data: { ...record, nextVaccinationDate: nextVaccinationDate, remindTime: remindTime },
+            data: {
+              ...record,
+              nextVaccinationDate: nextVaccinationDate,
+              remindTime: remindTime,
+              remindBefore: remindValue + remindUnit,
+            },
           })
-          console.log(res.data) // for debug
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()
           }, 1000)
         } catch (error) {
-          console.log('Error submitting vaccination record:', error) // for debug
           Taro.showToast({ title: '提交失败', icon: 'error' })
         }
       } else {
@@ -339,12 +352,14 @@ export default function VaccineRecord() {
   const handleReset = () => {
     setRecord({
       vaccinationDate: '',
-      vaccineType: '',
+      vaccinationType: '',
       reminder: false,
       remindTime: '',
       nextVaccinationDate: '',
       voucher: '',
       note: '',
+      valid: '',
+      remindBefore: '',
     })
 
     setIdDesc('')
@@ -418,6 +433,7 @@ export default function VaccineRecord() {
         title='接种时间'
         startDate={startDate}
         endDate={endDate}
+        defaultValue={new Date(Date.now())}
         visible={dateVisible}
         type='date'
         onClose={() => setDateVisible(false)}
@@ -443,7 +459,13 @@ export default function VaccineRecord() {
         <Switch className=' ml-2' checked={remindSwitch} onChange={(value) => onSwitchChange(value)} />
         {remindVisible && (
           <div className=' flex items-center'>
-            <Input type='number' placeholder='请输入数字' maxLength={2} value={remindValue} onChange={(value) => setRemindValue(value)} />
+            <Input
+              type='number'
+              placeholder='请输入数字'
+              maxLength={2}
+              value={remindValue}
+              onChange={(value) => setRemindValue(value)}
+            />
             <Popover
               visible={unitVisible}
               list={itemList}
@@ -456,9 +478,7 @@ export default function VaccineRecord() {
                 setUnitVisible(false)
               }}
             >
-                <Button type='primary'>
-                  {remindUnit}
-                </Button>
+              <Button type='primary'>{remindUnit}</Button>
             </Popover>
             <span className='text-sm mr-2'>前提醒</span>
           </div>

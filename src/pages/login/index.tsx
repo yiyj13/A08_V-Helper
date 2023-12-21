@@ -1,14 +1,14 @@
 import clsx from 'clsx'
 import useSWRMutation from 'swr/mutation'
 import { useUserStore } from '../../models'
-import { getToken } from '../../api/methods'
+import { Login } from '../../api/methods'
 
 export default function Index() {
-  const setToken = useUserStore.use.setToken()
+  const setUserInfo = useUserStore.use.setUserInfo()
 
-  const { error, trigger, isMutating } = useSWRMutation('getToken', getToken)
+  const { error, trigger, isMutating } = useSWRMutation('getToken', Login)
 
-  const handleLogin = () => trigger().then((token) => setToken(token))
+  const handleLogin = () => trigger().then((res) => setUserInfo(res))
 
   return (
     <>

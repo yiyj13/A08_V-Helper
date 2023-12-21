@@ -1,9 +1,13 @@
+import clsx from 'clsx'
 import { Text } from '@tarojs/components'
 import { RectRight } from '@nutui/icons-react-taro'
 
 import InjectSVG from '../../assets/home/injection.svg'
 
+import { dayjs } from '../../utils'
 import { VaccinationRecord } from '../../api/methods'
+import { useProfiles, useVaccineRecordForPerson } from '../../api/hooks'
+import { useRecordPopup } from '../../models'
 
 export type VacCalendarData = {
   date: string
@@ -33,10 +37,24 @@ export function MergeItems(raw: VaccinationRecord[]) {
 }
 
 export function VacCalendarItem({ key, record }: VacCalendarItemProps) {
+  const { id2name } = useProfiles()
+  const showPopup = useRecordPopup.use.show()
+
+  const overlook = record.isCompleted
+  const needWarning = !record.isCompleted && dayjs(record.vaccinationDate).isBefore(dayjs())
+  const timeError = record.isCompleted && dayjs(record.vaccinationDate).isAfter(dayjs())
+
   return (
     <li
       key={key}
-      className='flex h-16 animate-fade-in flex-row items-center justify-between rounded-2xl bg-slate-100 px-4 transition-all active:scale-105 active:shadow-md'
+      className={clsx(
+        'flex h-16 animate-fade-in flex-row items-center justify-between rounded-2xl bg-slate-100 px-4 transition-all active:scale-105 active:shadow-md',
+        {
+          'opacity-60 filter saturate-50': overlook,
+          'ring-2 ring-brand': needWarning,
+        }
+      )}
+      onClick={() => showPopup(record.ID)}
     >
       <div className='flex flex-row items-center gap-x-2'>
         <div className='h-10 w-10 rounded-full bg-brand p-2'>
@@ -44,9 +62,11 @@ export function VacCalendarItem({ key, record }: VacCalendarItemProps) {
         </div>
         <div className='flex flex-col'>
           <Text className='font-semibold text-brand'>
-            {record.profileId} {record.vaccine.name} 接种
+            {id2name(record.profileId)} {record.vaccine.name} {record.isCompleted ? '已接种' : '未接种'}
           </Text>
-          <Text className='text-sm text-gray-500'>{record.vaccinationDate}</Text>
+          <Text className={clsx('text-xs', { 'text-red-500': timeError, 'text-gray-500': !timeError })}>
+            接种：{record.vaccinationDate}
+          </Text>
         </div>
       </div>
       <RectRight color='gray' />
@@ -55,10 +75,27 @@ export function VacCalendarItem({ key, record }: VacCalendarItemProps) {
 }
 
 export function VacCalendarItemExpire({ key, record }: VacCalendarItemProps) {
+  const { id2name } = useProfiles()
+  const showPopup = useRecordPopup.use.show()
+  const { getVaccineState } = useVaccineRecordForPerson(record.profileId)
+  const state = getVaccineState(record.vaccineId)
+
+  if (record.isCompleted === false) return null
+  const currentDate = dayjs()
+  const overlook = state.inEffect && currentDate.isAfter(dayjs(record.nextVaccinationDate))
+  const needHighlight = !state.inEffect && currentDate.isAfter(dayjs(record.nextVaccinationDate))
+
   return (
     <li
       key={key}
-      className='flex h-16 animate-fade-in flex-row items-center justify-between rounded-2xl bg-gray-100 px-4 transition-all active:scale-105 active:shadow-md'
+      className={clsx(
+        'flex h-16 animate-fade-in flex-row items-center justify-between rounded-2xl bg-gray-100 px-4 transition-all active:scale-105 active:shadow-md',
+        {
+          'ring-2 ring-gray-500': needHighlight,
+          'opacity-40': overlook,
+        }
+      )}
+      onClick={() => showPopup(record.ID)}
     >
       <div className='flex flex-row items-center gap-x-2'>
         <div className='h-10 w-10 rounded-full bg-gray-200 p-2'>
@@ -66,14 +103,13 @@ export function VacCalendarItemExpire({ key, record }: VacCalendarItemProps) {
         </div>
         <div className='flex flex-col'>
           <Text className='font-semibold'>
-            {record.profileId} {record.vaccine.name} 过期
+            {id2name(record.profileId)} {record.vaccine.name}{' '}
+            {overlook ? '已补种' : needHighlight ? '已过期' : '未过期'}
           </Text>
-          <Text className='text-sm text-gray-500'>{record.nextVaccinationDate}</Text>
+          <Text className='text-xs text-gray-500'>过期：{record.nextVaccinationDate}</Text>
         </div>
       </div>
       <RectRight color='gray' />
     </li>
   )
 }
-
-
