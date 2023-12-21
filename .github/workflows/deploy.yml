@@ -35,7 +35,6 @@ jobs:
       env:
         SSH_PASS: ${{ secrets.SERVER_SSH_PASSWORD }}
       run: |
-        sudo apt-get update
         sudo apt-get install -y sshpass
         sudo sshpass -p $SSH_PASS ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cd /path/to/your/repo && docker-compose up --build -d"
       # Deploys the application on your server using SSH with password authentication
