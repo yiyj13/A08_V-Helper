@@ -61,22 +61,24 @@ type SubscriptionRequest struct {
 }
 
 func SetSubscription(c *gin.Context) {
-	var request SubscriptionRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	// 如果是检查容器路径的请求
-	if request.Action == "CheckContainerPath" {
-		c.String(http.StatusOK, "success")
-		return
-	}
-
-	// 订阅成功
-	log.Println("request:", request)
-
+	log.Println("request:", c.Request)
 	c.JSON(http.StatusOK, "success")
+	// var request SubscriptionRequest
+	// if err := c.ShouldBindJSON(&request); err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 	return
+	// }
+
+	// // 如果是检查容器路径的请求
+	// if request.Action == "CheckContainerPath" {
+	// 	c.String(http.StatusOK, "success")
+	// 	return
+	// }
+
+	// // 订阅成功
+	// log.Println("request:", request)
+
+	// c.JSON(http.StatusOK, "success")
 }
 
 type DefaultTemplateMessage struct {
