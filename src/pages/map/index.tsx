@@ -16,9 +16,11 @@ export default function MapPage() {
   const updateLocation = useDeviceStore.use.updateLocation()
   const iconWidth = 40
   const iconHeight = 40
+  const myLatitude = 40.0011
+  const myLongitude = 116.3265
   // 使用定位总是只能定位到海淀区政府，暂时用清华大学坐标替代
-  const [originLatitude, setOriginLatitude] = useState(40.0011)
-  const [originLongitude, setOriginLongitude] = useState(116.3265)
+  const [originLatitude, setOriginLatitude] = useState(myLatitude)
+  const [originLongitude, setOriginLongitude] = useState(myLongitude)
   const [focusVaccine, setFocusVaccine] = useState('无')
   const focusLocation = {
     id: 1,
@@ -73,6 +75,8 @@ export default function MapPage() {
     '无',
     '狂犬疫苗',
     'HPV疫苗',
+    '流感疫苗',
+    '常规疫苗'
   ]
 
   const vaccineOptions = vaccineList.map((item) => {
@@ -99,9 +103,12 @@ export default function MapPage() {
           columns={2}
           onChange={(v) => {
             setFocusVaccine(v.value)
-            // 向后端请求疫苗接种点
-            // 更新 markers
-            getMarkers(v.value)
+            if (v.value != '无') {
+              getMarkers(v.value)
+            } else {
+              setOriginLatitude(myLatitude)
+              setOriginLongitude(myLongitude)
+            }
           }}
         />
       </Menu>

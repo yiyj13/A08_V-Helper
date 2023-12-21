@@ -28,31 +28,35 @@ export default function () {
         <header className='flex justify-between items-center px-2 h-14'>
           <h1 className='text-2xl font-semibold'>{clinicName}</h1>
         </header>
-        <Cell.Group
-          title={<div className='text-base text-black font-semibold'>详细信息</div>}
-          divider={false}
-        >
-          <Cell
-            title="电话"
-            extra={phoneNumber}
-          />
-          <Cell
-            title="地址"
-            extra={clinicAddress}
-          />
-        </Cell.Group>
-        <Cell.Group
-          title={<div className='text-base text-black font-semibold'>疫苗列表</div>}
-          divider={false}
-        >
-          {vaccineList.map((item) => {
-            return (
-              <Cell
-                title={item}
-              />
-            )
-          })}
-        </Cell.Group>
+        <div className='m-2'>
+          <Cell.Group
+            title={<div className='text-base text-black font-semibold'>详细信息</div>}
+            divider={true}
+          >
+            <Cell
+              title="电话"
+              extra={phoneNumber}
+            />
+            <Cell
+              title="地址"
+              extra={clinicAddress}
+            />
+          </Cell.Group>
+        </div>
+        <div className='m-2'>
+          <Cell.Group
+            title={<div className='text-base text-black font-semibold'>疫苗列表</div>}
+            divider={true}
+          >
+            {vaccineList.map((item) => {
+              return (
+                <Cell
+                  title={item}
+                />
+              )
+            })}
+          </Cell.Group>
+        </div>
       </div>
     </div>
   )
