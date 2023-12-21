@@ -58,7 +58,7 @@ type VaccinationRecord struct {
 	NextVaccinationDate string  `json:"nextVaccinationDate"` // 疫苗失效时间
 	Note                string  `json:"note"`
 
-	Vaild        string `json:"vaild"`        // 前端表单
+	Valid        string `json:"valid"`        // 前端表单
 	RemindBefore string `json:"remindBefore"` // 前端表单
 
 	IsCompleted bool   `json:"isCompleted"` // 是否完成接种，未完成则为预约接种
