@@ -94,6 +94,7 @@ export default function MapPage() {
           // longitude={location.longitude}
           // latitude={location.latitude}
           markers={markers}
+          includePoints={markers}
         />
       </div>
       <Menu>
@@ -106,6 +107,7 @@ export default function MapPage() {
             if (v.value != '无') {
               getMarkers(v.value)
             } else {
+              setMarkers([focusLocation])
               setOriginLatitude(myLatitude)
               setOriginLongitude(myLongitude)
             }
