@@ -60,7 +60,7 @@ export type VaccinationRecord = GinBase & {
   reminder: boolean
   remindTime: string
   valid: string // 有效期 6月 1年
-  remindBefore: string // 提前多久提醒 2天 1周 
+  remindBefore: string // 提前多久提醒 2天 1周
   nextVaccinationDate: string
   note: string
   isCompleted: boolean
@@ -203,10 +203,25 @@ export async function getTemperatureRecordList(): Promise<TemperatureRecord[]> {
 export async function postArticle(
   title: string, // 标题
   content: string, // 内容
-  vaccineid?: number  // 疫苗id (可选)
-):
-Promise<Article> {
-  const response = await api.post('/api/articles', { title, content, vaccineid, isbind: vaccineid ? true : false })
+  vaccineid?: number // 疫苗id (可选)
+): Promise<Article> {
+  const response = await api.post('/api/articles', {
+    title,
+    content,
+    vaccineid,
+    isbind: vaccineid ? true : false,
+    userId: getUserID(),
+  })
+  return response.data
+}
+
+export async function getMyArticles(): Promise<Article[]> {
+  const response = await api.get('/api/articles/user/' + getUserID())
+  return response.data
+}
+
+export async function deleteArticle(id: number): Promise<string> {
+  const response = await api.delete('/api/articles/' + id)
   return response.data
 }
 

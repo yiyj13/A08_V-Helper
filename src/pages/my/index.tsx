@@ -1,3 +1,5 @@
+import Taro from '@tarojs/taro'
+import { useState, useEffect } from 'react'
 import { Avatar, Button } from '@nutui/nutui-react-taro'
 import { Follow, Notice, People, RectRight, Comment, Ask, Tips } from '@nutui/icons-react-taro'
 import { getUserID, useUserStore } from '../../models'
@@ -5,9 +7,6 @@ import { getUserID, useUserStore } from '../../models'
 import { Userinfo, getUserInfo, updateUserInfo } from '../../api/methods'
 
 import useSWR from 'swr'
-
-import Taro from '@tarojs/taro'
-import { useState, useEffect } from 'react'
 
 export default function ProfilePage() {
   const removeToken = useUserStore.use.removeUserInfo()
@@ -27,8 +26,16 @@ export default function ProfilePage() {
             text='成员档案'
             onClick={() => Taro.navigateTo({ url: '/pages/member/index' })}
           />
-          <ActionFlexRowItem icon={<Follow size={24} className='brand-color' />} text='收藏记录' />
-          <ActionFlexRowItem icon={<Comment size={24} className='brand-color' />} text='社区回复' />
+          <ActionFlexRowItem
+            icon={<Follow size={24} className='brand-color' />}
+            text='收藏记录'
+            onClick={() => Taro.navigateTo({ url: '/pages/my/follow/index' })}
+          />
+          <ActionFlexRowItem
+            icon={<Comment size={24} className='brand-color' />}
+            text='社区回复'
+            onClick={() => Taro.navigateTo({ url: '/pages/my/myposts/index' })}
+          />
         </div>
 
         <div className='flex flex-col m-4'>
@@ -79,7 +86,7 @@ function ProfileCard() {
     }
 
     handleUserAvatar()
-  }, []) 
+  }, [])
 
   return (
     <div className='flex p-4 m-4 items-center justify-between active:bg-gray-100 rounded-2xl'>

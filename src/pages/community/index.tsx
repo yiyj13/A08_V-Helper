@@ -8,6 +8,7 @@ import { ArticlePreview } from './ArticlePreview'
 import api, { Article, useVaccines } from '../../api/'
 import { PullDownRefresh } from '../../components/pulldownrefresh'
 import { NetworkError } from '../../components/errors'
+import { EmptyView } from '../../components/empty'
 import { useCommunityStore } from '../../models'
 
 const PAGESIZE = 5
@@ -50,6 +51,7 @@ export function Community() {
       <main className='px-8 pb-32 mt-4'>
         <div className='flex flex-col gap-6'>
           {error && <NetworkError></NetworkError>}
+          {isEmpty && <EmptyView text='来发布一篇帖子吧' />}
           {articles?.map((article, index) => (
             <ArticlePreview key={index} {...article} />
           ))}
@@ -61,7 +63,7 @@ export function Community() {
 }
 
 const Skeletons = () => (
-  <div className='flex flex-col gap-16'>
+  <div className='animate-delayed-show flex flex-col gap-16'>
     <Skeleton animated avatar rows={2}></Skeleton>
     <Skeleton animated avatar rows={4}></Skeleton>
     <Skeleton animated avatar rows={3}></Skeleton>
@@ -123,7 +125,7 @@ const Header = () => {
               )}
               onClick={() => toggleFilter(vaccine.ID)}
             >
-              {vaccine.name}
+              {'#'+vaccine.name}
             </li>
           ))}
         </ul>

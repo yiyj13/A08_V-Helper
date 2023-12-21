@@ -17,10 +17,21 @@ module.exports = {
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
+        'fade-in-half': 'fadeInHalf 0.3s ease-in',
+        'delayed-show': 'delayedShow 0.4s ease-in-out',
       },
       keyframes: () => ({
         fadeIn: {
           '0%': { opacity: 0 },
+          '100%': { opacity: 1 },
+        },
+        fadeInHalf: {
+          '0%': { opacity: 0 },
+          '100%': { opacity: 0.5 },
+        },
+        delayedShow: {
+          '0%': { opacity: 0 },
+          '50%': { opacity: 0 },
           '100%': { opacity: 1 },
         },
       }),

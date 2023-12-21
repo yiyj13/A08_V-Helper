@@ -30,16 +30,15 @@ const userStorage: StateStorage = {
 }
 
 const initialState: State = {
-  userinfo: null,
+  token: null,
+  id: null,
   isLogged: false,
 }
 const userStore = create<State & Action>()(
   immer(
     persist(
       (set, _get) => ({
-        token: null,
-        id: null,
-        isLogged: false,
+        ...initialState,
         setUserInfo: (data) => set({ token: data.openId, id: data.ID, isLogged: true }),
         removeUserInfo: () => set({ token: null, id: null, isLogged: false }),
       }),
