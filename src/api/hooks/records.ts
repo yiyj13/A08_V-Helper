@@ -2,18 +2,7 @@ import useSWR from 'swr'
 import { useMemo } from 'react'
 import { dayjs } from '../../utils'
 
-import { getVaccineRecordList, getVaccineRecordWithProfile, VaccinationRecord } from '..'
-
-export function useVaccineRecordList() {
-  const { data, ...rest } = useSWR('getVaccineRecordList', getVaccineRecordList, {
-    revalidateIfStale: false,
-  })
-
-  return {
-    ...rest,
-    data,
-  }
-}
+import { getVaccineRecordList } from '..'
 
 type VaccineState = {
   planning: boolean
@@ -21,21 +10,17 @@ type VaccineState = {
   inoculated: boolean
 }
 
-export function useVaccineRecordForPerson(profileID?: number) {
-  const { data, ...rest } = useSWR<VaccinationRecord[]>(
-    profileID ? [profileID, 'getVaccineRecordWithProfile'] : null,
-    ([id]) => getVaccineRecordWithProfile(id),
-    {
-      revalidateIfStale: false,
-    }
-  )
+export function useVaccineRecordList() {
+  const { data, ...rest } = useSWR('getVaccineRecordList', getVaccineRecordList, {
+    revalidateIfStale: false,
+  })
 
-  // TODO: performance?
-  const getVaccineState = useMemo<(vacID?: number) => VaccineState>(
-    () => (vacID?: number) => {
-      if (!data || data.length === 0) return { planning: false, inEffect: false, inoculated: false }
+  const getVaccineState = useMemo<(profileID?: number, vacID?: number) => VaccineState>(
+    () => (profileID?:number, vacID?: number) => {
+      const recordsForProfile = profileID ? data?.filter((record) => record.profileId === profileID) : []
+      if (!recordsForProfile || recordsForProfile.length === 0) return { planning: false, inEffect: false, inoculated: false }
 
-      const records = vacID ? data.filter((record) => record.vaccineId === vacID) : []
+      const records = vacID ? recordsForProfile.filter((record) => record.vaccineId === vacID) : []
       if (records.length === 0) return { planning: false, inEffect: false, inoculated: false }
 
       let planning = false,
@@ -69,6 +54,6 @@ export function useVaccineRecordForPerson(profileID?: number) {
   return {
     ...rest,
     data,
-    getVaccineState,
+    getVaccineState
   }
 }

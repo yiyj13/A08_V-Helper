@@ -52,11 +52,13 @@ function ChildrenVaccineItem({ item }: { item: ChildVaccine }) {
             'active:scale-105 active:shadow-md transition'
           )}
           onClick={() => {
+            const id = name2id(item.vaccine)
+            if (id === undefined) return
             Taro.navigateTo({ url: '/pages/vacDetails/index?id=' + name2id(item.vaccine) })
           }}
         >
           <h3 className='flex gap-x-1.5 font-semibold'>{item.vaccine}</h3>
-          <p className='mt-1 text-sm text-gray-600'>Description of ChildrenVaccineItem</p>
+          {/* <p className='mt-1 text-sm text-gray-600'>Description of ChildrenVaccineItem</p> */}
           <span
             className={clsx(
               'mt-1 -ms-1 p-1 inline-flex items-center gap-x-2 text-xs rounded-full border text-brand border-brand',

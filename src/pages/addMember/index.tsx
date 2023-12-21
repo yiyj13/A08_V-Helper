@@ -18,6 +18,7 @@ import {
   Grid,
 } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
+import { useSWRConfig } from 'swr'
 
 import api from '../../api'
 import { Profile } from '../../api/methods'
@@ -171,6 +172,9 @@ export default function AddMember() {
     fetchData()
   }, [])
 
+  const { mutate } = useSWRConfig()
+  const refreshProfileCache = () => mutate('getProfiles')
+
   const handleSubmission = async () => {
     const router = Taro.getCurrentInstance().router
 
@@ -179,6 +183,7 @@ export default function AddMember() {
       if (id) {
         try {
           await api.request({ url: `/api/profiles/${id}`, method: 'PUT', data: member })
+          refreshProfileCache()
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()
@@ -195,12 +200,13 @@ export default function AddMember() {
             ...member,
             ID: res.data.id,
           })
+          refreshProfileCache()
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()
           }, 1000)
         } catch (error) {
-           Taro.showToast({ title: '提交失败', icon: 'error' })
+          Taro.showToast({ title: '提交失败', icon: 'error' })
         }
       } else {
         Taro.showToast({ title: '请填写完整记录', icon: 'error' })

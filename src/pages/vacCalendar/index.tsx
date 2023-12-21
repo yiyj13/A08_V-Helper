@@ -1,14 +1,13 @@
 import { useMemo } from 'react'
-import dayjs from 'dayjs'
-import useSWR from 'swr'
 
-import { getVaccineRecordList } from '../../api/methods'
+import { useVaccineRecordList } from '../../api'
 
 import { MergeItems, VacCalendarItemExpire, VacCalendarItem } from './vacCalendarItem'
 import { NetworkError } from '../../components/errors'
 import RecordPopup from './recordPopup'
 import { Header } from './header'
 import { useCalendarStore } from '../../models'
+import { dayjs } from '../../utils'
 
 export default function Index() {
   return (
@@ -21,13 +20,11 @@ export default function Index() {
 }
 
 // TODO: implement interaction of date picker and scroll view
-// FIXME: if the date field of a record is in the far future, 
-// new items will be generated every time the page is refreshed
 export function VacCalendarScrollView() {
-  const { data, error } = useSWR('getVaccineRecordList', getVaccineRecordList)
+  const { data, error } = useVaccineRecordList()
 
   const mergedItems = useMemo(
-    () => (data ? MergeItems(data).sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf()) : null),
+    () => (data ? MergeItems(data).sort((a, b) => dayjs(a.date).unix() - dayjs(b.date).unix()) : null),
     [data]
   )
 
@@ -49,9 +46,9 @@ export function VacCalendarScrollView() {
             ?.filter((item) => (profileIdFilter ? item.record.profileId === profileIdFilter : true))
             .map((item) => {
               if (item.expireDate) {
-                return <VacCalendarItemExpire key={dayjs(item.date).valueOf()} record={item.record} />
+                return <VacCalendarItemExpire key={item.record.ID} record={item.record} />
               } else {
-                return <VacCalendarItem key={dayjs(item.date).valueOf()} record={item.record} />
+                return <VacCalendarItem key={-item.record.ID} record={item.record} />
               }
             })}
         </ol>
