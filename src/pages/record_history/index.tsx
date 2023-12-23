@@ -1,32 +1,29 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { Button, Menu } from '@nutui/nutui-react-taro'
 import { IconFont, Edit } from '@nutui/icons-react-taro'
 import Taro from '@tarojs/taro'
 
-import api, { getProfiles } from '../../api'
+import { useProfiles, useVaccineRecordList } from '../../api'
 
-import { Profile, VaccinationRecord } from '../../api/methods'
-import useSWR from 'swr'
+import { VaccinationRecord } from '../../api/methods'
+import { dayjs } from '../../utils'
 
 export default function RecordHistory() {
-  const [vaccinationRecordList, setVaccinationRecordList] = useState<VaccinationRecord[]>([])
-  const { data: profiles } = useSWR('getProfiles', getProfiles)
-  const [menuValue, setMenuValue] = useState<number>(0)
-
-  const fetchVaccinationRecords = async () => {
-    const res = await api.get('/api/vaccination-records')
-    var result = res.data as VaccinationRecord[]
-    result.sort((a, b) => new Date(a.vaccinationDate).getTime() - new Date(b.vaccinationDate).getTime())
-    setVaccinationRecordList(result)
-  }
-
-  useEffect(() => {
-    fetchVaccinationRecords()
-  }, [menuValue])
+  const { data: profiles } = useProfiles()
+  const { data: recordList } = useVaccineRecordList()
+  const vaccinationRecordList = useMemo(() => {
+    if (!recordList) return []
+    const result = recordList as VaccinationRecord[]
+    return result
+      .filter((r) => r.isCompleted)
+      .sort((a, b) => dayjs(b.vaccinationDate).unix() - dayjs(a.vaccinationDate).unix())
+  }, [recordList])
 
   const handleAddRecord = () => {
     Taro.navigateTo({ url: '/pages/record/index' })
   }
+
+  const [menuValue, setMenuValue] = useState<number>(0)
 
   const MemberDataList = useMemo(() => {
     const dataList = profiles ? profiles.map((item) => ({ value: item.ID, text: item.relationship })) : []
@@ -49,7 +46,7 @@ export default function RecordHistory() {
       {vaccinationRecordList
         ?.filter((item) => (menuValue !== 0 ? item.profileId === menuValue : true))
         .map((item, index) => (
-          <ItemRender data={item} key={index} menuVal={menuValue} />
+          <ItemRender data={item} key={index} />
         ))}
       <Button
         type='primary'
@@ -62,24 +59,9 @@ export default function RecordHistory() {
   )
 }
 
-const ItemRender = ({ data, menuVal }: { data: VaccinationRecord; menuVal: number }) => {
-  const [profileInfo, setProfileInfo] = useState<Profile>({} as Profile)
-
-  const getProfileInfo = (profileId: number) => {
-    api.request({ url: '/api/profiles/' + profileId }).then((res) => {
-      const result = res.data as Profile
-      setProfileInfo(result)
-    })
-  }
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (data.profileId === menuVal || menuVal === 0) {
-        await getProfileInfo(data.profileId)
-      }
-    }
-    fetchData()
-  }, [data.profileId, menuVal])
+const ItemRender = ({ data }: { data: VaccinationRecord }) => {
+  const { selectByID } = useProfiles()
+  const profileInfo = selectByID(data.profileId)
 
   const handleEditRecord = (recordData: VaccinationRecord) => {
     Taro.navigateTo({
@@ -94,12 +76,12 @@ const ItemRender = ({ data, menuVal }: { data: VaccinationRecord; menuVal: numbe
     >
       <div className='flex items-center justify-between'>
         <div className='flex items-center'>
-          <IconFont className='text-2xl mr-2' name={profileInfo.avatar} style={{ width: '40px', height: '40px' }} />
+          <IconFont className='text-2xl mr-2' name={profileInfo?.avatar} style={{ width: '40px', height: '40px' }} />
           <div className='flex justify-between mt-2'>
             <div className='font-bold' style={{ color: '#4796A1' }}>
-              {profileInfo.relationship}
+              {profileInfo?.relationship}
             </div>
-            <div className='font-bold ml-2'>{profileInfo.fullName}</div>
+            <div className='font-bold ml-2'>{profileInfo?.fullName}</div>
           </div>
         </div>
         <Edit className='cursor-pointer' onClick={() => handleEditRecord(data)} />

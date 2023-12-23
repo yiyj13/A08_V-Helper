@@ -3,43 +3,37 @@
     2. feat: filtering the record by record type manually
 */
 
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { Tabs } from '@nutui/nutui-react-taro'
 import { IconFont } from '@nutui/icons-react-taro'
 import Taro from '@tarojs/taro'
 
-import api from '../../api'
+import { useProfiles, useVaccineRecordList, useTemperatureList } from '../../api'
+import { dayjs } from '../../utils'
 
-import { Profile, VaccinationRecord, TemperatureRecord } from '../../api/methods'
+import { VaccinationRecord, TemperatureRecord } from '../../api/methods'
 
 export default function RecordHistory() {
-  const [vaccinationRecordList, setVaccinationRecordList] = useState<VaccinationRecord[]>([])
-  const [temperRecordList, setTemperRecordList] = useState<TemperatureRecord[]>([])
-
   const [tab1value, setTab1value] = useState('0')
+  const router = Taro.getCurrentInstance().router
+  const profileId = parseInt(router?.params.id as string)
 
-  useEffect(() => {
-    const router = Taro.getCurrentInstance().router
+  const { data: recordList } = useVaccineRecordList()
+  const { data: allTempers } = useTemperatureList()
 
-    const fetchData = async () => {
-      if (router && router.params && router.params.id !== undefined) {
-        try {
-          const vacRes = await api.get('/api/vaccination-records/profile/' + router.params.id)
-          const sortedVacRes = vacRes.data.sort(
-            (a, b) => new Date(a.vaccinationDate).getTime() - new Date(b.vaccinationDate).getTime()
-          )
-          setVaccinationRecordList(sortedVacRes as VaccinationRecord[])
-          const tempRes = await api.get('/api/temperature-records/profile/' + router.params.id)
-          const sortedTempRes = tempRes.data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-          setTemperRecordList(sortedTempRes as TemperatureRecord[])
-        } catch (error) {
-          console.error('Error fetching member information:', error)
-          Taro.showToast({ title: '获取成员信息失败', icon: 'error' })
-        }
-      }
-    }
-    fetchData()
-  }, [])
+  const vaccinationRecordList = useMemo(() => {
+    if (!recordList) return []
+    const result = recordList as VaccinationRecord[]
+    return result
+      .filter((r) => r.profileId === profileId && r.isCompleted)
+      .sort((a, b) => dayjs(b.vaccinationDate).unix() - dayjs(a.vaccinationDate).unix())
+  }, [recordList, profileId])
+
+  const temperRecordList = useMemo(() => {
+    if (!allTempers) return []
+    const result = allTempers as TemperatureRecord[]
+    return result.filter((r) => r.profileId === profileId).sort((a, b) => dayjs(b.date).unix() - dayjs(a.date).unix())
+  }, [allTempers, profileId])
 
   return (
     <>
@@ -65,21 +59,8 @@ export default function RecordHistory() {
 }
 
 const VaccineItemRender = ({ data }: { data: VaccinationRecord }) => {
-  const [profileInfo, setProfileInfo] = useState<Profile>({} as Profile)
-
-  const getProfileInfo = (profileId: number) => {
-    api.request({ url: '/api/profiles/' + profileId }).then((res) => {
-      const result = res.data as Profile
-      setProfileInfo(result)
-    })
-  }
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await getProfileInfo(data.profileId)
-    }
-    fetchData()
-  }, [])
+  const { selectByID } = useProfiles()
+  const profileInfo = selectByID(data.profileId)
 
   // const handleReadDocument = (recordData: VaccinationRecord) => {
   //   Taro.navigateTo({
@@ -93,12 +74,12 @@ const VaccineItemRender = ({ data }: { data: VaccinationRecord }) => {
     >
       <div className='flex items-center justify-between'>
         <div className='flex items-center'>
-          <IconFont className='text-2xl mr-2' name={profileInfo.avatar} style={{ width: '40px', height: '40px' }} />
+          <IconFont className='text-2xl mr-2' name={profileInfo?.avatar} style={{ width: '40px', height: '40px' }} />
           <div className='flex justify-between mt-2'>
             <div className='font-bold' style={{ color: '#4796A1' }}>
-              {profileInfo.relationship}
+              {profileInfo?.relationship}
             </div>
-            <div className='font-bold ml-2'>{profileInfo.fullName}</div>
+            <div className='font-bold ml-2'>{profileInfo?.fullName}</div>
           </div>
         </div>
         {/* <Eye className='cursor-pointer' onClick={() => handleReadDocument(data)} style={{ marginRight: '10px' }} /> */}
@@ -124,21 +105,8 @@ const VaccineItemRender = ({ data }: { data: VaccinationRecord }) => {
 }
 
 const TemperItemRender = ({ data }: { data: TemperatureRecord }) => {
-  const [profileInfo, setProfileInfo] = useState<Profile>({} as Profile)
-
-  const getProfileInfo = (profileId: number) => {
-    api.request({ url: '/api/profiles/' + profileId }).then((res) => {
-      const result = res.data as Profile
-      setProfileInfo(result)
-    })
-  }
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await getProfileInfo(data.profileId)
-    }
-    fetchData()
-  }, [])
+  const { selectByID } = useProfiles()
+  const profileInfo = selectByID(data.profileId)
 
   // const handleReadDocument = (recordData: TemperatureRecord) => {
   //   Taro.navigateTo({
@@ -162,12 +130,12 @@ const TemperItemRender = ({ data }: { data: TemperatureRecord }) => {
     >
       <div className='flex items-center justify-between'>
         <div className='flex items-center'>
-          <IconFont className='text-2xl mr-2' name={profileInfo.avatar} style={{ width: '40px', height: '40px' }} />
+          <IconFont className='text-2xl mr-2' name={profileInfo?.avatar} style={{ width: '40px', height: '40px' }} />
           <div className='flex justify-between mt-2'>
             <div className='font-bold' style={{ color: '#4796A1' }}>
-              {profileInfo.relationship}
+              {profileInfo?.relationship}
             </div>
-            <div className='font-bold ml-2'>{profileInfo.fullName}</div>
+            <div className='font-bold ml-2'>{profileInfo?.fullName}</div>
           </div>
         </div>
         {/* <Eye className='cursor-pointer' onClick={() => handleReadDocument(data)} style={{ marginRight: '10px' }} /> */}

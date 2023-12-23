@@ -7,8 +7,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { Cell, Switch, Picker, Uploader, Button, DatePicker, TextArea, Input, Popover } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
-import useSWR, { useSWRConfig } from 'swr'
-import api, { VaccinationRecord, getProfiles, useVaccines } from '../../api'
+import api, { VaccinationRecord, useProfiles, useVaccines, useVaccineRecordList } from '../../api'
 
 export default function VaccineRecord() {
   const router = Taro.getCurrentInstance().router
@@ -17,11 +16,9 @@ export default function VaccineRecord() {
     reminder: false,
   })
 
-  const { mutate } = useSWRConfig()
+  const { data: allRecords, mutate: refreshRecordCache } = useVaccineRecordList()
 
-  const { data: profiles } = useSWR('getProfiles', getProfiles)
-  const refreshRecordListCache = () => mutate('getVaccineRecordList')
-
+  const { data: profiles } = useProfiles()
   const MemberData = useMemo(
     () => (profiles ? profiles.map((item) => ({ value: item.ID, text: item.relationship })) : []),
     [profiles]
@@ -29,32 +26,35 @@ export default function VaccineRecord() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (router && router.params && router.params.id !== undefined) {
-        try {
-          const res = await api.get('/api/vaccination-records/' + router.params.id)
-          const result = res.data as VaccinationRecord
-          const relation = MemberData.find((item) => item.value === result.profileId)
-          setIdDesc(relation ? relation.text : '')
-          setNameDesc(result.vaccine.name)
-          setTypeDesc(result.vaccinationType)
-          setDateDesc(result.vaccinationDate)
-          setValidDesc(result.valid)
-          setRemindSwitch(result.reminder)
-          if (result.reminder) {
-            setRemindVisible(true)
-            setRemindValue(result.remindBefore.slice(0, -1))
-            setRemindUnit(result.remindBefore.slice(-1))
-          }
-          setNoteValue(result.note)
-          setRecord(result)
-        } catch (error) {
-          console.error('Error fetching member information:', error)
-          Taro.showToast({ title: '获取信息失败', icon: 'error' })
+      if (router?.params.id === undefined) return
+
+      try {
+        const result = allRecords?.find((item) => item.ID === Number(router.params.id))
+        if (!result) {
+          // TODO: handle 404
+          return
         }
+        const relation = MemberData.find((item) => item.value === result.profileId)
+        setIdDesc(relation ? relation.text : '')
+        setNameDesc(result.vaccine.name)
+        setTypeDesc(result.vaccinationType)
+        setDateDesc(result.vaccinationDate)
+        setValidDesc(result.valid)
+        setRemindSwitch(result.reminder)
+        if (result.reminder) {
+          setRemindVisible(true)
+          setRemindValue(result.remindBefore.slice(0, -1))
+          setRemindUnit(result.remindBefore.slice(-1))
+        }
+        setNoteValue(result.note)
+        setRecord(result)
+      } catch (error) {
+        console.error('Error fetching member information:', error)
+        Taro.showToast({ title: '获取信息失败', icon: 'error' })
       }
     }
     fetchData()
-  }, [MemberData])
+  }, [MemberData, router, allRecords])
 
   const { data: vaccines } = useVaccines()
   const VaccineData = vaccines ? vaccines.map((item) => ({ value: item.ID, text: item.name })) : []
@@ -302,7 +302,7 @@ export default function VaccineRecord() {
               remindBefore: remindValue + remindUnit,
             },
           })
-          refreshRecordListCache()
+          refreshRecordCache()
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()
@@ -340,7 +340,7 @@ export default function VaccineRecord() {
               remindBefore: remindValue + remindUnit,
             },
           })
-          refreshRecordListCache()
+          refreshRecordCache()
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()

@@ -1,28 +1,24 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { Button, Menu } from '@nutui/nutui-react-taro'
 import { IconFont, Edit } from '@nutui/icons-react-taro'
 import Taro from '@tarojs/taro'
 
-import api, { getProfiles } from '../../api'
+import { useTemperatureList, useProfiles } from '../../api'
 
-import { Profile, TemperatureRecord } from '../../api/methods'
-import useSWR from 'swr'
+import { TemperatureRecord } from '../../api/methods'
+import { dayjs } from '../../utils'
 
 export default function TemperHistory() {
-  const [temperRecordList, setTemperRecordList] = useState<TemperatureRecord[]>([])
-  const { data: profiles } = useSWR('getProfiles', getProfiles)
+  const { data: allTempers } = useTemperatureList()
+
+  const { data: profiles } = useProfiles()
   const [menuValue, setMenuValue] = useState<number>(0)
 
-  const fetchTemperatureRecords = async () => {
-    const res = await api.get('/api/temperature-records')
-    var result = res.data as TemperatureRecord[]
-    result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    setTemperRecordList(result)
-  }
-
-  useEffect(() => {
-    fetchTemperatureRecords()
-  }, [menuValue])
+  const temperRecordList = useMemo(() => {
+    if (!allTempers) return []
+    const result = allTempers as TemperatureRecord[]
+    return result.sort((a, b) => dayjs(b.date).unix() - dayjs(a.date).unix())
+  }, [allTempers])
 
   const handleAddRecord = () => {
     Taro.navigateTo({ url: '/pages/temper/index' })
@@ -49,7 +45,7 @@ export default function TemperHistory() {
       {temperRecordList
         ?.filter((item) => (menuValue !== 0 ? item.profileId === menuValue : true))
         .map((item, index) => (
-          <ItemRender data={item} key={index} menuVal={menuValue} />
+          <ItemRender data={item} key={index} />
         ))}
       <Button
         type='primary'
@@ -62,24 +58,9 @@ export default function TemperHistory() {
   )
 }
 
-const ItemRender = ({ data, menuVal }: { data: TemperatureRecord; menuVal: number }) => {
-  const [profileInfo, setProfileInfo] = useState<Profile>({} as Profile)
-
-  const getProfileInfo = (profileId: number) => {
-    api.request({ url: '/api/profiles/' + profileId }).then((res) => {
-      const result = res.data as Profile
-      setProfileInfo(result)
-    })
-  }
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (data.profileId === menuVal || menuVal === 0) {
-        await getProfileInfo(data.profileId)
-      }
-    }
-    fetchData()
-  }, [data.profileId, menuVal])
+const ItemRender = ({ data }: { data: TemperatureRecord }) => {
+  const { selectByID } = useProfiles()
+  const profileInfo = selectByID(data.profileId)
 
   const handleEditRecord = (recordData: TemperatureRecord) => {
     Taro.navigateTo({
@@ -104,12 +85,12 @@ const ItemRender = ({ data, menuVal }: { data: TemperatureRecord; menuVal: numbe
     >
       <div className='flex items-center justify-between'>
         <div className='flex items-center'>
-          <IconFont className='text-2xl mr-2' name={profileInfo.avatar} style={{ width: '40px', height: '40px' }} />
+          <IconFont className='text-2xl mr-2' name={profileInfo?.avatar} style={{ width: '40px', height: '40px' }} />
           <div className='flex justify-between mt-2'>
             <div className='font-bold' style={{ color: '#4796A1' }}>
-              {profileInfo.relationship}
+              {profileInfo?.relationship}
             </div>
-            <div className='font-bold ml-2'>{profileInfo.fullName}</div>
+            <div className='font-bold ml-2'>{profileInfo?.fullName}</div>
           </div>
         </div>
         <Edit className='cursor-pointer' onClick={() => handleEditRecord(data)} />
@@ -119,7 +100,7 @@ const ItemRender = ({ data, menuVal }: { data: TemperatureRecord; menuVal: numbe
           测温时间 <b className='text-black font-bold'>{data.date}</b>
         </div>
         <div className='text-gray-500'>
-            体温值 <b className={`text-black font-bold ${colorClass}`}>{data.temperature.toFixed(1)}</b>
+          体温值 <b className={`text-black font-bold ${colorClass}`}>{data.temperature.toFixed(1)}</b>
         </div>
       </div>
     </div>
