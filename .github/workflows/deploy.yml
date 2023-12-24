@@ -33,5 +33,5 @@ jobs:
 
     - name: Deploy to Server
       run: |
-        sshpass -p ${{ secrets.SERVER_SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cd /path/to/your/repo && docker-compose up --build -d"
+        sshpass -p "0CI[Ql%eZZuM:" ssh -o StrictHostKeyChecking=no ubuntu@101.43.194.58 "cd /home/ubuntu/backend/A08_V-Helper && git pull && cd go-backend && sudo docker-compose up --build -d"
       # Deploys the application on your server using SSH with password authentication
