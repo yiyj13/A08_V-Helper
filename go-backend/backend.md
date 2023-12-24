@@ -24,9 +24,10 @@
 - [ ] github action
 - [ ] token验证
 - [ ] 加密
-- [ ] 代码规范(配置文件)，注释
+- [ ] 代码规范(配置文件)，详细注释
 - [ ] 数据库时区更改
 - [ ] 性能测试
+- [ ] 路由拦截和重定向，部署时只暴露api接口
 
 
 
@@ -120,6 +121,7 @@ Post 时的json样例：
 | POST | /api/temperature-records | 添加体温记录 |
 | GET | /api/temperature-records | 获取全部体温记录 |
 | GET | /api/temperature-records/:id | 获取指定 id 的体温记录 |
+| GET | /api/temperature-records/user/:id | 获取指定 id 的用户的体温记录 |
 | GET | /api/temperature-records/profile/:id | 获取指定 id 的接种者的体温记录 |
 | PUT | /api/temperature-records/:id | 更新指定 id 的体温记录 |
 | DELETE | /api/temperature-records/:id | 删除指定 id 的体温记录 |

@@ -54,6 +54,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.POST("/temperature-records", tempertureRecordHandler.HandleCreateTempertureRecord)
 	router.GET("/temperature-records", tempertureRecordHandler.HandleGetAllTempertureRecords)
 	router.GET("/temperature-records/:id", tempertureRecordHandler.HandleGetTempertureRecordByID)
+	router.GET("/temperature-records/user/:userID", tempertureRecordHandler.HandleGetTempertureRecordsByUserID)
 	router.GET("/temperature-records/profile/:profileID", tempertureRecordHandler.HandleGetTempertureRecordsByProfileID)
 	router.PUT("/temperature-records/:id", tempertureRecordHandler.HandleUpdateTempertureRecordByID)
 	router.DELETE("/temperature-records/:id", tempertureRecordHandler.HandleDeleteTempertureRecordByID)

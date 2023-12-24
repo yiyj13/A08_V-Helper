@@ -18,6 +18,26 @@ func (s *TempertureRecordService) CreateTempertureRecord(record model.Temperture
 	return s.db.Create(&record).Error
 }
 
+func (s *TempertureRecordService) GetTempertureRecordsByUserID(userID uint) ([]model.TempertureRecord, error) {
+	// 先查询用户的所有档案
+	var profiles []model.Profile
+	if err := s.db.Where("user_id = ?", userID).Find(&profiles).Error; err != nil {
+		return nil, err
+	}
+
+	// 再查询所有档案的接种记录
+	var records []model.TempertureRecord
+	for _, profile := range profiles {
+		var tempRecords []model.TempertureRecord
+		if err := s.db.Where("profile_id = ?", profile.ID).Find(&tempRecords).Error; err != nil { //
+			return nil, err
+		}
+		records = append(records, tempRecords...)
+	}
+
+	return records, nil
+}
+
 func (s *TempertureRecordService) GetTempertureRecordsByProfileID(profileID uint) ([]model.TempertureRecord, error) {
 	var records []model.TempertureRecord
 	if err := s.db.Where("profile_id = ?", profileID).Find(&records).Error; err != nil {

@@ -99,9 +99,9 @@ type TemplateMessageData struct {
 	} `json:"thing5"` // 备注
 	Thing7 struct {
 		Value string `json:"value"`
-	} `json:"thing4"` // 接种地址
+	} `json:"thing7"` // 接种地址
 	Number8 struct {
-		Value string `json:"value"`
+		Value int `json:"value"`
 	} `json:"number8"` // 接种剂数
 }
 
@@ -130,17 +130,17 @@ func SendTemplateMessage(accessToken, openID, templateID, page, phone, vaxName, 
 		Thing5: struct {
 			Value string `json:"value"`
 		}{
-			Value: comment,
+			Value: "备注：" + comment + "，请准时接种",
 		},
 		Thing7: struct {
 			Value string `json:"value"`
 		}{
-			Value: vaxLocation,
+			Value: "接种地点：" + vaxLocation + "，请准时接种",
 		},
 		Number8: struct {
-			Value string `json:"value"`
+			Value int `json:"value"`
 		}{
-			Value: vaxType,
+			Value: 1,
 		},
 	}
 
