@@ -3,17 +3,15 @@
 */
 
 import { useState, useMemo, useEffect } from 'react'
-import useSWR from 'swr'
 import Taro from '@tarojs/taro'
 import { Text } from '@tarojs/components'
 import { Picker, Range, DatePicker, Cell, Button, TextArea, InputNumber } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
-import api from '../../api'
-import { TemperatureRecord, getProfiles } from '../../api/methods'
+import api, { TemperatureRecord, useProfiles, useTemperatureList } from '../../api'
 
 export default function TemperRecord() {
-  const { data: profiles } = useSWR('getProfiles', getProfiles)
+  const { data: profiles } = useProfiles()
 
   const MemberData = useMemo(
     () => (profiles ? profiles.map((item) => ({ value: item.ID, text: item.relationship })) : []),
@@ -21,17 +19,21 @@ export default function TemperRecord() {
   )
   const router = Taro.getCurrentInstance().router
 
+  const { data: allTemperatures, mutate: refreshTemperatureCache } = useTemperatureList()
+
   useEffect(() => {
     const fetchData = async () => {
       if (router && router.params && router.params.id !== undefined) {
         try {
-          const res = await api.get('/api/temperature-records/' + router.params.id)
-          const result = res.data as TemperatureRecord
+          const result = allTemperatures?.find((item) => item.ID === Number(router?.params.id))
+          if (!result) {
+          // TODO: handle 404
+            return
+          }
           const relation = MemberData.find((item) => item.value === result.profileId)
           setIdDesc(relation ? relation.text : '')
           setDateDesc(result.date)
           setNoteValue(result.note)
-          updateTemperature(result.temperature)
           setTempRecord(result)
         } catch (error) {
           console.error('Error fetching member information:', error)
@@ -40,7 +42,7 @@ export default function TemperRecord() {
       }
     }
     fetchData()
-  }, [MemberData])
+  }, [MemberData, allTemperatures, router])
 
   const [tempRecord, setTempRecord] = useState<Partial<TemperatureRecord>>({
     date: new Date(Date.now()).toISOString().replace('T', ' ').slice(0, 16),
@@ -110,6 +112,7 @@ export default function TemperRecord() {
       if (id) {
         try {
           await api.request({ url: `/api/temperature-records/${id}`, method: 'PUT', data: tempRecord })
+          refreshTemperatureCache()
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()
@@ -124,6 +127,7 @@ export default function TemperRecord() {
       if (tempRecord && tempRecord.profileId !== undefined && tempRecord.profileId >= 0) {
         try {
           await api.request({ url: '/api/temperature-records', method: 'POST', data: tempRecord })
+          refreshTemperatureCache()
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
             Taro.navigateBack()

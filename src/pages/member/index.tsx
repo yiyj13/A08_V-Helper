@@ -1,21 +1,13 @@
-import { useState } from 'react'
 import { Button } from '@nutui/nutui-react-taro'
-import { IconFont, Edit, Eye} from '@nutui/icons-react-taro'
-import Taro, { useDidShow } from '@tarojs/taro'
+import { IconFont, Edit, Eye } from '@nutui/icons-react-taro'
+import Taro from '@tarojs/taro'
 
-import api from '../../api'
+import { useProfiles } from '../../api'
 
 import { Profile } from '../../api/methods'
 
 export default function Member() {
-  const [memberDataList, setMemberDataList] = useState<Profile[]>([])
-
-  useDidShow(() => {
-    api.request({ url: '/api/profiles' }).then((res) => {
-      const result = res.data as Profile[]
-      setMemberDataList(result)
-    })
-  })
+  const {data: memberDataList} = useProfiles()
 
   const handleAddMember = () => {
     Taro.navigateTo({ url: '/pages/addMember/index' })
@@ -23,7 +15,7 @@ export default function Member() {
 
   return (
     <div style={{ height: '100%', position: 'relative', paddingBottom: '70px' }}>
-      {memberDataList.map((item, index) => (
+      {memberDataList?.map((item, index) => (
         <ItemRender data={item} key={index} />
       ))}
       <Button

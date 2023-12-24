@@ -11,9 +11,14 @@ export function useProfiles() {
     return data?.find((v) => v.ID === id)?.fullName
   }
 
+  function selectByID(id?: number) {
+    return data?.find((v) => v.ID === id)
+  }
+
   return {
     ...rest,
     data,
     id2name,
+    selectByID
   }
 }

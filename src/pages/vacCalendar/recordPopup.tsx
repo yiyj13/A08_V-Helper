@@ -1,14 +1,13 @@
 import Taro from '@tarojs/taro'
-import { ReactNode } from 'react'
+import { ReactNode, useMemo } from 'react'
 import clsx from 'clsx'
-import useSWR, { useSWRConfig } from 'swr'
 import { PageContainer } from '@tarojs/components'
 import { Date as DateIcon, Clock, Checked, Order, Edit, Del2 } from '@nutui/icons-react-taro'
 
 import InjectSVG from '../../assets/home/injection.svg'
 
 import { useRecordPopup } from '../../models'
-import { useProfiles, getVaccineRecord, deleteVaccineRecord, putVaccineRecord } from '../../api'
+import { useProfiles, useVaccineRecordList, deleteVaccineRecord, putVaccineRecord } from '../../api'
 
 export default function RecordPopup() {
   const recordID = useRecordPopup.use.recordId()
@@ -16,25 +15,24 @@ export default function RecordPopup() {
   const hide = useRecordPopup.use.hide()
   const clear = useRecordPopup.use.clear()
 
-  const { data: record, mutate: refreshThisRecord } = useSWR(recordID ? [recordID, 'getVaccineRecord'] : null, ([id]) =>
-    getVaccineRecord(id)
-  )
+  const { data: allRecords, mutate: refresh } = useVaccineRecordList()
 
-  const { mutate } = useSWRConfig()
-  const refreshRecordList = () => mutate('getVaccineRecordList')
+  const record = useMemo(() => {
+    if (!recordID) return undefined
+    return allRecords?.find((r) => r.ID === recordID)
+  }, [recordID, allRecords])
 
   const handleDelete = async () => {
     if (!recordID) return
     await deleteVaccineRecord(recordID)
-    refreshRecordList()
+    refresh()
     hide()
   }
 
   const handleComplete = async () => {
     if (!recordID || record?.isCompleted) return
     await putVaccineRecord(recordID, { isCompleted: true })
-    refreshThisRecord()
-    refreshRecordList()
+    refresh()
   }
 
   const handleEdit = () => {
@@ -67,7 +65,7 @@ export default function RecordPopup() {
         <DividerLine />
 
         <SubHeader icon={<Clock />} text='提醒' />
-        <GrayCard title='失效日期' text={record?.nextVaccinationDate} />
+        <GrayCard title='提前提醒' text={record?.reminder ? '失效' + record.remindBefore + '前' : '未设置'} />
 
         <DividerLine />
 
