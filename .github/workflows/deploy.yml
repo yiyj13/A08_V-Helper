@@ -32,8 +32,6 @@ jobs:
       # Builds and pushes the image to Docker Hub (or your container registry)
 
     - name: Deploy to Server
-      env:
-        SSH_PASS: ${{ secrets.SERVER_SSH_PASSWORD }}
       run: |
-        sshpass -p $SSH_PASS ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cd /home/ubuntu/backend/A08_V-Helper && git pull && cd go-backend && sudo docker-compose up --build -d"
+        sshpass -p ${{ secrets.SERVER_SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cd /path/to/your/repo && docker-compose up --build -d"
       # Deploys the application on your server using SSH with password authentication

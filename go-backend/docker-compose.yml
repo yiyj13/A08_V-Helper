@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: deployments/Dockerfile
     ports:
-      - "8080:8080"
+      # - "8080:8080"
     depends_on:
       - db
     env_file:
@@ -20,7 +20,7 @@ services:
       timeout: 20s
       retries: 10
     ports:
-      - "3306:3306"
+      # - "3306:3306"
   nginx:
     image: nginx:latest
     ports:
