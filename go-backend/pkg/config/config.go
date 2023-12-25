@@ -25,6 +25,6 @@ func LoadConfig() Config {
 
 func (c Config) BuildDSN() string {
 	// 在 Docker 环境中，DBHost 应指向 Docker Compose 服务名称
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=Asia%%2FShanghai",
 		c.DBUser, c.DBPassword, c.DBHost, c.DBPort, c.DBName)
 }

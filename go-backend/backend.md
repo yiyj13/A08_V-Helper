@@ -16,18 +16,18 @@
 - [x] 更方便地通过json数据更新数据库
 - [ ] 更新文档中相关API
 - [x] 接种记录的字段完善
-- [ ] 收藏帖子和疫苗
+- [x] 收藏帖子和疫苗
 - [x] 解耦 接种记录 和 接种预约
 - [x] 根据疫苗筛选帖子
 - [ ] 消息提醒的发送 (https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/subscribe-message.html)
 - [x] 图床
-- [ ] github action
+- [x] github action
 - [ ] token验证
 - [ ] 加密
 - [ ] 代码规范(配置文件)，详细注释
-- [ ] 数据库时区更改
+- [x] 数据库时区更改
 - [ ] 性能测试
-- [ ] 路由拦截和重定向，部署时只暴露api接口
+- [x] 路由拦截和重定向，部署时只暴露api接口
 
 
 
