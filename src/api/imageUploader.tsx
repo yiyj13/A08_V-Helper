@@ -1,9 +1,11 @@
 import Taro from '@tarojs/taro';
 
-export async function uploadImage(imageFile, cloudPath) {
+// imagePath: 需要上传的本地图片路径
+// cloudPath: 希望图片存储在云端的路径
+export async function uploadImage(imagePath, cloudPath) {
   Taro.uploadFile({
     url: 'http://101.43.194.58:8081/upload',
-    filePath: imageFile,
+    filePath: imagePath,
     name: 'myFile',
     formData:{
       'cloudpath': cloudPath
