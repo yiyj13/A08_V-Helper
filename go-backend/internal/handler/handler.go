@@ -21,6 +21,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.GET("/users/removefollowingVaccine/:id", userHandler.HandleRemoveFollowingVaccine)
 	router.GET("/users/addfollowingArticle/:id", userHandler.HandleAddFollowingArticle)
 	router.GET("/users/removefollowingArticle/:id", userHandler.HandleRemoveFollowingArticle)
+	router.GET("/users/public/:id", userHandler.HandleGetPublicUserByID)
 
 	profileService := service.NewProfileService(db)
 	profileHandler := NewProfileHandler(profileService)
@@ -77,6 +78,15 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.GET("/replys/:id", replyHandler.HandleGetReplyByID)
 	router.PUT("/replys/:id", replyHandler.HandleUpdateReplyByID)
 	router.DELETE("/replys/:id", replyHandler.HandleDeleteReplyByID)
+
+	// 通知发送
+	messageService := service.NewMessageService(db)
+	messageHandler := NewMessageHandler(messageService)
+	router.POST("/messages", messageHandler.HandleAddMessage)
+	router.GET("/messages", messageHandler.HandleGetAllMessages)
+	router.GET("/messages/:id", messageHandler.HandleGetMessageByID)
+	router.PUT("/messages/:id", messageHandler.HandleUpdateMessageByID)
+	router.DELETE("/messages/:id", messageHandler.HandleDeleteMessageByID)
 
 	// 根据疫苗寻找诊所
 	clinicService := service.NewClinicService(db)
