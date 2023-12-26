@@ -19,6 +19,8 @@ export type Userinfo = GinBase & {
 
 export type UserFollowing = Pick<Userinfo, 'followingArticles' | 'followingVaccines'>
 
+export type UserPublic = Pick<Userinfo, 'userName' | 'avatar'>
+
 export type Vaccine = GinBase & {
   name: string
   description: string
@@ -88,13 +90,21 @@ export async function Login(): Promise<Userinfo> {
   return response.data as Userinfo
 }
 
+export async function getUserPublic(id: number): Promise<UserPublic> {
+  const response = await api.get('/api/users/public/' + id)
+  return response.data as UserPublic
+}
+
 export async function getUserInfo(): Promise<Userinfo> {
   const response = await api.get('/api/users/' + getUserID())
   return response.data as Userinfo
 }
 
 export async function updateUserInfo(data: Partial<Userinfo>): Promise<Userinfo> {
-  const response = await api.put('/api/users/' + getUserID(), data)
+  const response = await api.put('/api/users/' + getUserID(), {
+    ...data,
+    ID: getUserID(),
+  })
   return response.data
 }
 

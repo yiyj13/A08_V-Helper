@@ -1,12 +1,14 @@
 import Taro from '@tarojs/taro'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Avatar, Button } from '@nutui/nutui-react-taro'
 import { Follow, Notice, People, RectRight, Comment, Ask, Tips } from '@nutui/icons-react-taro'
 import { getUserID, useUserStore } from '../../models'
 
-import { Userinfo, getUserInfo, updateUserInfo } from '../../api/methods'
+import { updateUserInfo } from '../../api/methods'
 
-import useSWR from 'swr'
+import { useUserPublic } from '../../api'
+import { uploadAvatar } from '../../api/imageUploader'
+import { PICTURE_BASE_URL } from '../../api/config'
 
 export default function ProfilePage() {
   const removeToken = useUserStore.use.removeUserInfo()
@@ -68,35 +70,34 @@ export default function ProfilePage() {
 }
 
 function ProfileCard() {
-  const [userInfo, setUserInfo] = useState<Partial<Userinfo>>()
+  const { data, mutate } = useUserPublic()
+
   useEffect(() => {
+    if (data?.avatar !== '' && data?.userName !== '') return
+
     const handleUserAvatar = async () => {
-      try {
-        const res = await Taro.getUserProfile({
-          desc: '用于完善用户资料',
-        })
-        setUserInfo({
-          ...userInfo,
-          avatar: res.userInfo.avatarUrl,
-          userName: res.userInfo.nickName,
-        })
-      } catch (error) {
-        console.error('Error fetching user profile:', error)
-      }
+      const resGetInfo = await Taro.getUserProfile({ desc: '用于完善用户资料' })
+      const resDownload = await Taro.downloadFile({ url: resGetInfo.userInfo.avatarUrl })
+      await uploadAvatar(resDownload.tempFilePath)
+      await updateUserInfo({
+        avatar: `${PICTURE_BASE_URL}/user/${getUserID()}`,
+        userName: resGetInfo.userInfo.nickName,
+      })
+      mutate()
     }
 
     handleUserAvatar()
-  }, [])
+  }, [data, mutate])
 
   return (
     <div className='flex p-4 m-4 items-center justify-between active:bg-gray-100 rounded-2xl'>
       <div className='flex flex-row'>
         <div className='mr-4 flex-shrink-0'>
-          <Avatar size='64' src={userInfo?.avatar} />
+          <Avatar size='64' src={data?.avatar} />
         </div>
         <div>
-          <h4 className='text-lg font-bold'>{userInfo ? userInfo.userName : 'Username:'}</h4>
-          <p className='mt-1 text-gray-500'>{userInfo ? `ID: ${getUserID()}` : 'ID: '}</p>
+          <h4 className='text-lg font-bold'>{data?.userName || '匿名'}</h4>
+          <p className='mt-1 text-gray-500'>{`ID: ${getUserID()}`}</p>
         </div>
       </div>
       <RectRight />
