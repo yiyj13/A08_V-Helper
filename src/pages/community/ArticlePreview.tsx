@@ -1,17 +1,20 @@
 import Taro from '@tarojs/taro'
 import clsx from 'clsx'
 import { memo } from 'react'
-import { Follow, Comment } from '@nutui/icons-react-taro'
-import { useVaccines, Article } from '../../api/'
+import { useVaccines, Article, useUserPublic } from '../../api/'
 import { getCreateTime } from '../../utils'
 
 export type ArticlePreviewProps = Partial<Article>
 
-{/* TODO: abbreviate the content */}
+{
+  /* TODO: abbreviate the content */
+}
 export const ArticlePreview = memo((props: ArticlePreviewProps) => {
   const { id2name } = useVaccines()
 
   const handleClick = () => Taro.navigateTo({ url: '/pages/community/articlepage/index?id=' + props.ID })
+
+  const {data: author} = useUserPublic(Number(props.userId))
 
   return (
     <a
@@ -28,12 +31,12 @@ export const ArticlePreview = memo((props: ArticlePreviewProps) => {
           <dl className='flex items-center gap-2'>
             <img
               alt='Paul Clapton'
-              src='https://avatars.githubusercontent.com/u/69092274?v=4'
-              className='h-8 w-8 rounded-full object-cover shadow-sm'
+              src={author?.avatar}
+              className='h-8 w-8 rounded-full object-cover bg-slate-100 shadow-sm'
             />
 
             <div className='flex flex-col'>
-              <dt className='text-sm font-medium text-gray-600'>{props.userName || 'PlaceHolder'}</dt>
+              <dt className='text-sm font-medium text-gray-600'>{author?.userName || '匿名用户'}</dt>
               <dd className='text-xs text-gray-500'>{props.CreatedAt && getCreateTime(props.CreatedAt)}</dd>
             </div>
           </dl>

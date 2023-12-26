@@ -5,7 +5,7 @@ import clsx from 'clsx'
 import { memo, useRef } from 'react'
 import { getCreateTime } from '../../../utils'
 import { Article, unfollowArticle } from '../../../api'
-import { useVaccines, useUserFollowing } from '../../../api/hooks'
+import { useVaccines, useUserFollowing, useUserPublic } from '../../../api/hooks'
 
 export const ArticlePreview = memo((props: Article) => {
   const { id2name } = useVaccines()
@@ -19,6 +19,8 @@ export const ArticlePreview = memo((props: Article) => {
     mutate()
   }
   const closeRef = useRef<SwipeInstance>(null)
+
+  const {data: author} = useUserPublic(Number(props.userId))
 
   return (
     <Swipe
@@ -50,12 +52,12 @@ export const ArticlePreview = memo((props: Article) => {
             <dl className='flex items-center gap-2'>
               <img
                 alt='Paul Clapton'
-                src='https://avatars.githubusercontent.com/u/69092274?v=4'
-                className='h-8 w-8 rounded-full object-cover shadow-sm'
+                src={author?.avatar}
+                className='h-8 w-8 rounded-full object-cover bg-slate-100 shadow-sm'
               />
 
               <div className='flex flex-col'>
-                <dt className='text-sm font-medium text-gray-600'>{props.userName || 'PlaceHolder'}</dt>
+                <dt className='text-sm font-medium text-gray-600'>{author?.userName || '匿名用户'}</dt>
                 <dd className='text-xs text-gray-500'>{props.CreatedAt && getCreateTime(props.CreatedAt)}</dd>
               </div>
             </dl>
