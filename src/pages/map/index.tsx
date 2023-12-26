@@ -15,11 +15,13 @@ import './index.css'
 export default function MapPage() {
   const location = useDeviceStore.use.location()
   const updateLocation = useDeviceStore.use.updateLocation()
-  const iconWidth = 40
-  const iconHeight = 40
+  const iconWidthNormal = 40
+  const iconHeightNormal = 40
+  const iconWidthFocus = 60
+  const iconHeightFocus = 60
   const myLatitude = 40.0011
   const myLongitude = 116.3265
-  var myPositionID = 1
+  const myPositionID = 1
   const currentPosition = {
     id: 1,
     title: "当前位置",
@@ -27,14 +29,15 @@ export default function MapPage() {
     longitude: myLongitude,
     distance: 0,
     iconPath: CurrentPositionIconPath,
-    width: iconWidth,
-    height: iconHeight
+    width: iconWidthNormal,
+    height: iconHeightNormal
   }
   // 使用定位总是只能定位到海淀区，暂时用清华大学坐标替代
   const [centralLatitude, setCentralLatitude] = useState(myLatitude)
   const [centralLongitude, setCentralLongitude] = useState(myLongitude)
   const [focusVaccine, setFocusVaccine] = useState('无')
   const [markers, setMarkers] = useState([currentPosition])
+  const [focusMarkerID, setFocusMarkerID] = useState(1)
 
   // 获取当前位置
   // TODO: error handling
@@ -59,8 +62,8 @@ export default function MapPage() {
         longitude: parseFloat(item.longitude),
         distance: Math.trunc(2 * 6378 * 1000 * Math.asin(Math.sqrt(Math.pow(Math.sin((Math.PI / 180) * (parseFloat(item.latitude) - centralLatitude) / 2), 2) + Math.cos((Math.PI / 180) * parseFloat(item.latitude)) * Math.cos((Math.PI / 180) * centralLatitude) * Math.pow(Math.sin((Math.PI / 180) * (parseFloat(item.longitude) - centralLongitude) / 2), 2)))),
         iconPath: PositionIconPath,
-        width: iconWidth,
-        height: iconHeight
+        width: iconWidthNormal,
+        height: iconHeightNormal
       }
     })
     setMarkers([currentPosition, ...clinicMarkers])
@@ -145,6 +148,15 @@ export default function MapPage() {
                     onClick={() => {
                       setCentralLatitude(item.latitude)
                       setCentralLongitude(item.longitude)
+                      const lastFocusMarker = markers.find((item) => item.id == focusMarkerID)
+                      if (lastFocusMarker) {
+                        lastFocusMarker.width = iconWidthNormal
+                        lastFocusMarker.height = iconHeightNormal
+                      }
+                      setFocusMarkerID(item.id)
+                      item.width = iconWidthFocus
+                      item.height = iconHeightFocus
+                      setMarkers([...markers])
                     }}
                     extra={<MoreS onClick={() => {Taro.navigateTo({ url: `/pages/map/clinic/index?clinicName=${item.title}` })}}/>}
                   />
