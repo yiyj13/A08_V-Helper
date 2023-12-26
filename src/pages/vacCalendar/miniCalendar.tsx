@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import Taro from '@tarojs/taro'
 import { Text } from '@tarojs/components'
 import { Skeleton } from '@nutui/nutui-react-taro'
@@ -11,8 +12,21 @@ import { PullDownRefresh } from '../../components/pulldownrefresh'
 import RecordPopup from './recordPopup'
 
 export function MiniCalendar() {
-  const { data, isLoading, error, mutate } = useVaccineRecordList()
-  const isEmpty = !data || (data && data.length === 0)
+  const { data, isLoading, error, mutate, getVaccineState } = useVaccineRecordList()
+
+  const data2render = useMemo(() => {
+    if (!data) return []
+    return MergeItems(data)
+      .filter((item) => {
+        const state = getVaccineState(item.record.profileId, item.record.vaccineId)
+        return state.planning || !state.inEffect && item.expireDate
+      })
+      .sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf())
+      .slice(0, 3)
+  }, [data, getVaccineState])
+
+  const isDataEmpty = !data || (data && data.length === 0)
+  const isRenderEmpty = data2render.length === 0
 
   return (
     <>
@@ -33,24 +47,19 @@ export function MiniCalendar() {
               <Skeleton animated rows={3} visible={!isLoading} />
             ) : error ? (
               <NetworkError />
-            ) : isEmpty ? (
+            ) : isDataEmpty ? (
               <EmptyNotice />
+            ) : isRenderEmpty ? (
+              <ListEmptyNotice />
             ) : (
               <ol className='mt-2 space-y-4 text-sm leading-6'>
-                {data &&
-                  MergeItems(data)
-                    .filter(
-                      (item) => !item.record.isCompleted || (item.expireDate && dayjs(item.date).isAfter(dayjs()))
-                    )
-                    .sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf())
-                    .slice(0, 4)
-                    .map((item) => {
-                      if (item.expireDate) {
-                        return <VacCalendarItemExpire key={dayjs(item.date).valueOf()} record={item.record} />
-                      } else {
-                        return <VacCalendarItem key={dayjs(item.date).valueOf()} record={item.record} />
-                      }
-                    })}
+                {data2render?.map((item) => {
+                  if (item.expireDate) {
+                    return <VacCalendarItemExpire key={dayjs(item.date).valueOf()} record={item.record} />
+                  } else {
+                    return <VacCalendarItem key={dayjs(item.date).valueOf()} record={item.record} />
+                  }
+                })}
               </ol>
             )}
           </PullDownRefresh>
@@ -63,7 +72,6 @@ export function MiniCalendar() {
 }
 
 const EmptyNotice = () => {
-  // an material style gray card with a little bit of shadow, with text "提示：疫苗日历暂无数据，可以通过添加疫苗记录来生成日历"
   return (
     <div className='flex flex-col p-4 m-4 h-full justify-center rounded-2xl bg-gray-100'>
       <div className='flex flex-row gap-x-2 text-brand items-center'>
@@ -76,6 +84,27 @@ const EmptyNotice = () => {
           填写接种记录
         </text>
         表单来生成日历
+      </div>
+    </div>
+  )
+}
+
+const ListEmptyNotice = () => {
+  return (
+    <div className='flex flex-col p-4 m-4 h-full justify-center rounded-2xl bg-gray-100'>
+      <div className='flex flex-row gap-x-2 text-brand items-center'>
+        <Ask />
+        <Text className='text-lg font-bold'>提示</Text>
+      </div>
+      <div className='text-sm text-gray-500 mt-2'>
+        首页仅按照时间顺序展示若干未完成项和已过期项, 点击
+        <text
+          className='text-sm underline text-brand'
+          onClick={() => Taro.navigateTo({ url: '/pages/vacCalendar/index' })}
+        >
+          更多
+        </text>
+        查看完整日历
       </div>
     </div>
   )

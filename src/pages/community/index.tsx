@@ -96,7 +96,9 @@ const Header = () => {
                 <span className='text-2xl font-bold'>疫苗社区</span>
               </a>
               <div className='flex items-center' onClick={toggleExpand}>
-                <span className='pr-2 py-2 text-sm rounded-md'>筛选</span>
+                <span className='pr-2 py-2 text-sm rounded-md'>{
+                  filter ? '#'+data?.find(v => v.ID === filter)?.name : '筛选'
+                }</span>
                 <ArrowDown
                   size={10}
                   className={clsx('transition-all transform', {
