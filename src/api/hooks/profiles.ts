@@ -1,4 +1,5 @@
 import useSWR from 'swr'
+import { useCallback } from 'react'
 
 import { getProfiles } from '..'
 
@@ -7,18 +8,20 @@ export function useProfiles() {
     revalidateIfStale: false,
   })
 
-  function id2name(id?: number) {
-    return data?.find((v) => v.ID === id)?.fullName
-  }
+  const id2name = useCallback(
+    (id?: number) => data?.find((v) => v.ID === id)?.fullName,
+    [data]
+  )
 
-  function selectByID(id?: number) {
-    return data?.find((v) => v.ID === id)
-  }
+  const selectByID = useCallback(
+    (id?: number) => data?.find((v) => v.ID === id),
+    [data]
+  )
 
   return {
     ...rest,
     data,
     id2name,
-    selectByID
+    selectByID,
   }
 }

@@ -146,7 +146,7 @@ const BottomBar = (props: { article_id: number; onSubmit: any }) => {
 }
 
 const FollowButton = (props: { article_id: number }) => {
-  const { data: user, mutate } = useUserFollowing()
+  const { checkArticleFollowed: isArticleFollowed, mutate } = useUserFollowing()
   const handleFollowClick = async () => {
     await followArticle(props.article_id)
     mutate()
@@ -155,7 +155,7 @@ const FollowButton = (props: { article_id: number }) => {
     await unfollowArticle(props.article_id)
     mutate()
   }
-  const following = user?.followingArticles?.find((a) => a.ID === props.article_id) !== undefined
+  const following = isArticleFollowed(props.article_id)
   return following ? (
     <HeartFill1 className='text-brand' size={16} onClick={handleUnfollowClick}></HeartFill1>
   ) : (
