@@ -1,18 +1,16 @@
 import { Tabbar, Button } from '@nutui/nutui-react-taro'
 import { Home, Search, Find, Uploader, My } from '@nutui/icons-react-taro'
-import { useEffect } from 'react'
 
 import './index.css'
 
 import { useTabStore } from '../models'
-import ButtonActionSheet, { useActionStore, useActionReset } from './actionsheet'
+import ButtonActionSheet from './actionsheet'
 
 function CustomTabBar() {
   const setTabIndex = useTabStore((state) => state.setTabIndex)
   const tabIndex = useTabStore((state) => state.tabIndex)
 
-  const setIsVisible = useActionStore((state) => state.setActionVisible)
-  useEffect(useActionReset, [])
+  const setIsVisible = useTabStore((state) => state.setActionVisible)
 
   return (
     <>
