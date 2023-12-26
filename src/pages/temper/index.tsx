@@ -8,7 +8,8 @@ import { Text } from '@tarojs/components'
 import { Picker, Range, DatePicker, Cell, Button, TextArea, InputNumber } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
-import api, { TemperatureRecord, useProfiles, useTemperatureList } from '../../api'
+import { TemperatureRecord, postTemperatureRecord, putTemperatureRecord } from '../../api'
+import { useProfiles, useTemperatureList } from '../../api/hooks'
 
 export default function TemperRecord() {
   const { data: profiles } = useProfiles()
@@ -27,7 +28,7 @@ export default function TemperRecord() {
         try {
           const result = allTemperatures?.find((item) => item.ID === Number(router?.params.id))
           if (!result) {
-          // TODO: handle 404
+            // TODO: handle 404
             return
           }
           const relation = MemberData.find((item) => item.value === result.profileId)
@@ -111,7 +112,7 @@ export default function TemperRecord() {
       const { id } = router.params
       if (id) {
         try {
-          await api.request({ url: `/api/temperature-records/${id}`, method: 'PUT', data: tempRecord })
+          await putTemperatureRecord(Number(id), tempRecord)
           refreshTemperatureCache()
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
@@ -126,7 +127,7 @@ export default function TemperRecord() {
     } else {
       if (tempRecord && tempRecord.profileId !== undefined && tempRecord.profileId >= 0) {
         try {
-          await api.request({ url: '/api/temperature-records', method: 'POST', data: tempRecord })
+          await postTemperatureRecord(tempRecord)
           refreshTemperatureCache()
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {

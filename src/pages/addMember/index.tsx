@@ -18,9 +18,8 @@ import {
   Grid,
 } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
-import { useSWRConfig } from 'swr'
 
-import api from '../../api'
+import { useProfiles, postProfile, putProfile } from '../../api'
 import { Profile } from '../../api/methods'
 
 export default function AddMember() {
@@ -144,14 +143,19 @@ export default function AddMember() {
     setNoteValue(value)
   }
 
+  const { selectByID, mutate: refreshProfileCache } = useProfiles()
+
   useEffect(() => {
     const router = Taro.getCurrentInstance().router
 
     const fetchData = async () => {
       if (router && router.params && router.params.id !== undefined) {
         try {
-          const res = await api.get('/api/profiles/' + router.params.id)
-          const result = res.data as Profile
+          const result = selectByID(Number(router.params.id))
+          if (result === undefined) {
+            // TODO: handle 404
+            return
+          }
           setMember(result)
           setNameValue(result.fullName || '')
           setRelationDesc(result.relationship || '')
@@ -170,10 +174,7 @@ export default function AddMember() {
       }
     }
     fetchData()
-  }, [])
-
-  const { mutate } = useSWRConfig()
-  const refreshProfileCache = () => mutate('getProfiles')
+  }, [selectByID])
 
   const handleSubmission = async () => {
     const router = Taro.getCurrentInstance().router
@@ -182,7 +183,7 @@ export default function AddMember() {
       const { id } = router.params
       if (id) {
         try {
-          await api.request({ url: `/api/profiles/${id}`, method: 'PUT', data: member })
+          await putProfile(Number(id), member)
           refreshProfileCache()
           Taro.showToast({ title: '提交成功', icon: 'success' })
           setTimeout(() => {
@@ -195,10 +196,10 @@ export default function AddMember() {
     } else {
       if (member && member.fullName && member.relationship && member.gender && member.dateOfBirth) {
         try {
-          const res = await api.post('/api/profiles', member)
+          const res = await postProfile(member)
           setMember({
             ...member,
-            ID: res.data.id,
+            ID: res.ID,
           })
           refreshProfileCache()
           Taro.showToast({ title: '提交成功', icon: 'success' })

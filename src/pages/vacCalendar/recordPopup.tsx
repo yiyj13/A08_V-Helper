@@ -7,7 +7,7 @@ import { Date as DateIcon, Clock, Checked, Order, Edit, Del2 } from '@nutui/icon
 import InjectSVG from '../../assets/home/injection.svg'
 
 import { useRecordPopup } from '../../models'
-import { useProfiles, useVaccineRecordList, deleteVaccineRecord, putVaccineRecord } from '../../api'
+import { useProfiles, useVaccineRecordList, deleteVaccineRecord, putVaccineRecord, useVaccines } from '../../api'
 
 export default function RecordPopup() {
   const recordID = useRecordPopup.use.recordId()
@@ -16,6 +16,8 @@ export default function RecordPopup() {
   const clear = useRecordPopup.use.clear()
 
   const { data: allRecords, mutate: refresh } = useVaccineRecordList()
+
+  const { id2name } = useVaccines()
 
   const record = useMemo(() => {
     if (!recordID) return undefined
@@ -50,7 +52,7 @@ export default function RecordPopup() {
       <div className='flex flex-col justify-center px-4 pt-2 pb-8'>
         <Nav />
 
-        <Header profileId={record?.profileId} vaccineName={record?.vaccine.name} />
+        <Header profileId={record?.profileId} vaccineName={id2name(record?.vaccineId)} />
         <GrayCard text={record?.vaccinationType || '类型'} />
 
         <DividerLine />

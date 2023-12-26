@@ -3,7 +3,7 @@ import { Button, Menu } from '@nutui/nutui-react-taro'
 import { IconFont, Edit } from '@nutui/icons-react-taro'
 import Taro from '@tarojs/taro'
 
-import { useProfiles, useVaccineRecordList } from '../../api'
+import { useProfiles, useVaccineRecordList, useVaccines } from '../../api'
 
 import { VaccinationRecord } from '../../api/methods'
 import { dayjs } from '../../utils'
@@ -62,6 +62,7 @@ export default function RecordHistory() {
 const ItemRender = ({ data }: { data: VaccinationRecord }) => {
   const { selectByID } = useProfiles()
   const profileInfo = selectByID(data.profileId)
+  const { id2name } = useVaccines()
 
   const handleEditRecord = (recordData: VaccinationRecord) => {
     Taro.navigateTo({
@@ -88,7 +89,7 @@ const ItemRender = ({ data }: { data: VaccinationRecord }) => {
       </div>
       <div className='flex justify-between mt-2'>
         <div className='text-gray-500'>
-          接种疫苗 <b className='text-black font-bold'>{data.vaccine.name}</b>
+          接种疫苗 <b className='text-black font-bold'>{id2name(data.vaccineId)}</b>
         </div>
         <div className='text-gray-500'>
           接种类型 <b className='text-black font-bold'>{data.vaccinationType}</b>

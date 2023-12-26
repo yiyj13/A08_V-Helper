@@ -1,21 +1,14 @@
 import useSWR from 'swr'
+import { useCallback } from 'react'
+import { getVaccineList } from '../methods'
 
-import { getVaccineList, Vaccine } from '../methods'
-
-// TODO: maintain 'followed', 'order', 'history', 'expired' states
 export function useVaccines() {
-  const { data: raw, ...rest } = useSWR('getVaccineList', getVaccineList, {
+  const { data, ...rest } = useSWR('getVaccineList', getVaccineList, {
     revalidateIfStale: false,
   })
-  const data = raw as Pick<Vaccine, 'name' | 'ID'>[]
+  const name2id = useCallback((name?: string) => data?.find((v) => v.name === name)?.ID, [data])
 
-  function name2id(name?: string) {
-    return data?.find((v) => v.name === name)?.ID
-  }
-
-  function id2name(id?: number) {
-    return data?.find((v) => v.ID === id)?.name
-  }
+  const id2name = useCallback((id?: number) => data?.find((v) => v.ID === id)?.name ?? '', [data])
 
   return {
     ...rest,
