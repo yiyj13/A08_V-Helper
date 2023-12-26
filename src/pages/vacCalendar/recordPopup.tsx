@@ -8,6 +8,7 @@ import InjectSVG from '../../assets/home/injection.svg'
 
 import { useRecordPopup } from '../../models'
 import { useProfiles, useVaccineRecordList, deleteVaccineRecord, putVaccineRecord, useVaccines } from '../../api'
+import { dayjs } from '../../utils'
 
 export default function RecordPopup() {
   const recordID = useRecordPopup.use.recordId()
@@ -33,7 +34,7 @@ export default function RecordPopup() {
 
   const handleComplete = async () => {
     if (!recordID || record?.isCompleted) return
-    await putVaccineRecord(recordID, { isCompleted: true })
+    await putVaccineRecord(recordID, { isCompleted: true, vaccinationDate: dayjs().format('YYYY-MM-DD') })
     refresh()
   }
 
