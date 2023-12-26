@@ -88,6 +88,15 @@ export default function MapPage() {
           latitude={centralLatitude}
           markers={markers}
           includePoints={markers}
+          onMarkerTap={(e) => {
+            e.detail.markerId
+            const tappedMarker = markers.find((item) => item.id == e.detail.markerId)
+            if (tappedMarker) {
+              setCentralLatitude(tappedMarker.latitude)
+              setCentralLongitude(tappedMarker.longitude)
+              Taro.navigateTo({ url: `/pages/map/clinic/index?clinicName=${tappedMarker.title}` })
+            }
+          }}
         >
           <CoverView className='location-button'>
             <Button
