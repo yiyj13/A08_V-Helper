@@ -7,7 +7,8 @@ import { useState, useMemo, useEffect } from 'react'
 import { Cell, Switch, Picker, Uploader, Button, DatePicker, TextArea, Input, Popover } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
-import api, { VaccinationRecord, useProfiles, useVaccines, useVaccineRecordList } from '../../api'
+import { VaccinationRecord, postVaccineRecord, putVaccineRecord } from '../../api'
+import { useProfiles, useVaccines, useVaccineRecordList } from '../../api/hooks'
 
 export default function VaccineRecord() {
   const router = Taro.getCurrentInstance().router
@@ -15,6 +16,8 @@ export default function VaccineRecord() {
   const [record, setRecord] = useState<Partial<VaccinationRecord>>({
     reminder: false,
   })
+
+  const { id2name } = useVaccines()
 
   const { data: allRecords, mutate: refreshRecordCache } = useVaccineRecordList()
 
@@ -36,7 +39,7 @@ export default function VaccineRecord() {
         }
         const relation = MemberData.find((item) => item.value === result.profileId)
         setIdDesc(relation ? relation.text : '')
-        setNameDesc(result.vaccine.name)
+        setNameDesc(id2name(result.vaccineId))
         setTypeDesc(result.vaccinationType)
         setDateDesc(result.vaccinationDate)
         setValidDesc(result.valid)
@@ -54,7 +57,7 @@ export default function VaccineRecord() {
       }
     }
     fetchData()
-  }, [MemberData, router, allRecords])
+  }, [MemberData, router, allRecords, id2name])
 
   const { data: vaccines } = useVaccines()
   const VaccineData = vaccines ? vaccines.map((item) => ({ value: item.ID, text: item.name })) : []
@@ -292,15 +295,11 @@ export default function VaccineRecord() {
         try {
           const nextVaccinationDate = addDays(record.vaccinationDate, validDesc)
           const remindTime = subtractDays(nextVaccinationDate, remindValue + remindUnit).concat(' 10:00')
-          await api.request({
-            url: `/api/vaccination-records/${id}`,
-            method: 'PUT',
-            data: {
-              ...record,
-              nextVaccinationDate: nextVaccinationDate,
-              remindTime: remindTime,
-              remindBefore: remindValue + remindUnit,
-            },
+          await putVaccineRecord(Number(id), {
+            ...record,
+            nextVaccinationDate: nextVaccinationDate,
+            remindTime: remindTime,
+            remindBefore: remindValue + remindUnit,
           })
           refreshRecordCache()
           Taro.showToast({ title: '提交成功', icon: 'success' })
@@ -330,15 +329,11 @@ export default function VaccineRecord() {
         const nextVaccinationDate = addDays(record.vaccinationDate, validDesc)
         const remindTime = subtractDays(nextVaccinationDate, remindValue + remindUnit).concat(' 10:00')
         try {
-          await api.request({
-            url: '/api/vaccination-records',
-            method: 'POST',
-            data: {
-              ...record,
-              nextVaccinationDate: nextVaccinationDate,
-              remindTime: remindTime,
-              remindBefore: remindValue + remindUnit,
-            },
+          await postVaccineRecord({
+            ...record,
+            nextVaccinationDate: nextVaccinationDate,
+            remindTime: remindTime,
+            remindBefore: remindValue + remindUnit,
           })
           refreshRecordCache()
           Taro.showToast({ title: '提交成功', icon: 'success' })

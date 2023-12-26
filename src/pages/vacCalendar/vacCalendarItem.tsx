@@ -6,7 +6,7 @@ import InjectSVG from '../../assets/home/injection.svg'
 
 import { dayjs } from '../../utils'
 import { VaccinationRecord } from '../../api/methods'
-import { useProfiles, useVaccineRecordList } from '../../api/hooks'
+import { useProfiles, useVaccineRecordList, useVaccines } from '../../api/hooks'
 import { useRecordPopup } from '../../models'
 
 export type VacCalendarData = {
@@ -41,6 +41,8 @@ export function VacCalendarItem({ key, record, hideOverlook = false }: VacCalend
   const { id2name } = useProfiles()
   const showPopup = useRecordPopup.use.show()
 
+  const { id2name: getVacname } = useVaccines()
+
   const overlook = record.isCompleted
   const needWarning = !record.isCompleted && dayjs(record.vaccinationDate).isBefore(dayjs())
   const timeError = record.isCompleted && dayjs(record.vaccinationDate).isAfter(dayjs())
@@ -66,7 +68,7 @@ export function VacCalendarItem({ key, record, hideOverlook = false }: VacCalend
         </div>
         <div className='flex flex-col'>
           <Text className='font-semibold text-brand'>
-            {id2name(record.profileId)} {record.vaccine.name} {record.isCompleted ? '已接种' : '未接种'}
+            {id2name(record.profileId)} {getVacname(record.vaccineId)} {record.isCompleted ? '已接种' : '未接种'}
           </Text>
           <Text className={clsx('text-xs', { 'text-red-500': timeError, 'text-gray-500': !timeError })}>
             接种：{record.vaccinationDate}
@@ -84,6 +86,8 @@ export function VacCalendarItemExpire({ key, record, hideOverlook = false }: Vac
   const { getVaccineState } = useVaccineRecordList()
   const state = getVaccineState(record.profileId, record.vaccineId)
 
+  const { id2name: getVacname } = useVaccines()
+
   if (record.isCompleted === false) return null
   const currentDate = dayjs()
   const overlook = state.inEffect && currentDate.isAfter(dayjs(record.nextVaccinationDate))
@@ -95,8 +99,9 @@ export function VacCalendarItemExpire({ key, record, hideOverlook = false }: Vac
     <li
       key={key}
       className={clsx(
-        'flex h-16 animate-fade-in flex-row items-center justify-between rounded-2xl bg-gray-100 px-4 transition-all active:scale-105 active:shadow-md',
+        'flex h-16 flex-row items-center justify-between rounded-2xl bg-gray-100 px-4 transition-all active:scale-105 active:shadow-md',
         {
+          'animate-fade-in': !overlook,
           'ring-2 ring-gray-500': needHighlight,
           'opacity-40': overlook,
         }
@@ -109,7 +114,7 @@ export function VacCalendarItemExpire({ key, record, hideOverlook = false }: Vac
         </div>
         <div className='flex flex-col'>
           <Text className='font-semibold'>
-            {id2name(record.profileId)} {record.vaccine.name}{' '}
+            {id2name(record.profileId)} {getVacname(record.vaccineId)}{' '}
             {overlook ? '已补种' : needHighlight ? '已过期' : '未过期'}
           </Text>
           <Text className='text-xs text-gray-500'>过期：{record.nextVaccinationDate}</Text>

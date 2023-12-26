@@ -1,8 +1,9 @@
 import { Button, Divider, Uploader } from '@nutui/nutui-react-taro'
 import { useState } from 'react'
 import { useRouter } from 'taro-hooks'
-import useSWRMutation from 'swr/mutation'
+import { useSWRConfig } from 'swr'
 import clsx from 'clsx'
+import Taro from '@tarojs/taro'
 
 import ComboBox from '../../components/combobox'
 import TextAreaCustom from './maintextarea'
@@ -12,19 +13,23 @@ import { postArticle, useVaccines } from '../../api'
 
 export default function Index() {
   const [route, { back }] = useRouter()
+  const vaccineID = Number(route.params.vaccineID)
   const [title, setTitle] = useState<string>('')
   const [content, setContent] = useState('')
-  const [vaccineName, setVaccineName] = useState<string | undefined>(route.params.vacName)
+  const { data: vaccines, isLoading, id2name, name2id } = useVaccines()
 
-  const { data: vaccines, isLoading, name2id } = useVaccines()
-  const { trigger } = useSWRMutation('postArticle', () =>
-    postArticle(title, content, name2id(vaccineName))
-  )
+  const [vaccineName, setVaccineName] = useState<string | undefined>(id2name(vaccineID))
+  const { mutate } = useSWRConfig()
 
-  const handleSubmit = () => {
-    trigger()
-      .then(back)
-      .catch((e) => console.log(e))
+  const handleSubmit = async () => {
+    await postArticle(title, content, name2id(vaccineName))
+    mutate([vaccineID, 'getTopArticlesWithVaccine'])
+    Taro.showToast({
+      title: '发布成功',
+      icon: 'success',
+      duration: 1000,
+    })
+    setTimeout(() => back(), 1000)
   }
 
   return (

@@ -1,8 +1,8 @@
 import useSWR from 'swr'
-import { useMemo } from 'react'
+import { useMemo, useCallback } from 'react'
 import { dayjs } from '../../utils'
 
-import { getVaccineRecordList } from '..'
+import { VaccinationRecord, getVaccineRecordList } from '..'
 
 type VaccineState = {
   planning: boolean
@@ -10,50 +10,76 @@ type VaccineState = {
   inoculated: boolean
 }
 
+export const initialVaccineState: VaccineState = {
+  planning: false,
+  inEffect: false,
+  inoculated: false,
+}
+
 export function useVaccineRecordList() {
   const { data, ...rest } = useSWR('getVaccineRecordList', getVaccineRecordList, {
     revalidateIfStale: false,
   })
 
-  const getVaccineState = useMemo<(profileID?: number, vacID?: number) => VaccineState>(
-    () => (profileID?:number, vacID?: number) => {
-      const recordsForProfile = profileID ? data?.filter((record) => record.profileId === profileID) : []
-      if (!recordsForProfile || recordsForProfile.length === 0) return { planning: false, inEffect: false, inoculated: false }
-
-      const records = vacID ? recordsForProfile.filter((record) => record.vaccineId === vacID) : []
-      if (records.length === 0) return { planning: false, inEffect: false, inoculated: false }
-
-      let planning = false,
-        inEffect = false,
-        inoculated = false
-      const currentDate = dayjs()
-
-      records.forEach((record) => {
-        const vaccinationDate = dayjs(record.vaccinationDate)
-        const nextVaccinationDate = record.nextVaccinationDate ? dayjs(record.nextVaccinationDate) : null
-
-        if (vaccinationDate.isAfter(currentDate)) {
-          planning = true
-        }
-        if (
-          vaccinationDate.isBefore(currentDate) &&
-          (!nextVaccinationDate || nextVaccinationDate.isAfter(currentDate))
-        ) {
-          inEffect = true
-        }
-        if (record.isCompleted || (nextVaccinationDate && nextVaccinationDate.isBefore(currentDate))) {
-          inoculated = true
+  const _states = useMemo(() => {
+    const computedSet = new Set()
+    return data
+      ?.map((record) => {
+        if (computedSet.has(`${record.profileId}-${record.vaccineId}`)) return null
+        const s = _computeVaccineState(data, record.profileId, record.vaccineId)
+        computedSet.add(`${record.profileId}-${record.vaccineId}`)
+        return {
+          profileId: record.profileId,
+          vaccineId: record.vaccineId,
+          ...s,
         }
       })
+      .filter((s) => s !== null) as (VaccineState & { profileId: number; vaccineId: number })[]
+  }, [data])
 
-      return { planning, inEffect, inoculated }
+  const getVaccineState = useCallback(
+    (profileId?: number, vaccineId?: number): VaccineState => {
+      return _states?.find((s) => s.profileId === profileId && s.vaccineId === vaccineId) ?? initialVaccineState
     },
-    [data]
+    [_states]
   )
 
   return {
     ...rest,
     data,
-    getVaccineState
+    getVaccineState,
   }
+}
+
+const _computeVaccineState = (data?: VaccinationRecord[], profileId?: number, vaccineId?: number): VaccineState => {
+  const recordsForProfile = profileId ? data?.filter((record) => record.profileId === profileId) : []
+  if (!recordsForProfile || recordsForProfile.length === 0) return initialVaccineState
+
+  const records = vaccineId ? recordsForProfile.filter((record) => record.vaccineId === vaccineId) : []
+  if (records.length === 0) return initialVaccineState
+
+  let planning = false,
+    inEffect = false,
+    inoculated = false
+  const currentDate = dayjs()
+
+  records.forEach((record) => {
+    const vaccinationDate = dayjs(record.vaccinationDate)
+    const nextVaccinationDate = record.nextVaccinationDate ? dayjs(record.nextVaccinationDate) : null
+
+    if (!record.isCompleted) {
+      planning = true
+    }
+    if (vaccinationDate.isBefore(currentDate) && (!nextVaccinationDate || nextVaccinationDate.isAfter(currentDate))) {
+      inEffect = true
+    }
+    if (
+      record.isCompleted
+      // || (nextVaccinationDate && nextVaccinationDate.isBefore(currentDate))
+    ) {
+      inoculated = true
+    }
+  })
+
+  return { planning, inEffect, inoculated }
 }

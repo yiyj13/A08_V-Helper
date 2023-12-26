@@ -136,30 +136,13 @@ export async function getVaccineList(): Promise<Vaccine[]> {
   return response.data
 }
 
-export async function getVaccineByID(id: string): Promise<Vaccine> {
-  const response = await api.get('/api/vaccines/' + id)
-  return response.data
-}
-
 export async function getVaccineRecordList(): Promise<VaccinationRecord[]> {
-  const response = await api.get('/api/vaccination-records')
-  // 将要替换为：
-  // const response = await api.get('/api/vaccination-records/user/' + getUserID())
-  return response.data
-}
-
-export async function getVaccineRecordWithProfile(profileId: number): Promise<VaccinationRecord[]> {
-  const response = await api.get('/api/vaccination-records/profile/' + profileId)
+  const response = await api.get('/api/vaccination-records/user/' + getUserID())
   return response.data
 }
 
 export async function postVaccineRecord(data: Partial<VaccinationRecord>): Promise<VaccinationRecord> {
   const response = await api.post('/api/vaccination-records', data)
-  return response.data
-}
-
-export async function getVaccineRecord(id: number): Promise<VaccinationRecord> {
-  const response = await api.get('/api/vaccination-records/' + id)
   return response.data
 }
 
@@ -174,19 +157,20 @@ export async function putVaccineRecord(id: number, data: Partial<VaccinationReco
 }
 
 export async function getProfiles(): Promise<Profile[]> {
-  const response = await api.get('/api/profiles')
-  // 将要替换为：
-  // const response = await api.get('/api/profiles/user/' + getUserID())
+  const response = await api.get('/api/profiles/user/' + getUserID())
   return response.data
 }
 
 export async function postProfile(data: Partial<Profile>): Promise<Profile> {
-  const response = await api.post('/api/profiles', data)
+  const response = await api.post('/api/profiles', {
+    ...data,
+    userId: getUserID(),
+  })
   return response.data
 }
 
-export async function putProfile(data: Partial<Profile>): Promise<Profile> {
-  const response = await api.put('/api/profiles/' + data.ID, data)
+export async function putProfile(id: number, data: Partial<Profile>): Promise<Profile> {
+  const response = await api.put('/api/profiles/' + id, data)
   return response.data
 }
 
@@ -196,7 +180,34 @@ export async function deleteProfile(id: number): Promise<Profile> {
 }
 
 export async function getTemperatureRecordList(): Promise<TemperatureRecord[]> {
-  const response = await api.get('/api/temperature-records')
+  const response = await api.get('/api/temperature-records/user/' + getUserID())
+  return response.data
+}
+
+export async function postTemperatureRecord(data: Partial<TemperatureRecord>): Promise<TemperatureRecord> {
+  const response = await api.post('/api/temperature-records', data)
+  return response.data
+}
+
+export async function putTemperatureRecord(id: number, data: Partial<TemperatureRecord>): Promise<TemperatureRecord> {
+  const response = await api.put('/api/temperature-records/' + id, data)
+  return response.data
+}
+
+export async function deleteTemperatureRecord(id: number): Promise<string> {
+  const response = await api.delete('/api/temperature-records/' + id)
+  return response.data
+}
+
+export async function getTopArticlesWithVaccine(
+  vaccineid: number
+): Promise<Article[]> {
+  const response = await api.get('/api/articles', {
+    page: 1,
+    size: 2,
+    isBind: true,
+    vaccineID: vaccineid,
+  })
   return response.data
 }
 
@@ -223,13 +234,6 @@ export async function getMyArticles(): Promise<Article[]> {
 export async function deleteArticle(id: number): Promise<string> {
   const response = await api.delete('/api/articles/' + id)
   return response.data
-}
-
-export async function getArticleFullByID(id?: string): Promise<ArticleFull> {
-  if (!id) return Promise.reject('id is empty')
-  const article = (await api.get('/api/articles/' + id)).data
-  const replies = (await api.get('/api/replys', { articleId: id })).data
-  return { ...article, replies }
 }
 
 export async function getArticleByID(id: number): Promise<Article> {

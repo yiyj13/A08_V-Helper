@@ -8,7 +8,7 @@ import { Tabs } from '@nutui/nutui-react-taro'
 import { IconFont } from '@nutui/icons-react-taro'
 import Taro from '@tarojs/taro'
 
-import { useProfiles, useVaccineRecordList, useTemperatureList } from '../../api'
+import { useProfiles, useVaccineRecordList, useTemperatureList, useVaccines } from '../../api'
 import { dayjs } from '../../utils'
 
 import { VaccinationRecord, TemperatureRecord } from '../../api/methods'
@@ -61,6 +61,7 @@ export default function RecordHistory() {
 const VaccineItemRender = ({ data }: { data: VaccinationRecord }) => {
   const { selectByID } = useProfiles()
   const profileInfo = selectByID(data.profileId)
+  const { id2name } = useVaccines()
 
   // const handleReadDocument = (recordData: VaccinationRecord) => {
   //   Taro.navigateTo({
@@ -86,7 +87,7 @@ const VaccineItemRender = ({ data }: { data: VaccinationRecord }) => {
       </div>
       <div className='flex justify-between mt-2'>
         <div className='text-gray-500'>
-          接种疫苗 <b className='text-black font-bold'>{data.vaccine.name}</b>
+          接种疫苗 <b className='text-black font-bold'>{id2name(data.vaccineId)}</b>
         </div>
         <div className='text-gray-500'>
           接种类型 <b className='text-black font-bold'>{data.vaccinationType}</b>
