@@ -1,15 +1,16 @@
 import { useState } from 'react'
 import Taro from '@tarojs/taro'
 
-import { Map as TaroMap } from '@tarojs/components'
+import { Map as TaroMap, CoverView } from '@tarojs/components'
 import { useEffect } from 'react'
-import { Loading, Cell, Menu } from '@nutui/nutui-react-taro'
-import { MoreS } from '@nutui/icons-react-taro'
+import { Loading, Cell, Menu, Button } from '@nutui/nutui-react-taro'
+import { MoreS, Find } from '@nutui/icons-react-taro'
 import { useDeviceStore } from '../../models'
 import PositionIconPath from "../../assets/map/position.png"
-import FocusPositionIconPath from "../../assets/map/focusPosition.png"
+import CurrentPositionIconPath from "../../assets/map/focusPosition.png"
 
 import api from '../../api'
+import './index.css'
 
 export default function MapPage() {
   const location = useDeviceStore.use.location()
@@ -18,22 +19,22 @@ export default function MapPage() {
   const iconHeight = 40
   const myLatitude = 40.0011
   const myLongitude = 116.3265
-  // 使用定位总是只能定位到海淀区政府，暂时用清华大学坐标替代
-  const [originLatitude, setOriginLatitude] = useState(myLatitude)
-  const [originLongitude, setOriginLongitude] = useState(myLongitude)
-  const [focusVaccine, setFocusVaccine] = useState('无')
-  const focusLocation = {
+  var myPositionID = 1
+  const currentPosition = {
     id: 1,
-    title: "目标地点",
-    latitude: originLatitude,
-    longitude: originLongitude,
+    title: "当前位置",
+    latitude: myLatitude,
+    longitude: myLongitude,
     distance: 0,
-    iconPath: FocusPositionIconPath,
+    iconPath: CurrentPositionIconPath,
     width: iconWidth,
     height: iconHeight
   }
-  const [markers, setMarkers] = useState([focusLocation])
-  var myPositionID = 1
+  // 使用定位总是只能定位到海淀区，暂时用清华大学坐标替代
+  const [centralLatitude, setCentralLatitude] = useState(myLatitude)
+  const [centralLongitude, setCentralLongitude] = useState(myLongitude)
+  const [focusVaccine, setFocusVaccine] = useState('无')
+  const [markers, setMarkers] = useState([currentPosition])
 
   // 获取当前位置
   // TODO: error handling
@@ -49,12 +50,6 @@ export default function MapPage() {
   const getMarkers = async (searchValue: string) => {
     const response = await api.get('/api/clinics/vaccineName/' + searchValue)
 
-    // // 解析
-    // const clinicNames = response.data[0].clinicInfo.split(';')
-    // const clinicInfo = clinicNames.map((item: string) => {
-    //   return api.get('/api/clinics/clinicName/' + item)
-    // })
-    // // const clinicInfo = response.data[0].clinicInfo.split(';').map((item: string) => item.split(','))
     const clinicPostion = response.data
     const clinicMarkers = clinicPostion.map((item, index) => {
       return {
@@ -62,13 +57,13 @@ export default function MapPage() {
         title: item.clinicName,
         latitude: parseFloat(item.latitude),
         longitude: parseFloat(item.longitude),
-        distance: Math.trunc(2 * 6378 * 1000 * Math.asin(Math.sqrt(Math.pow(Math.sin((Math.PI / 180) * (parseFloat(item.latitude) - originLatitude) / 2), 2) + Math.cos((Math.PI / 180) * parseFloat(item.latitude)) * Math.cos((Math.PI / 180) * originLatitude) * Math.pow(Math.sin((Math.PI / 180) * (parseFloat(item.longitude) - originLongitude) / 2), 2)))),
+        distance: Math.trunc(2 * 6378 * 1000 * Math.asin(Math.sqrt(Math.pow(Math.sin((Math.PI / 180) * (parseFloat(item.latitude) - centralLatitude) / 2), 2) + Math.cos((Math.PI / 180) * parseFloat(item.latitude)) * Math.cos((Math.PI / 180) * centralLatitude) * Math.pow(Math.sin((Math.PI / 180) * (parseFloat(item.longitude) - centralLongitude) / 2), 2)))),
         iconPath: PositionIconPath,
         width: iconWidth,
         height: iconHeight
       }
     })
-    setMarkers([focusLocation, ...clinicMarkers])
+    setMarkers([currentPosition, ...clinicMarkers])
   }
 
   const vaccineList = [
@@ -89,53 +84,67 @@ export default function MapPage() {
         <TaroMap
           className='w-full h-full'
           scale={15}
-          longitude={originLongitude}
-          latitude={originLatitude}
-          // longitude={location.longitude}
-          // latitude={location.latitude}
+          longitude={centralLongitude}
+          latitude={centralLatitude}
           markers={markers}
           includePoints={markers}
-        />
+        >
+          <CoverView className='location-button'>
+            <Button
+              fill="solid"
+              type="primary"
+              icon={<Find/>}
+              style={{ margin: 5, width: 40, height: 40, borderRadius: 8, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+              onClick={() => {
+                setCentralLatitude(myLatitude)
+                setCentralLongitude(myLongitude)
+              }}
+            />
+          </CoverView>
+        </TaroMap>
       </div>
-      <Menu>
-        <Menu.Item
-          options={vaccineOptions}
-          value={focusVaccine}
-          columns={2}
-          onChange={(v) => {
-            setFocusVaccine(v.value)
-            if (v.value != '无') {
-              getMarkers(v.value)
-            } else {
-              setMarkers([focusLocation])
-              setOriginLatitude(myLatitude)
-              setOriginLongitude(myLongitude)
-            }
-          }}
-        />
-      </Menu>
+      <div className='flex flex-row'>
+        <div className='grow'>
+          <Menu>
+            <Menu.Item
+              options={vaccineOptions}
+              value={focusVaccine}
+              columns={2}
+              onChange={(v) => {
+                setFocusVaccine(v.value)
+                if (v.value != '无') {
+                  getMarkers(v.value)
+                } else {
+                  setMarkers([currentPosition])
+                }
+              }}
+            />
+          </Menu>
+        </div>
+      </div>
       <div className='h-2/4 overflow-auto'>
         <div>
-          {markers.map((item, index) => {
-            if (item.id != myPositionID) {
-              return (
-                <Cell
-                  key={index}
-                  title={item.title}
-                  description={item.distance + " m"}
-                  onClick={() => {
-                    const updatedMarkers = [...markers]
-                    setMarkers(updatedMarkers)
-                    setOriginLatitude(item.latitude)
-                    setOriginLongitude(item.longitude)
-                  }}
-                  extra={<MoreS onClick={() => {Taro.navigateTo({ url: `/pages/map/clinic/index?clinicName=${item.title}` })}}/>}
-                />
-              )
-            } else {
-              return null
-            }
-          })}
+          {markers
+            .sort((a, b) => a.distance - b.distance)
+            .map((item, index) => {
+              if (item.id != myPositionID) {
+                return (
+                  <Cell
+                    key={index}
+                    title={item.title}
+                    description={item.distance > 1000 ? `${(item.distance / 1000).toFixed(1)} km` : `${item.distance} m`}
+                    onClick={() => {
+                      setCentralLatitude(item.latitude)
+                      setCentralLongitude(item.longitude)
+                    }}
+                    extra={<MoreS onClick={() => {Taro.navigateTo({ url: `/pages/map/clinic/index?clinicName=${item.title}` })}}/>}
+                  />
+                )
+              } else {
+                return null
+              }
+            })
+          }
         </div>
       </div>
     </div>
