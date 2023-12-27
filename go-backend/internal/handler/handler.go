@@ -1,7 +1,10 @@
 package handler
 
 import (
+	"log"
+	"net/http"
 	"v-helper/internal/service"
+	"v-helper/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -10,56 +13,59 @@ import (
 func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	userService := service.NewUserService(db)
 	userHandler := NewUserHandler(userService)
-	router.POST("/users", userHandler.HandleCreateUser)
-	router.GET("/users", userHandler.HandleGetAllUsers)
-	router.GET("/users/:id", userHandler.HandleGetUserByID)
-	router.PUT("/users/:id", userHandler.HandleUpdateUserByID)
-	router.DELETE("/users/:id", userHandler.HandleDeleteUserByID)
 	router.GET("/users/login", userHandler.LogInHandler)
-	router.GET("/users/:id/following", userHandler.HandleGetUserWithFollowings)
-	router.GET("/users/addfollowingVaccine/:id", userHandler.HandleAddFollowingVaccine)
-	router.GET("/users/removefollowingVaccine/:id", userHandler.HandleRemoveFollowingVaccine)
-	router.GET("/users/addfollowingArticle/:id", userHandler.HandleAddFollowingArticle)
-	router.GET("/users/removefollowingArticle/:id", userHandler.HandleRemoveFollowingArticle)
-	router.GET("/users/public/:id", userHandler.HandleGetPublicUserByID)
 
-	profileService := service.NewProfileService(db)
-	profileHandler := NewProfileHandler(profileService)
-	router.POST("/profiles", profileHandler.HandleCreateProfile)
-	router.GET("/profiles", profileHandler.HandleGetAllProfiles)
-	router.GET("/profiles/:id", profileHandler.HandleGetProfileByID)
-	router.GET("/profiles/user/:userID", profileHandler.HandleGetProfilesByUserID)
-	router.PUT("/profiles/:id", profileHandler.HandleUpdateProfileByID)
-	router.DELETE("/profiles/:id", profileHandler.HandleDeleteProfileByID)
+	// router.Use(JWTAuthMiddleware())
+	{
+		router.POST("/users", userHandler.HandleCreateUser)
+		router.GET("/users", userHandler.HandleGetAllUsers)
+		router.GET("/users/:id", userHandler.HandleGetUserByID)
+		router.PUT("/users/:id", userHandler.HandleUpdateUserByID)
+		router.DELETE("/users/:id", userHandler.HandleDeleteUserByID)
+		router.GET("/users/:id/following", userHandler.HandleGetUserWithFollowings)
+		router.GET("/users/addfollowingVaccine/:id", userHandler.HandleAddFollowingVaccine)
+		router.GET("/users/removefollowingVaccine/:id", userHandler.HandleRemoveFollowingVaccine)
+		router.GET("/users/addfollowingArticle/:id", userHandler.HandleAddFollowingArticle)
+		router.GET("/users/removefollowingArticle/:id", userHandler.HandleRemoveFollowingArticle)
+		router.GET("/users/public/:id", userHandler.HandleGetPublicUserByID)
 
-	vaccineService := service.NewVaccineService(db)
-	vaccineHandler := NewVaccineHandler(vaccineService)
-	router.POST("/vaccines", vaccineHandler.HandleCreateVaccine)
-	router.GET("/vaccines", vaccineHandler.HandleGetAllVaccines)
-	router.GET("/vaccines/:id", vaccineHandler.HandleGetVaccineByID)
-	router.PUT("/vaccines/:id", vaccineHandler.HandleUpdateVaccineByID)
-	router.DELETE("/vaccines/:id", vaccineHandler.HandleDeleteVaccineByID)
+		profileService := service.NewProfileService(db)
+		profileHandler := NewProfileHandler(profileService)
+		router.POST("/profiles", profileHandler.HandleCreateProfile)
+		router.GET("/profiles", profileHandler.HandleGetAllProfiles)
+		router.GET("/profiles/:id", profileHandler.HandleGetProfileByID)
+		router.GET("/profiles/user/:userID", profileHandler.HandleGetProfilesByUserID)
+		router.PUT("/profiles/:id", profileHandler.HandleUpdateProfileByID)
+		router.DELETE("/profiles/:id", profileHandler.HandleDeleteProfileByID)
 
-	vaccinationRecordService := service.NewVaccinationRecordService(db)
-	vaccinationRecordHandler := NewVaccinationRecordHandler(vaccinationRecordService)
-	router.POST("/vaccination-records", vaccinationRecordHandler.HandleCreateVaccinationRecord)
-	router.GET("/vaccination-records", vaccinationRecordHandler.HandleGetAllVaccinationRecords)
-	router.GET("/vaccination-records/:id", vaccinationRecordHandler.HandleGetVaccinationRecordByID)
-	router.GET("/vaccination-records/user/:userID", vaccinationRecordHandler.HandleGetVaccinationRecordsByUserID)
-	router.GET("/vaccination-records/profile/:profileID", vaccinationRecordHandler.HandleGetVaccinationRecordsByProfileID)
-	router.PUT("/vaccination-records/:id", vaccinationRecordHandler.HandleUpdateVaccinationRecordByID)
-	router.DELETE("/vaccination-records/:id", vaccinationRecordHandler.HandleDeleteVaccinationRecordByID)
+		vaccineService := service.NewVaccineService(db)
+		vaccineHandler := NewVaccineHandler(vaccineService)
+		router.POST("/vaccines", vaccineHandler.HandleCreateVaccine)
+		router.GET("/vaccines", vaccineHandler.HandleGetAllVaccines)
+		router.GET("/vaccines/:id", vaccineHandler.HandleGetVaccineByID)
+		router.PUT("/vaccines/:id", vaccineHandler.HandleUpdateVaccineByID)
+		router.DELETE("/vaccines/:id", vaccineHandler.HandleDeleteVaccineByID)
 
-	tempertureRecordService := service.NewTempertureRecordService(db)
-	tempertureRecordHandler := NewTempertureRecordHandler(tempertureRecordService)
-	router.POST("/temperature-records", tempertureRecordHandler.HandleCreateTempertureRecord)
-	router.GET("/temperature-records", tempertureRecordHandler.HandleGetAllTempertureRecords)
-	router.GET("/temperature-records/:id", tempertureRecordHandler.HandleGetTempertureRecordByID)
-	router.GET("/temperature-records/user/:userID", tempertureRecordHandler.HandleGetTempertureRecordsByUserID)
-	router.GET("/temperature-records/profile/:profileID", tempertureRecordHandler.HandleGetTempertureRecordsByProfileID)
-	router.PUT("/temperature-records/:id", tempertureRecordHandler.HandleUpdateTempertureRecordByID)
-	router.DELETE("/temperature-records/:id", tempertureRecordHandler.HandleDeleteTempertureRecordByID)
+		vaccinationRecordService := service.NewVaccinationRecordService(db)
+		vaccinationRecordHandler := NewVaccinationRecordHandler(vaccinationRecordService)
+		router.POST("/vaccination-records", vaccinationRecordHandler.HandleCreateVaccinationRecord)
+		router.GET("/vaccination-records", vaccinationRecordHandler.HandleGetAllVaccinationRecords)
+		router.GET("/vaccination-records/:id", vaccinationRecordHandler.HandleGetVaccinationRecordByID)
+		router.GET("/vaccination-records/user/:userID", vaccinationRecordHandler.HandleGetVaccinationRecordsByUserID)
+		router.GET("/vaccination-records/profile/:profileID", vaccinationRecordHandler.HandleGetVaccinationRecordsByProfileID)
+		router.PUT("/vaccination-records/:id", vaccinationRecordHandler.HandleUpdateVaccinationRecordByID)
+		router.DELETE("/vaccination-records/:id", vaccinationRecordHandler.HandleDeleteVaccinationRecordByID)
 
+		tempertureRecordService := service.NewTempertureRecordService(db)
+		tempertureRecordHandler := NewTempertureRecordHandler(tempertureRecordService)
+		router.POST("/temperature-records", tempertureRecordHandler.HandleCreateTempertureRecord)
+		router.GET("/temperature-records", tempertureRecordHandler.HandleGetAllTempertureRecords)
+		router.GET("/temperature-records/:id", tempertureRecordHandler.HandleGetTempertureRecordByID)
+		router.GET("/temperature-records/user/:userID", tempertureRecordHandler.HandleGetTempertureRecordsByUserID)
+		router.GET("/temperature-records/profile/:profileID", tempertureRecordHandler.HandleGetTempertureRecordsByProfileID)
+		router.PUT("/temperature-records/:id", tempertureRecordHandler.HandleUpdateTempertureRecordByID)
+		router.DELETE("/temperature-records/:id", tempertureRecordHandler.HandleDeleteTempertureRecordByID)
+	}
 	// 帖子
 	articleService := service.NewArticleService(db)
 	articleHandler := NewArticleHandler(articleService)
@@ -82,6 +88,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	// 通知发送
 	messageService := service.NewMessageService(db)
 	messageHandler := NewMessageHandler(messageService)
+	go messageHandler.MessageScheduler()
 	router.POST("/messages", messageHandler.HandleAddMessage)
 	router.GET("/messages", messageHandler.HandleGetAllMessages)
 	router.GET("/messages/:id", messageHandler.HandleGetMessageByID)
@@ -101,4 +108,32 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.DELETE("/clinics/:id", clinicHandler.HandleDeleteClinicByID)
 	router.GET("/wechat-validation", handleWechatValidation)
 	router.POST("/wechat-validation", SetSubscription)
+}
+
+func JWTAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token := c.GetHeader("Authorization")
+
+		if token == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
+			c.Abort()
+			return
+		}
+
+		log.Println("token:", token)
+
+		ok, err := utils.VerifyToken(token)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			c.Abort()
+			return
+		}
+
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
 }

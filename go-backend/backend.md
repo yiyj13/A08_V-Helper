@@ -179,6 +179,31 @@ Post 时的json样例：
 }
 ```
 
+## 消息
+
+| 方法 | 路由 | 功能 |
+| ---- | ---- | ---- |
+| POST | /api/messages | 添加消息 |
+| GET | /api/messages | 获取全部消息 |
+| GET | /api/messages/:id | 获取指定 id 的消息 |
+| PUT | /api/messages/:id | 更新指定 id 的消息 |
+| DELETE |/api/messages/:id | 删除指定 id 的消息 |
+
+Post 时的json样例：
+```json
+{
+   "openId": "1234567890",
+   "page": "pages/welcome/welcome",
+   "vaxName": "新冠疫苗",
+   "comment": "您的接种时间已到",
+   "vaxLocation": "本地社区医院",
+   "vaxNum": 1,
+   "realTime": true,
+   "sendTime": "2021-07-01 12:00",
+   "sent": false
+}
+```
+
 # 模型设计
 
 通过以下数据表来支持后端的功能：
@@ -311,22 +336,40 @@ type Reply struct {
 // Message 消息模型
 type Message struct {
 	gorm.Model
-	Content  string `json:"content"` // 消息内容，将不同字段拼接成字符串
-	UserName string `json:"userName"`
-	UserID   uint   `json:"userId"`
-	SendTime string `json:"sendTime"` // 发送时间，注意用string与前端交互，例如"2021-07-01 12:00"
+	OpenID      string `json:"openId"`
+	Page        string `json:"page"` // 消息跳转页面，例如"pages/welcome/welcome"
+	VaxName     string `json:"vaxName"`
+	Comment     string `json:"comment"`
+	VaxLocation string `json:"vaxLocation"`
+	VaxNum      int    `json:"vaxNum"`
+	RealTime    bool   `json:"realTime"` // 是否实时提醒
+	SendTime    string `json:"sendTime"` // 如果不是实时提醒，则需要设置提醒时间，用字符串存具体时间，例如"2021-07-01 12:00"
+	Sent        bool   `json:"sent"`     // 是否已发送
 }
 ```
 
-  **接种地点表 (VaccinationLocations)**:
+9. **接种地点表 (VaccinationLocations)**:
 
-- Name
-- Address 
-- ContactNumber
-- OperatingHours
-- PositionX
-- PositionY
-- OptionalVaccine 
+```go
+// 持有某种疫苗的所有诊所
+type VaccineClinicList struct {
+	gorm.Model
+	VaccineName string `json:"vaccineName"`
+	ClinicList  string `json:"clinicList"`
+	// ClinicName  StringList `json:"clinicName"`
+}
+
+// 诊所信息
+type Clinic struct {
+	gorm.Model
+	ClinicName  string `json:"clinicName"`
+	VaccineList string `json:"vaccineList"`
+	Latitude    string `json:"latitude"`
+	Longitude   string `json:"longitude"`
+	PhoneNumber string `json:"phoneNumber"`
+	Address     string `json:"address"`
+}
+```
 
 ## 项目优化
 
@@ -486,3 +529,40 @@ JWT 主要包含三个部分，用点（`.`）分隔：
 - **短期有效性**: 为 JWT 设置合理的过期时间，以减少被盗用的风险。
 
 通过使用 JWT，我们可以实现无状态的身份验证，这意味着服务器不需要存储任何用户的登录信息，从而使应用更加易于扩展。同时，它也为客户端和服务器之间的通信提供了一种安全可靠的方式来验证和传输用户身份信息。
+
+
+## 消息通知
+
+设计一个优雅的系统来处理定时消息发送功能涉及多个方面：数据库设计、消息调度逻辑、错误处理、性能优化等。以下是一个设计方案及其相关思路：
+
+### 1. **系统目标**
+- 实现一个可靠的消息调度系统，能够在预定时间发送消息。
+- 确保系统可扩展性和高效性能。
+- 提供稳健的错误处理和日志记录。
+
+### 2. **数据库设计**
+- `messages` 表用于存储消息信息。
+  - 字段包括：`id`, `open_id`, `page`, `vax_name`, `comment`, `vax_location`, `vax_num`, `real_time`, `send_time`, `sent`, `created_at`, `updated_at`.
+  - `send_time` 用于确定消息发送时间。
+  - `sent` 标记消息是否已发送。
+
+### 3. **消息调度逻辑**
+- 实现一个消息调度器，定期从数据库中检索未发送的消息，并按`send_time`排序。
+- 对于每个未发送的消息，计算当前时间与`send_time`的差值，若到达或超过发送时间，则触发发送逻辑。
+
+### 4. **消息发送机制**
+- 消息发送逻辑封装在`SendTemplateMessage`函数中，利用微信小程序的模板消息接口实现。
+- 发送成功后，更新数据库中对应消息的`sent`状态为`true`。
+
+### 5. **错误处理和日志记录**
+- 在消息发送过程中，任何错误都应被捕获并记录。
+- 提供详细的日志记录，包括消息发送时间、状态和任何失败的原因。
+
+#### 6. **性能考虑**
+- 消息调度器应避免创建过多goroutine，以减少资源消耗。
+- 数据库查询应优化，避免过大的数据加载和频繁查询。
+
+### 7. **安全和隐私**
+- 确保处理用户数据时遵循隐私法规。
+- 敏感信息（如用户OpenID）应被适当保护。
+

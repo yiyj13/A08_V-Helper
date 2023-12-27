@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 	"v-helper/internal/model"
 	"v-helper/internal/service"
 
@@ -201,8 +202,6 @@ func (h *MessageHandler) HandleAddMessage(c *gin.Context) {
 			return
 		}
 		message.Sent = true
-	} else {
-		// 非实时提醒
 	}
 
 	if err := h.MessageService.CreateMessage(message); err != nil {
@@ -267,4 +266,71 @@ func (h *MessageHandler) HandleDeleteMessageByID(c *gin.Context) {
 	}
 	log.Println("message deleted successfully: ", messageID)
 	c.JSON(http.StatusOK, gin.H{"message": "message deleted successfully"})
+}
+
+// getMessagesToSend 从数据库获取未发送的消息，并按发送时间排序
+func (h *MessageHandler) getMessagesToSend() []model.Message {
+	// 实现数据库查询逻辑
+	messages, err := h.MessageService.GetAllUnsentMessages()
+	if err != nil {
+		log.Println("failed to get messages to send: ", err)
+		return nil
+	}
+
+	// 按SendTime排序
+	sort.Slice(messages, func(i, j int) bool {
+		return messages[i].SendTime < messages[j].SendTime
+	})
+
+	return messages
+}
+
+// handleMessage 处理消息发送逻辑
+func (h *MessageHandler) handleMessage(messages []model.Message) {
+	for _, message := range messages {
+		// 判断是否到达发送时间
+		now := time.Now()
+		sendTime, err := time.ParseInLocation("2006-01-02 15:04", message.SendTime, time.Local)
+		if err != nil {
+			log.Println("failed to parse send time: ", err)
+			return
+		}
+		log.Printf("Now:%v, Send Time:%v\n", now, sendTime)
+
+		if now.After(sendTime) {
+			// 到达发送时间，发送消息
+			if err := SendTemplateMessage("", message.OpenID, "", message.Page, message.VaxName, message.Comment, message.VaxLocation, message.VaxNum); err != nil {
+				log.Println("failed to send template message: ", err)
+				return
+			}
+			message.Sent = true
+
+			// 更新数据库
+			if err := h.MessageService.UpdateMessageByID(message); err != nil {
+				log.Println("failed to update message: ", err)
+				return
+			}
+
+		} else {
+			// 未到达发送时间，跳过
+			break
+		}
+
+	}
+}
+
+// MessageScheduler 负责定时检查并发送消息
+func (h *MessageHandler) MessageScheduler() {
+	for {
+		// 从数据库中获取还未发送的消息，按SendTime排序
+		messages := h.getMessagesToSend() // 按SendTime排序
+
+		if len(messages) > 0 {
+			// 处理最接近当前时间的消息
+			h.handleMessage(messages)
+		}
+
+		// 等待一段时间后再次检查
+		time.Sleep(1 * time.Minute)
+	}
 }
