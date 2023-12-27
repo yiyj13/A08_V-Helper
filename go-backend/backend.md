@@ -19,15 +19,15 @@
 - [x] 收藏帖子和疫苗
 - [x] 解耦 接种记录 和 接种预约
 - [x] 根据疫苗筛选帖子
-- [ ] 消息提醒的发送 (https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/subscribe-message.html)
+- [x] 消息提醒的发送 (https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/subscribe-message.html)
 - [x] 图床
 - [x] github action
-- [ ] token验证
+- [x] token验证
 - [ ] 加密
 - [ ] 代码规范(配置文件)，详细注释
 - [x] 数据库时区更改
 - [ ] 单元测试
-- [ ] 性能测试
+- [x] 性能测试
 - [x] 路由拦截和重定向，部署时只暴露api接口
 
 
@@ -435,6 +435,51 @@ type Clinic struct {
    - 精心设计数据库模型和关联，以优化性能和简化数据访问逻辑。
    - 使用迁移来管理数据库结构的更改。
 
+## 性能测试报告
+
+### 测试概述
+
+**测试工具**: 使用Locust 2.20.0进行了性能测试。
+
+**测试目的**: 评估Web应用在并发用户负载下的性能表现。
+
+**测试场景**:
+- 测试了六个不同的API端点。
+- 总共模拟了200个并发用户。
+- 用户生成速率为每秒10个用户。
+
+### 测试结果
+
+**请求统计**:
+
+| 类型 | 路径                        | 请求数  | 失败率 | 平均响应时间 (ms) | 最小响应时间 (ms) | 最大响应时间 (ms) | 请求/秒 |
+|------|-----------------------------|---------|--------|-------------------|-------------------|-------------------|---------|
+| GET  | /                           | 959     | 0.00%  | 40                | 9                 | 895               | 3.26    |
+| GET  | /api/profiles               | 1915    | 0.00%  | 78                | 9                 | 3606              | 6.51    |
+| GET  | /api/temperature-records    | 3906    | 0.00%  | 41                | 8                 | 3349              | 13.28   |
+| GET  | /api/users                  | 1945    | 0.00%  | 60                | 10                | 1818              | 6.61    |
+| GET  | /api/vaccination-records    | 3888    | 0.00%  | 709               | 22                | 16251             | 13.22   |
+| GET  | /api/vaccines               | 3905    | 0.00%  | 1127              | 21                | 18216             | 13.28   |
+
+**响应时间分位数**:
+
+不同的API端点在不同的响应时间分位数上表现出了差异。特别是`/api/vaccination-records`和`/api/vaccines`在更高的分位数上显示了较长的响应时间，这可能表明在高负载下这些端点的性能表现下降。
+
+### 性能分析
+
+- **吞吐量**: 所有API端点总体上保持了较高的请求处理率。
+- **响应时间**: 大多数API端点的响应时间较短，但`/api/vaccination-records`和`/api/vaccines`的响应时间较长，特别是在95%以上的分位数，表明在高负载下可能存在性能瓶颈。
+- **可靠性**: 在测试过程中没有发现失败的请求，这说明服务在测试负载下保持了较高的可靠性。
+
+### 后续
+
+- **性能优化**: 对于响应时间较长的API端点，建议进行更深入的性能分析，以识别和解决可能的瓶颈。
+- **资源监控**: 在进行性能测试时监控服务器资源使用情况，如CPU、内存和网络使用情况，以帮助识别性能瓶颈。
+- **扩展性评估**: 考虑进行更高负载的测试，以评估服务在极端条件下的表现和扩展需求。
+
+### 总结
+
+总体而言，测试显示了应用在处理中等负载下的良好性能。然而，某些API端点在高分位数的响应时间表明可能存在性能优化的空间。
 
 ## 遇到的问题
 
@@ -566,3 +611,22 @@ JWT 主要包含三个部分，用点（`.`）分隔：
 - 确保处理用户数据时遵循隐私法规。
 - 敏感信息（如用户OpenID）应被适当保护。
 
+```mermaid
+graph TD
+    A[启动消息调度器] --> B[定期从数据库中检索消息]
+    B --> C{检查消息是否未发送<br>和发送时间是否到达}
+    C -->|是| D[触发消息发送逻辑]
+    C -->|否| E[等待下一次检索]
+    D --> F{发送消息<br>使用SendTemplateMessage}
+    F -->|成功| G[更新数据库<br>标记为已发送]
+    F -->|失败| H[记录错误<br>保持消息未发送状态]
+
+    style A fill:#f9f,stroke:#333,stroke-width:4px
+    style B fill:#bbf,stroke:#f66,stroke-width:2px
+    style C fill:#ddf,stroke:#333,stroke-width:2px
+    style D fill:#bdf,stroke:#333,stroke-width:2px
+    style E fill:#bdf,stroke:#333,stroke-width:2px
+    style F fill:#daf,stroke:#333,stroke-width:2px
+    style G fill:#bdf,stroke:#333,stroke-width:2px
+    style H fill:#fbb,stroke:#333,stroke-width:2px
+```

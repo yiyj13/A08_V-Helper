@@ -326,7 +326,7 @@ func (h *MessageHandler) MessageScheduler() {
 		messages := h.getMessagesToSend() // 按SendTime排序
 
 		if len(messages) > 0 {
-			// 处理最接近当前时间的消息
+			// 处理待发送的消息
 			h.handleMessage(messages)
 		}
 
