@@ -1,7 +1,8 @@
 package utils
 
 import (
-	"errors"
+	"fmt"
+	"log"
 	"time"
 	"v-helper/internal/model"
 
@@ -12,7 +13,7 @@ var jwtKey = []byte("your_secret_key") // 从安全的配置来源获取
 
 // JWTClaims 自定义 JWT Claims 结构
 type JWTClaims struct {
-	UserID uint
+	OpenID string
 	jwt.StandardClaims
 }
 
@@ -20,7 +21,7 @@ type JWTClaims struct {
 func GenerateJWT(user model.User) (string, error) {
 	expirationTime := time.Now().Add(1 * time.Hour)
 	claims := &JWTClaims{
-		UserID: user.ID,
+		OpenID: user.OpenID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -44,14 +45,15 @@ func ParseJWT(tokenString string) (*JWTClaims, error) {
 		return nil, err
 	}
 	if !token.Valid {
-		return nil, errors.New("invalid token")
+		return nil, fmt.Errorf("invalid token")
 	}
 	return claims, nil
 }
 
 // VerifyToken 验证 JWT 令牌
 func VerifyToken(tokenString string) (bool, error) {
-	_, err := ParseJWT(tokenString)
+	claims, err := ParseJWT(tokenString)
+	log.Println("claims:", claims)
 	if err != nil {
 		return false, err
 	}

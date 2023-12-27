@@ -6,5 +6,5 @@ import (
 )
 
 func TestMessage(t *testing.T) {
-	handler.SendTemplateMessage("", "oYgei62WYUHLbqshmE90303gXFbY", "", "", "", "", "", "", "")
+	handler.SendTemplateMessage("", "oYgei686TJ13gmm7s8azpU5JTkKI", "", "", "", "", "", 2)
 }

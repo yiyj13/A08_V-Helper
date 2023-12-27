@@ -32,6 +32,22 @@ func (h *TempertureRecordHandler) HandleCreateTempertureRecord(c *gin.Context) {
 	c.JSON(http.StatusCreated, record)
 }
 
+func (h *TempertureRecordHandler) HandleGetTempertureRecordsByUserID(c *gin.Context) {
+	userID, err := strconv.ParseUint(c.Param("userID"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	records, err := h.tempertureRecordService.GetTempertureRecordsByUserID(uint(userID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, records)
+}
+
 func (h *TempertureRecordHandler) HandleGetTempertureRecordsByProfileID(c *gin.Context) {
 	profileID, err := strconv.ParseUint(c.Param("profileID"), 10, 32)
 	if err != nil {

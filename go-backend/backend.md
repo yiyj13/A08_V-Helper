@@ -6,9 +6,9 @@
 - [X] 配置文件，数据库连接
 - [X] 通过docker-compose部署测试
 - [ ] 完善数据库模型
-  - [ ] 在model中加入新模型时，需要在init中进行迁移
-  - [ ] 在service中实现对模型的增删改查
-  - [ ] 在handler中实现API接口，并注册路由
+  - [x] 在model中加入新模型时，需要在init中进行迁移
+  - [x] 在service中实现对模型的增删改查
+  - [x] 在handler中实现API接口，并注册路由
 - [x] 用户登录，主要通过微信接口实现
 - [ ] 对有需要的模型在获取时进行分页、排序(时间排序)和筛选(按疫苗)
   - [x] 帖子
@@ -16,17 +16,19 @@
 - [x] 更方便地通过json数据更新数据库
 - [ ] 更新文档中相关API
 - [x] 接种记录的字段完善
-- [ ] 收藏帖子和疫苗
+- [x] 收藏帖子和疫苗
 - [x] 解耦 接种记录 和 接种预约
 - [x] 根据疫苗筛选帖子
-- [ ] 消息提醒的发送 (https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/subscribe-message.html)
+- [x] 消息提醒的发送 (https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/subscribe-message.html)
 - [x] 图床
 - [x] github action
-- [ ] token验证
+- [x] token验证
 - [ ] 加密
-- [ ] 代码规范(配置文件)，注释
-- [ ] 数据库时区更改
-- [ ] 性能测试
+- [ ] 代码规范(配置文件)，详细注释
+- [x] 数据库时区更改
+- [ ] 单元测试
+- [x] 性能测试
+- [x] 路由拦截和重定向，部署时只暴露api接口
 
 
 
@@ -120,6 +122,7 @@ Post 时的json样例：
 | POST | /api/temperature-records | 添加体温记录 |
 | GET | /api/temperature-records | 获取全部体温记录 |
 | GET | /api/temperature-records/:id | 获取指定 id 的体温记录 |
+| GET | /api/temperature-records/user/:id | 获取指定 id 的用户的体温记录 |
 | GET | /api/temperature-records/profile/:id | 获取指定 id 的接种者的体温记录 |
 | PUT | /api/temperature-records/:id | 更新指定 id 的体温记录 |
 | DELETE | /api/temperature-records/:id | 删除指定 id 的体温记录 |
@@ -173,6 +176,31 @@ Post 时的json样例：
    "content": "我也是",
    "userName": "李四",
    "userId": 2
+}
+```
+
+## 消息
+
+| 方法 | 路由 | 功能 |
+| ---- | ---- | ---- |
+| POST | /api/messages | 添加消息 |
+| GET | /api/messages | 获取全部消息 |
+| GET | /api/messages/:id | 获取指定 id 的消息 |
+| PUT | /api/messages/:id | 更新指定 id 的消息 |
+| DELETE |/api/messages/:id | 删除指定 id 的消息 |
+
+Post 时的json样例：
+```json
+{
+   "openId": "1234567890",
+   "page": "pages/welcome/welcome",
+   "vaxName": "新冠疫苗",
+   "comment": "您的接种时间已到",
+   "vaxLocation": "本地社区医院",
+   "vaxNum": 1,
+   "realTime": true,
+   "sendTime": "2021-07-01 12:00",
+   "sent": false
 }
 ```
 
@@ -308,24 +336,150 @@ type Reply struct {
 // Message 消息模型
 type Message struct {
 	gorm.Model
-	Content  string `json:"content"` // 消息内容，将不同字段拼接成字符串
-	UserName string `json:"userName"`
-	UserID   uint   `json:"userId"`
-	SendTime string `json:"sendTime"` // 发送时间，注意用string与前端交互，例如"2021-07-01 12:00"
+	OpenID      string `json:"openId"`
+	Page        string `json:"page"` // 消息跳转页面，例如"pages/welcome/welcome"
+	VaxName     string `json:"vaxName"`
+	Comment     string `json:"comment"`
+	VaxLocation string `json:"vaxLocation"`
+	VaxNum      int    `json:"vaxNum"`
+	RealTime    bool   `json:"realTime"` // 是否实时提醒
+	SendTime    string `json:"sendTime"` // 如果不是实时提醒，则需要设置提醒时间，用字符串存具体时间，例如"2021-07-01 12:00"
+	Sent        bool   `json:"sent"`     // 是否已发送
 }
 ```
 
-  **接种地点表 (VaccinationLocations)**:
+9. **接种地点表 (VaccinationLocations)**:
 
-- Name
-- Address 
-- ContactNumber
-- OperatingHours
-- PositionX
-- PositionY
-- OptionalVaccine 
+```go
+// 持有某种疫苗的所有诊所
+type VaccineClinicList struct {
+	gorm.Model
+	VaccineName string `json:"vaccineName"`
+	ClinicList  string `json:"clinicList"`
+	// ClinicName  StringList `json:"clinicName"`
+}
 
+// 诊所信息
+type Clinic struct {
+	gorm.Model
+	ClinicName  string `json:"clinicName"`
+	VaccineList string `json:"vaccineList"`
+	Latitude    string `json:"latitude"`
+	Longitude   string `json:"longitude"`
+	PhoneNumber string `json:"phoneNumber"`
+	Address     string `json:"address"`
+}
+```
 
+## 项目优化
+
+在使用Go语言的Gin框架、Gorm ORM、Nginx作为路由器，以及MySQL作为数据库的项目中，下面是一些具体的最佳实践和注意事项，以确保后端服务的安全性、性能、可靠性和可维护性：
+
+### 安全性
+1. **使用中间件实现认证和授权**：
+   - 使用Gin的中间件来处理JWT（JSON Web Tokens）或OAuth认证。
+   - 对敏感路由（如用户数据修改、管理员功能等）实施权限检查。
+
+2. **SQL注入防御**：
+   - Gorm自身提供了防止SQL注入的措施。确保始终使用Gorm的方法来构建查询，避免直接拼接SQL字符串。
+
+3. **输入验证**：
+   - 在处理来自客户端的数据时，始终进行验证。使用Gin的绑定和验证功能来验证请求数据。
+
+4. **HTTPS配置**：
+   - 即使Nginx处理HTTPS，也应在Gin中正确配置SSL，尤其是当应用直接暴露到外网时。
+
+### 性能和可伸缩性
+1. **数据库连接池管理**：
+   - 适当配置Gorm的数据库连接池参数，如MaxOpenConns（最大打开连接数）、MaxIdleConns（最大空闲连接数）和ConnMaxLifetime（连接的最大存活时间）。
+
+2. **查询优化**：
+   - 使用Gorm的懒加载特性，并在必要时使用预加载（`.Preload`）来减少数据库查询次数。
+
+3. **使用缓存**：
+   - 考虑使用Redis等缓存机制来存储热点数据，减少对数据库的直接访问。
+
+### 可靠性和可用性
+1. **错误处理**：
+   - 在Gin中使用恢复中间件（Recovery Middleware）来处理panic情况。
+   - 记录详细的错误日志，可以使用如Logrus等日志库。
+
+2. **数据备份和迁移策略**：
+   - 定期备份MySQL数据库。
+   - 使用如Flyway或Liquibase等数据库迁移工具来管理数据库的版本和迁移。
+
+### 代码质量和维护性
+1. **代码结构**：
+   - 将业务逻辑、数据访问和API路由清晰分离。
+   - 遵循Go语言的编码规范和最佳实践。
+
+2. **单元测试**：
+   - 编写单元测试来验证业务逻辑，可以使用Go自带的测试框架。
+
+### 部署和持续集成
+1. **Docker化应用**：
+   - 使用Docker来容器化您的应用，这有利于确保一致的部署和运行环境。
+   - 使用Docker Compose或Kubernetes来管理容器和服务。
+
+2. **CI/CD流程**：
+   - 使用如Jenkins、Travis CI或GitHub Actions等CI/CD工具自动化测试、构建和部署流程。
+
+### Nginx配置
+1. **路由配置**：
+   - 使用Nginx处理静态内容和反向代理到Gin应用。
+   - 配置HTTPS，重定向所有HTTP流量到HTTPS。
+   - 实现必要的安全性头部，如CSP、HSTS等。
+
+### 数据库和数据模型
+1. **Gorm模型设计**：
+   - 精心设计数据库模型和关联，以优化性能和简化数据访问逻辑。
+   - 使用迁移来管理数据库结构的更改。
+
+## 性能测试报告
+
+### 测试概述
+
+**测试工具**: 使用Locust 2.20.0进行了性能测试。
+
+**测试目的**: 评估Web应用在并发用户负载下的性能表现。
+
+**测试场景**:
+- 测试了六个不同的API端点。
+- 总共模拟了200个并发用户。
+- 用户生成速率为每秒10个用户。
+
+### 测试结果
+
+**请求统计**:
+
+| 类型 | 路径                        | 请求数  | 失败率 | 平均响应时间 (ms) | 最小响应时间 (ms) | 最大响应时间 (ms) | 请求/秒 |
+|------|-----------------------------|---------|--------|-------------------|-------------------|-------------------|---------|
+| GET  | /                           | 959     | 0.00%  | 40                | 9                 | 895               | 3.26    |
+| GET  | /api/profiles               | 1915    | 0.00%  | 78                | 9                 | 3606              | 6.51    |
+| GET  | /api/temperature-records    | 3906    | 0.00%  | 41                | 8                 | 3349              | 13.28   |
+| GET  | /api/users                  | 1945    | 0.00%  | 60                | 10                | 1818              | 6.61    |
+| GET  | /api/vaccination-records    | 3888    | 0.00%  | 709               | 22                | 16251             | 13.22   |
+| GET  | /api/vaccines               | 3905    | 0.00%  | 1127              | 21                | 18216             | 13.28   |
+
+**响应时间分位数**:
+
+不同的API端点在不同的响应时间分位数上表现出了差异。特别是`/api/vaccination-records`和`/api/vaccines`在更高的分位数上显示了较长的响应时间，这可能表明在高负载下这些端点的性能表现下降。
+
+### 性能分析
+
+- **吞吐量**: 所有API端点总体上保持了较高的请求处理率。
+- **响应时间**: 大多数API端点的响应时间较短，但`/api/vaccination-records`和`/api/vaccines`的响应时间较长，特别是在95%以上的分位数，表明在高负载下可能存在性能瓶颈。
+- **可靠性**: 在测试过程中没有发现失败的请求，这说明服务在测试负载下保持了较高的可靠性。
+
+### 后续
+
+- **性能优化**: 对于响应时间较长的API端点，建议进行更深入的性能分析，以识别和解决可能的瓶颈。
+- **资源监控**: 在进行性能测试时监控服务器资源使用情况，如CPU、内存和网络使用情况，以帮助识别性能瓶颈。
+- **扩展性评估**: 考虑进行更高负载的测试，以评估服务在极端条件下的表现和扩展需求。
+
+### 总结
+
+总体而言，测试显示了应用在处理中等负载下的良好性能。然而，某些API端点在高分位数的响应时间表明可能存在性能优化的空间。
 
 ## 遇到的问题
 
@@ -420,3 +574,59 @@ JWT 主要包含三个部分，用点（`.`）分隔：
 - **短期有效性**: 为 JWT 设置合理的过期时间，以减少被盗用的风险。
 
 通过使用 JWT，我们可以实现无状态的身份验证，这意味着服务器不需要存储任何用户的登录信息，从而使应用更加易于扩展。同时，它也为客户端和服务器之间的通信提供了一种安全可靠的方式来验证和传输用户身份信息。
+
+
+## 消息通知
+
+设计一个优雅的系统来处理定时消息发送功能涉及多个方面：数据库设计、消息调度逻辑、错误处理、性能优化等。以下是一个设计方案及其相关思路：
+
+### 1. **系统目标**
+- 实现一个可靠的消息调度系统，能够在预定时间发送消息。
+- 确保系统可扩展性和高效性能。
+- 提供稳健的错误处理和日志记录。
+
+### 2. **数据库设计**
+- `messages` 表用于存储消息信息。
+  - 字段包括：`id`, `open_id`, `page`, `vax_name`, `comment`, `vax_location`, `vax_num`, `real_time`, `send_time`, `sent`, `created_at`, `updated_at`.
+  - `send_time` 用于确定消息发送时间。
+  - `sent` 标记消息是否已发送。
+
+### 3. **消息调度逻辑**
+- 实现一个消息调度器，定期从数据库中检索未发送的消息，并按`send_time`排序。
+- 对于每个未发送的消息，计算当前时间与`send_time`的差值，若到达或超过发送时间，则触发发送逻辑。
+
+### 4. **消息发送机制**
+- 消息发送逻辑封装在`SendTemplateMessage`函数中，利用微信小程序的模板消息接口实现。
+- 发送成功后，更新数据库中对应消息的`sent`状态为`true`。
+
+### 5. **错误处理和日志记录**
+- 在消息发送过程中，任何错误都应被捕获并记录。
+- 提供详细的日志记录，包括消息发送时间、状态和任何失败的原因。
+
+#### 6. **性能考虑**
+- 消息调度器应避免创建过多goroutine，以减少资源消耗。
+- 数据库查询应优化，避免过大的数据加载和频繁查询。
+
+### 7. **安全和隐私**
+- 确保处理用户数据时遵循隐私法规。
+- 敏感信息（如用户OpenID）应被适当保护。
+
+```mermaid
+graph TD
+    A[启动消息调度器] --> B[定期从数据库中检索消息]
+    B --> C{检查消息是否未发送<br>和发送时间是否到达}
+    C -->|是| D[触发消息发送逻辑]
+    C -->|否| E[等待下一次检索]
+    D --> F{发送消息<br>使用SendTemplateMessage}
+    F -->|成功| G[更新数据库<br>标记为已发送]
+    F -->|失败| H[记录错误<br>保持消息未发送状态]
+
+    style A fill:#f9f,stroke:#333,stroke-width:4px
+    style B fill:#bbf,stroke:#f66,stroke-width:2px
+    style C fill:#ddf,stroke:#333,stroke-width:2px
+    style D fill:#bdf,stroke:#333,stroke-width:2px
+    style E fill:#bdf,stroke:#333,stroke-width:2px
+    style F fill:#daf,stroke:#333,stroke-width:2px
+    style G fill:#bdf,stroke:#333,stroke-width:2px
+    style H fill:#fbb,stroke:#333,stroke-width:2px
+```

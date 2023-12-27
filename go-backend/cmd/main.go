@@ -1,6 +1,7 @@
 package main
 
 import (
+	"time"
 	"v-helper/internal/handler"
 	"v-helper/pkg/db"
 
@@ -10,6 +11,13 @@ import (
 )
 
 func main() {
+	// 设置时区为中国时区
+	loc, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		panic(err)
+	}
+	time.Local = loc
+
 	cfg := config.LoadConfig()
 	database := db.Init(cfg)
 

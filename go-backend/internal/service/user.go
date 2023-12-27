@@ -100,6 +100,15 @@ func (s *UserService) DeleteUserByID(id uint) error {
 	return s.db.Where("id = ?", id).Delete(&model.User{}).Error
 }
 
+// 根据id获取UserName和Avatar
+func (s *UserService) GetPublicUserByID(id uint) (model.User, error) {
+	var user model.User
+	if err := s.db.Select("user_name", "avatar").First(&user, id).Error; err != nil {
+		return user, err
+	}
+	return user, nil
+}
+
 // GetUserByOpenID 根据 OpenID 获取用户
 func (s *UserService) GetUserByOpenID(openID string) (model.User, error) {
 	var user model.User

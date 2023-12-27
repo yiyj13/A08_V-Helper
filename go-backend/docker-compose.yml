@@ -4,23 +4,29 @@ services:
     build:
       context: .
       dockerfile: deployments/Dockerfile
-    ports:
-      - "8080:8080"
     depends_on:
       - db
     env_file:
       - .env
+    networks:
+      - backend
+
   db:
     image: mysql:8.1
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
+      TZ: Asia/Shanghai
+    command: --default-time-zone='+08:00'
+    volumes:
+      - db_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 20s
       retries: 10
-    ports:
-      - "3306:3306"
+    networks:
+      - backend
+
   nginx:
     image: nginx:latest
     ports:
@@ -28,7 +34,15 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./index.html:/usr/share/nginx/html/index.html
-      # - ./certs/localhost.crt:/etc/ssl/certs/localhost.crt
-      # - ./certs/localhost.key:/etc/ssl/private/localhost.key
     depends_on:
       - app
+    networks:
+      - frontend
+      - backend
+
+volumes:
+  db_data:
+
+networks:
+  frontend:
+  backend:
