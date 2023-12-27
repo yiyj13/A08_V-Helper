@@ -1,14 +1,14 @@
 [
     {
         "name": "新冠疫苗",
-        "description": "用于预防新型冠状病毒(SARS-CoV-2) 感染所致的疾病(COVID-19)。",
+        "description": "用于预防新型冠状病毒(SARS-CoV-2) 感染所致的疾病(COVID-19)",
         "targetDisease": "2019冠状病毒病（COVID-19）是由SARS-CoV-2病毒引起的一种传染病。\n大多数感染此病毒的人会出现轻度至中度呼吸系统疾病，无需专门治疗即可康复。但有些人可能会患重症并需要医护。老年人，以及那些患有心血管疾病、糖尿病、慢性呼吸系统疾病或癌症等基础病的人较易发展为重症。任何年龄任何人都可能会生病、患重症或死亡。\n预防和减缓传播的最好办法是充分了解此病和病毒传播方式。应与他人保持至少1米的距离，佩戴合适的口罩，勤洗手或用含酒精成分的洗手液清洁手部，以保护自己和他人免受感染。轮到时请接种疫苗，并请遵循当地指示。\n当感染者咳嗽或打喷嚏、说话、唱歌或呼吸时，病毒会以液体微粒形式从其口或鼻传出。这些微粒从较大的液滴到较小的气溶胶不等。为此应注意呼吸礼仪，例如对着弯曲的臂肘部咳嗽。若感觉不适，应居家自我隔离，直到康复。",
         "sideEffects": "接种部位：疼痛、肿胀、瘙痒、红斑、硬结 \n 全身：头痛、疲乏、肌痛、恶心、腹泻、关节痛、咳嗽、寒战、瘙痒、食欲减退、流涕、咽痛、鼻充血、腹痛",
-        "precautions": "对疫苗成分过敏者禁用。\n患有严重神经系统疾病者禁用。\n未控制的严重慢性病患者。\n妊娠期及哺乳期妇女禁用"
+        "precautions": "对疫苗成分过敏者禁用。\n患有严重神经系统疾病者禁用。\n未控制的严重慢性病患者禁用。\n妊娠期及哺乳期妇女禁用"
     },
     {
         "name": "乙肝疫苗",
-        "description": "用于预防乙型肝炎的疫苗。",
+        "description": "用于预防乙型肝炎的疫苗",
         "targetDisease": "乙型肝炎是由乙型肝炎病毒导致肝脏感染。感染可以是急性（短期且严重）或慢性（长期）。\n乙肝可造成慢性感染。乙肝患者死于肝硬化和肝癌的风险很高。\n乙肝可通过接触受感染的体液（如血液、唾液、阴道分泌物和精液）传播。它也可以由母亲传给孩子。乙肝可以通过安全有效的疫苗来预防。疫苗通常在出生后不久接种，几周后注射加强针。疫苗对病毒的预防程度几乎可达100%。",
         "sideEffects": "注射部位红肿、疼痛\n流感类似症状（如发热、寒战、头痛），疲乏、头晕",
         "precautions": "对疫苗成分过敏者禁用。\n患有脑病、未控制的癫痫和其他神经系统疾病者禁用。\n患急性疾病、严重慢性疾病、慢性疾病的急性发作期和发热者禁用。\n妊娠期妇女禁用。"
@@ -99,30 +99,135 @@
     },
     {
         "name": "13价肺炎多糖结合疫苗",
-        "description": "TODO",
-        "targetDisease": "TODO",
-        "sideEffects": "TODO",
-        "precautions": "TODO"
+        "description": "本品接种用于婴幼儿和儿童的主动免疫，以预防由肺炎球菌血清型1、3、4、5、6A、6B、7F、9V、14、18C、19A、19F和23F引起的侵袭性疾病（包括菌血症性肺炎、脑膜炎、败血症和菌血症等）。",
+        "targetDisease": "菌血症性肺炎、脑膜炎、败血症和菌血症",
+        "sideEffects": "食欲下降\n嗜睡/睡眠增加；入睡困难/睡眠减少\n发热；接种部位红斑、硬结/肿胀、疼痛/触痛；接种部位红斑或硬结/肿胀2.5cm～ 7.0 cm（接种幼儿剂次后）",
+        "precautions": "对本品中任何活性成分、辅料或白喉类毒素过敏者禁用。"
     },
     {
         "name": "五价轮状病毒疫苗",
-        "description": "TODO",
-        "targetDisease": "TODO",
-        "sideEffects": "TODO",
-        "precautions": "TODO"
+        "description": "用于预防血清型G1，G2，G3，G4，G9导致的婴幼儿轮状病毒胃肠炎的疫苗。",
+        "targetDisease": "血清型G1，G2，G3，G4，G9导致的婴幼儿轮状病毒胃肠炎",
+        "sideEffects": "头痛、发热",
+        "precautions": "禁止严重联合免疫缺陷疾病（SCID）患儿接种本品。\n禁止具有肠套叠既往史婴儿接种本品。"
     },
     {
         "name": "百白破IPV和Hib五联疫苗",
-        "description": "TODO",
-        "targetDisease": "TODO",
-        "sideEffects": "TODO",
-        "precautions": "TODO"
+        "description": "针对百日咳、白喉、破伤风、脊髓灰质炎，以及由b型流感嗜血杆菌引起的感染，对孩子进行预防接种的联合疫苗。",
+        "targetDisease": "百日咳、白喉、破伤风、脊髓灰质炎，以及由b型流感嗜血杆菌引起的感染",
+        "sideEffects": "发热、血小板减少、恶心、呕吐、过敏",
+        "precautions": "对疫苗成分过敏者禁用。"
     },
     {
         "name": "b型流感嗜血杆菌疫苗",
-        "description": "TODO",
-        "targetDisease": "TODO",
-        "sideEffects": "TODO",
-        "precautions": "TODO"
+        "description": "用作预防流感嗜血杆菌（HIB）感染的疫苗。",
+        "targetDisease": "脑膜炎、肺炎",
+        "sideEffects": "在注射处感到疼痛；发烧",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "轮状病毒疫苗",
+        "description": "用于预防血清型G1，G2，G3，G4，G9导致的婴幼儿轮状病毒胃肠炎的疫苗。",
+        "targetDisease": "血清型G1，G2，G3，G4，G9导致的婴幼儿轮状病毒胃肠炎",
+        "sideEffects": "头痛、发热",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "四联疫苗",
+        "description": "用于预防百日咳、白喉、破伤风、B 型流感嗜血杆菌的疫苗。",
+        "targetDisease": "百日咳、白喉、破伤风、B 型流感嗜血杆菌",
+        "sideEffects": "头痛、发热",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "ACYW群流脑多糖结合疫苗",
+        "description": "用于预防A群、C群、W135群和Y群脑膜炎奈瑟球菌引起的流行性脑脊髓膜炎的疫苗",
+        "targetDisease": "A群、C群、W135群和Y群脑膜炎奈瑟球菌引起的流行性脑脊髓膜炎",
+        "sideEffects": "头痛、发热",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "A群C群流脑结合疫苗",
+        "description": "见A+C群流脑疫苗",
+        "targetDisease": "见A+C群流脑疫苗",
+        "sideEffects": "见A+C群流脑疫苗",
+        "precautions": "见A+C群流脑疫苗"
+    },
+    {
+        "name": "A+C流脑疫苗（结合）",
+        "description": "见A+C群流脑疫苗",
+        "targetDisease": "见A+C群流脑疫苗",
+        "sideEffects": "见A+C群流脑疫苗",
+        "precautions": "见A+C群流脑疫苗"
+    },
+    {
+        "name": "三价流感疫苗 （6-35月龄）",
+        "description": "用于预防流感病毒的疫苗。",
+        "targetDisease": "流行性感冒",
+        "sideEffects": "头痛、发热",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "肠道病毒71型灭活疫苗",
+        "description": "用于预防肠道病毒71型的疫苗。",
+        "targetDisease": "手足口病",
+        "sideEffects": "头痛、发热",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "腮腺炎疫苗",
+        "description": "用于预防流行性腮腺炎的疫苗。",
+        "targetDisease": "流行性腮腺炎",
+        "sideEffects": "头痛、发热",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "乙脑灭活疫苗 （Vero）",
+        "description": "用于预防血清型G1，G2，G3，G4，G9导致的婴幼儿轮状病毒胃肠炎的疫苗。",
+        "targetDisease": "血清型G1，G2，G3，G4，G9导致的婴幼儿轮状病毒胃肠炎",
+        "sideEffects": "头痛、发热",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "甲肝灭活疫苗",
+        "description": "用于预防流行性乙型脑炎的疫苗。",
+        "targetDisease": "流行性乙型脑炎",
+        "sideEffects": "头痛、发热",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "水痘减毒活疫苗",
+        "description": "用于预防血清型G1，G2，G3，G4，G9导致的婴幼儿轮状病毒胃肠炎的疫苗。",
+        "targetDisease": "血清型G1，G2，G3，G4，G9导致的婴幼儿轮状病毒胃肠炎",
+        "sideEffects": "头痛、发热",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "ACYW群流脑多糖疫苗",
+        "description": "用于预防水痘带状疱疹病毒引起的急性传染病的疫苗。",
+        "targetDisease": "水痘带状疱疹病毒引起的急性传染病",
+        "sideEffects": "头痛、发热",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "23价肺炎球菌疫苗",
+        "description": "用于预防肺炎、脑膜炎、菌血症的疫苗。",
+        "targetDisease": "肺炎、脑膜炎、菌血症",
+        "sideEffects": "头痛、发热",
+        "precautions": "对疫苗成分过敏者禁用。"
+    },
+    {
+        "name": "四价流感疫苗",
+        "description": "见流感疫苗",
+        "targetDisease": "见流感疫苗",
+        "sideEffects": "见流感疫苗",
+        "precautions": "见流感疫苗"
+    },
+    {
+        "name": "新冠肺炎疫苗 （Vero）",
+        "description": "用于预防新型冠状病毒的疫苗。",
+        "targetDisease": "乏力、咳嗽、发热；肺炎；呼吸困难",
+        "sideEffects": "接种部位疼痛；全身疲乏；头痛",
+        "precautions": "对疫苗成分过敏者禁用\n既往发生过疫苗严重过敏反应者禁用\n患有严重神经系统疾病者(如横贯性脊髓炎、格林巴利综合症、脱髓鞘疾病等)禁用"
     }
 ]
