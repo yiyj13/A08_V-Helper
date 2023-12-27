@@ -21,6 +21,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.GET("/users/removefollowingVaccine/:id", userHandler.HandleRemoveFollowingVaccine)
 	router.GET("/users/addfollowingArticle/:id", userHandler.HandleAddFollowingArticle)
 	router.GET("/users/removefollowingArticle/:id", userHandler.HandleRemoveFollowingArticle)
+	router.GET("/users/public/:id", userHandler.HandleGetPublicUserByID)
 
 	profileService := service.NewProfileService(db)
 	profileHandler := NewProfileHandler(profileService)
@@ -54,6 +55,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.POST("/temperature-records", tempertureRecordHandler.HandleCreateTempertureRecord)
 	router.GET("/temperature-records", tempertureRecordHandler.HandleGetAllTempertureRecords)
 	router.GET("/temperature-records/:id", tempertureRecordHandler.HandleGetTempertureRecordByID)
+	router.GET("/temperature-records/user/:userID", tempertureRecordHandler.HandleGetTempertureRecordsByUserID)
 	router.GET("/temperature-records/profile/:profileID", tempertureRecordHandler.HandleGetTempertureRecordsByProfileID)
 	router.PUT("/temperature-records/:id", tempertureRecordHandler.HandleUpdateTempertureRecordByID)
 	router.DELETE("/temperature-records/:id", tempertureRecordHandler.HandleDeleteTempertureRecordByID)
@@ -77,6 +79,15 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.PUT("/replys/:id", replyHandler.HandleUpdateReplyByID)
 	router.DELETE("/replys/:id", replyHandler.HandleDeleteReplyByID)
 
+	// 通知发送
+	messageService := service.NewMessageService(db)
+	messageHandler := NewMessageHandler(messageService)
+	router.POST("/messages", messageHandler.HandleAddMessage)
+	router.GET("/messages", messageHandler.HandleGetAllMessages)
+	router.GET("/messages/:id", messageHandler.HandleGetMessageByID)
+	router.PUT("/messages/:id", messageHandler.HandleUpdateMessageByID)
+	router.DELETE("/messages/:id", messageHandler.HandleDeleteMessageByID)
+
 	// 根据疫苗寻找诊所
 	clinicService := service.NewClinicService(db)
 	clinicHandler := NewClinicHandler(clinicService)
@@ -88,5 +99,6 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	// router.GET("/clinics/:id", clinicHandler.HandleGetClinicByID)
 	// router.PUT("/clinics/:id", clinicHandler.HandleUpdateClinicByID)
 	router.DELETE("/clinics/:id", clinicHandler.HandleDeleteClinicByID)
-	router.GET("/foo/bar", SetSubscription)
+	router.GET("/wechat-validation", handleWechatValidation)
+	router.POST("/wechat-validation", SetSubscription)
 }

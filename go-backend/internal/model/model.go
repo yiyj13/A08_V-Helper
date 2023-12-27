@@ -17,6 +17,7 @@ type User struct {
 	Avatar            string    `json:"avatar"`                                                      // 头像链接
 	FollowingVaccines []Vaccine `gorm:"many2many:user_following_vaccines;" json:"followingVaccines"` // 用户关注的疫苗
 	FollowingArticles []Article `gorm:"many2many:user_following_articles;" json:"followingArticles"` // 用户关注的文章
+	Token             string    `gorm:"-" json:"token"`                                              // 登录时返回的token，用于校验用户身份
 }
 
 // Profile 身份模型
@@ -58,7 +59,7 @@ type VaccinationRecord struct {
 	NextVaccinationDate string  `json:"nextVaccinationDate"` // 疫苗失效时间
 	Note                string  `json:"note"`
 
-	Vaild        string `json:"vaild"`        // 前端表单
+	Valid        string `json:"valid"`        // 前端表单
 	RemindBefore string `json:"remindBefore"` // 前端表单
 
 	IsCompleted bool   `json:"isCompleted"` // 是否完成接种，未完成则为预约接种
@@ -97,10 +98,15 @@ type Reply struct {
 // Message 消息模型
 type Message struct {
 	gorm.Model
-	Content  string `json:"content"` // 消息内容，将不同字段拼接成字符串
-	UserName string `json:"userName"`
-	UserID   uint   `json:"userId"`
-	SendTime string `json:"sendTime"` // 发送时间，注意用string与前端交互，例如"2021-07-01 12:00"
+	OpenID      string `json:"openId"`
+	Page        string `json:"page"` // 消息跳转页面，例如"pages/welcome/welcome"
+	VaxName     string `json:"vaxName"`
+	Comment     string `json:"comment"`
+	VaxLocation string `json:"vaxLocation"`
+	VaxNum      int    `json:"vaxNum"`
+	RealTime    bool   `json:"realTime"` // 是否实时提醒
+	SendTime    string `json:"sendTime"` // 如果不是实时提醒，则需要设置提醒时间，用字符串存具体时间，例如"2021-07-01 12:00"
+	Sent        bool   `json:"sent"`     // 是否已发送
 }
 
 type StringList []string

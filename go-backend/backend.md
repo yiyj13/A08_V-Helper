@@ -6,9 +6,9 @@
 - [X] 配置文件，数据库连接
 - [X] 通过docker-compose部署测试
 - [ ] 完善数据库模型
-  - [ ] 在model中加入新模型时，需要在init中进行迁移
-  - [ ] 在service中实现对模型的增删改查
-  - [ ] 在handler中实现API接口，并注册路由
+  - [x] 在model中加入新模型时，需要在init中进行迁移
+  - [x] 在service中实现对模型的增删改查
+  - [x] 在handler中实现API接口，并注册路由
 - [x] 用户登录，主要通过微信接口实现
 - [ ] 对有需要的模型在获取时进行分页、排序(时间排序)和筛选(按疫苗)
   - [x] 帖子
@@ -16,17 +16,19 @@
 - [x] 更方便地通过json数据更新数据库
 - [ ] 更新文档中相关API
 - [x] 接种记录的字段完善
-- [ ] 收藏帖子和疫苗
+- [x] 收藏帖子和疫苗
 - [x] 解耦 接种记录 和 接种预约
 - [x] 根据疫苗筛选帖子
 - [ ] 消息提醒的发送 (https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/subscribe-message.html)
 - [x] 图床
-- [ ] github action
+- [x] github action
 - [ ] token验证
 - [ ] 加密
-- [ ] 代码规范(配置文件)，注释
-- [ ] 数据库时区更改
+- [ ] 代码规范(配置文件)，详细注释
+- [x] 数据库时区更改
+- [ ] 单元测试
 - [ ] 性能测试
+- [x] 路由拦截和重定向，部署时只暴露api接口
 
 
 
@@ -120,6 +122,7 @@ Post 时的json样例：
 | POST | /api/temperature-records | 添加体温记录 |
 | GET | /api/temperature-records | 获取全部体温记录 |
 | GET | /api/temperature-records/:id | 获取指定 id 的体温记录 |
+| GET | /api/temperature-records/user/:id | 获取指定 id 的用户的体温记录 |
 | GET | /api/temperature-records/profile/:id | 获取指定 id 的接种者的体温记录 |
 | PUT | /api/temperature-records/:id | 更新指定 id 的体温记录 |
 | DELETE | /api/temperature-records/:id | 删除指定 id 的体温记录 |
@@ -325,6 +328,69 @@ type Message struct {
 - PositionY
 - OptionalVaccine 
 
+## 项目优化
+
+在使用Go语言的Gin框架、Gorm ORM、Nginx作为路由器，以及MySQL作为数据库的项目中，下面是一些具体的最佳实践和注意事项，以确保后端服务的安全性、性能、可靠性和可维护性：
+
+### 安全性
+1. **使用中间件实现认证和授权**：
+   - 使用Gin的中间件来处理JWT（JSON Web Tokens）或OAuth认证。
+   - 对敏感路由（如用户数据修改、管理员功能等）实施权限检查。
+
+2. **SQL注入防御**：
+   - Gorm自身提供了防止SQL注入的措施。确保始终使用Gorm的方法来构建查询，避免直接拼接SQL字符串。
+
+3. **输入验证**：
+   - 在处理来自客户端的数据时，始终进行验证。使用Gin的绑定和验证功能来验证请求数据。
+
+4. **HTTPS配置**：
+   - 即使Nginx处理HTTPS，也应在Gin中正确配置SSL，尤其是当应用直接暴露到外网时。
+
+### 性能和可伸缩性
+1. **数据库连接池管理**：
+   - 适当配置Gorm的数据库连接池参数，如MaxOpenConns（最大打开连接数）、MaxIdleConns（最大空闲连接数）和ConnMaxLifetime（连接的最大存活时间）。
+
+2. **查询优化**：
+   - 使用Gorm的懒加载特性，并在必要时使用预加载（`.Preload`）来减少数据库查询次数。
+
+3. **使用缓存**：
+   - 考虑使用Redis等缓存机制来存储热点数据，减少对数据库的直接访问。
+
+### 可靠性和可用性
+1. **错误处理**：
+   - 在Gin中使用恢复中间件（Recovery Middleware）来处理panic情况。
+   - 记录详细的错误日志，可以使用如Logrus等日志库。
+
+2. **数据备份和迁移策略**：
+   - 定期备份MySQL数据库。
+   - 使用如Flyway或Liquibase等数据库迁移工具来管理数据库的版本和迁移。
+
+### 代码质量和维护性
+1. **代码结构**：
+   - 将业务逻辑、数据访问和API路由清晰分离。
+   - 遵循Go语言的编码规范和最佳实践。
+
+2. **单元测试**：
+   - 编写单元测试来验证业务逻辑，可以使用Go自带的测试框架。
+
+### 部署和持续集成
+1. **Docker化应用**：
+   - 使用Docker来容器化您的应用，这有利于确保一致的部署和运行环境。
+   - 使用Docker Compose或Kubernetes来管理容器和服务。
+
+2. **CI/CD流程**：
+   - 使用如Jenkins、Travis CI或GitHub Actions等CI/CD工具自动化测试、构建和部署流程。
+
+### Nginx配置
+1. **路由配置**：
+   - 使用Nginx处理静态内容和反向代理到Gin应用。
+   - 配置HTTPS，重定向所有HTTP流量到HTTPS。
+   - 实现必要的安全性头部，如CSP、HSTS等。
+
+### 数据库和数据模型
+1. **Gorm模型设计**：
+   - 精心设计数据库模型和关联，以优化性能和简化数据访问逻辑。
+   - 使用迁移来管理数据库结构的更改。
 
 
 ## 遇到的问题

@@ -33,5 +33,5 @@ jobs:
 
     - name: Deploy to Server
       run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cd /home/ubuntu/backend/A08_V-Helper && git pull && cd go-backend && sudo docker-compose up --build -d"
-      # Deploys the application on your server using SSH. Set SERVER_USER, SERVER_IP, and SSH private key as secrets in your repo.
+        sshpass -p "0CI[Ql%eZZuM:" ssh -o StrictHostKeyChecking=no ubuntu@101.43.194.58 "cd /home/ubuntu/backend/A08_V-Helper && git pull && cd go-backend && sudo docker-compose up --build -d"
+      # Deploys the application on your server using SSH with password authentication
