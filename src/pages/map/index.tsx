@@ -3,11 +3,12 @@ import Taro from '@tarojs/taro'
 
 import { Map as TaroMap, CoverView } from '@tarojs/components'
 import { useEffect } from 'react'
-import { Loading, Cell, Menu, Button } from '@nutui/nutui-react-taro'
-import { MoreS, Find } from '@nutui/icons-react-taro'
+import { Loading, Cell, Menu } from '@nutui/nutui-react-taro'
+import { MoreS } from '@nutui/icons-react-taro'
 import { useDeviceStore } from '../../models'
-import PositionIconPath from "../../assets/map/position.png"
-import CurrentPositionIconPath from "../../assets/map/focusPosition.png"
+import LocationIconPath from "../../assets/map/position.png"
+import CurrentLocationIconPath from "../../assets/map/focusPosition.png"
+import GPSPositionIcon from "../../assets/map/gps.png"
 
 import api from '../../api'
 import './index.css'
@@ -28,7 +29,7 @@ export default function MapPage() {
     latitude: myLatitude,
     longitude: myLongitude,
     distance: 0,
-    iconPath: CurrentPositionIconPath,
+    iconPath: CurrentLocationIconPath,
     width: iconWidthNormal,
     height: iconHeightNormal
   }
@@ -61,7 +62,7 @@ export default function MapPage() {
         latitude: parseFloat(item.latitude),
         longitude: parseFloat(item.longitude),
         distance: Math.trunc(2 * 6378 * 1000 * Math.asin(Math.sqrt(Math.pow(Math.sin((Math.PI / 180) * (parseFloat(item.latitude) - centralLatitude) / 2), 2) + Math.cos((Math.PI / 180) * parseFloat(item.latitude)) * Math.cos((Math.PI / 180) * centralLatitude) * Math.pow(Math.sin((Math.PI / 180) * (parseFloat(item.longitude) - centralLongitude) / 2), 2)))),
-        iconPath: PositionIconPath,
+        iconPath: LocationIconPath,
         width: iconWidthNormal,
         height: iconHeightNormal
       }
@@ -102,16 +103,23 @@ export default function MapPage() {
           }}
         >
           <CoverView className='location-button'>
-            <Button
-              fill="solid"
-              type="primary"
-              icon={<Find/>}
-              style={{ margin: 5, width: 40, height: 40, borderRadius: 8, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+            <button
+              style={{
+                width: 50, height: 50,
+                borderRadius: 5,
+              }}
               onClick={() => {
                 setCentralLatitude(myLatitude)
                 setCentralLongitude(myLongitude)
-              }}
-            />
+              }}>
+              <img
+                src={GPSPositionIcon}
+                style={{
+                  margin: 10,
+                  width: 30, height: 30
+                }}
+              />
+            </button>
           </CoverView>
         </TaroMap>
       </div>
@@ -128,6 +136,8 @@ export default function MapPage() {
                   getMarkers(v.value)
                 } else {
                   setMarkers([currentPosition])
+                  setCentralLatitude(myLatitude)
+                  setCentralLongitude(myLongitude)
                 }
               }}
             />
