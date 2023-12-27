@@ -6,6 +6,15 @@ import (
 	"gorm.io/gorm"
 )
 
+type IReplyService interface {
+	CreateReply(reply model.Reply) error
+	GetAllReplys() ([]model.Reply, error)
+	GetReplysByArticleID(articleID uint) ([]model.Reply, error)
+	GetReplyByID(id uint) (model.Reply, error)
+	UpdateReplyByID(id uint, reply model.Reply) error
+	DeleteReplyByID(id uint) error
+}
+
 type ReplyService struct {
 	db *gorm.DB
 }

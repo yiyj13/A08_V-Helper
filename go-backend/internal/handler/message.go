@@ -201,8 +201,6 @@ func (h *MessageHandler) HandleAddMessage(c *gin.Context) {
 			return
 		}
 		message.Sent = true
-	} else {
-		// 非实时提醒
 	}
 
 	if err := h.MessageService.CreateMessage(message); err != nil {

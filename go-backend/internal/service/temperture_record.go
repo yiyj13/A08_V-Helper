@@ -6,6 +6,16 @@ import (
 	"gorm.io/gorm"
 )
 
+type ITempertureRecordService interface {
+	CreateTempertureRecord(record model.TempertureRecord) error
+	GetTempertureRecordsByUserID(userID uint) ([]model.TempertureRecord, error)
+	GetTempertureRecordsByProfileID(profileID uint) ([]model.TempertureRecord, error)
+	GetAllTempertureRecords() ([]model.TempertureRecord, error)
+	GetTempertureRecordByID(id uint) (model.TempertureRecord, error)
+	UpdateTempertureRecordByID(id uint, record model.TempertureRecord) error
+	DeleteTempertureRecordByID(id uint) error
+}
+
 type TempertureRecordService struct {
 	db *gorm.DB
 }

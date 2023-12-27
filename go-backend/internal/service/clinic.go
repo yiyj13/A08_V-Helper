@@ -8,6 +8,17 @@ import (
 	"gorm.io/gorm"
 )
 
+type IClinicService interface {
+	CreateClinic(clinic model.VaccineClinicList) error
+	GetAllClinics() ([]model.VaccineClinicList, error)
+	GetClinicsByVaccineID(vaccineID uint) ([]model.VaccineClinicList, error)
+	GetClinicsByVaccineName(vaccineName string) ([]clinicPosition, error)
+	GetClinicsByClinicName(clinicName string) (model.Clinic, error)
+	GetClinicByID(id uint) (model.VaccineClinicList, error)
+	UpdateClinicByID(id uint, clinic model.VaccineClinicList) error
+	DeleteClinicByID(id uint) error
+}
+
 type ClinicService struct {
 	db *gorm.DB
 }

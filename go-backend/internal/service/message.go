@@ -6,6 +6,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type IMessageService interface {
+	CreateMessage(message model.Message) error
+	GetAllMessages() ([]model.Message, error)
+	GetMessageByID(id uint) (model.Message, error)
+	UpdateMessageByID(message model.Message) error
+	DeleteMessageByID(id uint) error
+}
+
 type MessageService struct {
 	db *gorm.DB
 }

@@ -6,6 +6,15 @@ import (
 	"gorm.io/gorm"
 )
 
+type IProfileService interface {
+	CreateProfile(profile model.Profile) error
+	GetAllProfiles() ([]model.Profile, error)
+	GetProfileByID(id uint) (model.Profile, error)
+	UpdateProfileByID(id uint, profile model.Profile) error
+	DeleteProfileByID(id uint) error
+	GetProfilesByUserID(userID uint) ([]model.Profile, error)
+}
+
 type ProfileService struct {
 	db *gorm.DB
 }

@@ -6,6 +6,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type IVaccineService interface {
+	CreateVaccine(vaccine model.Vaccine) error
+	GetAllVaccines() ([]model.Vaccine, error)
+	GetVaccineByID(id uint) (model.Vaccine, error)
+	UpdateVaccineByID(id uint, vaccine model.Vaccine) error
+	DeleteVaccineByID(id uint) error
+}
+
 type VaccineService struct {
 	db *gorm.DB
 }

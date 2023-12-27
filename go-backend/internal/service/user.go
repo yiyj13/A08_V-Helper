@@ -8,6 +8,21 @@ import (
 	"gorm.io/gorm"
 )
 
+type IUserService interface {
+	CreateUser(user model.User) error
+	GetAllUsers() ([]model.User, error)
+	GetUserByID(id uint) (model.User, error)
+	GetUserWithFollowings(id uint) (model.User, error)
+	AddFollowingVaccine(userID uint, vaccineID uint) error
+	RemoveFollowingVaccine(userID uint, vaccineID uint) error
+	AddFollowingArticle(userID uint, articleID uint) error
+	RemoveFollowingArticle(userID uint, articleID uint) error
+	UpdateUserByID(user model.User) error
+	DeleteUserByID(id uint) error
+	GetPublicUserByID(id uint) (model.User, error)
+	GetUserByOpenID(openID string) (model.User, error)
+}
+
 type UserService struct {
 	db *gorm.DB
 }

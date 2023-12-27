@@ -7,6 +7,18 @@ import (
 	"gorm.io/gorm"
 )
 
+type IVaccinationRecordService interface {
+	CreateVaccinationRecord(record model.VaccinationRecord) error
+	GetVaccinationRecordsByUserID(userID uint) ([]model.VaccinationRecord, error)
+	GetVaccinationRecordsByProfileID(profileID uint) ([]model.VaccinationRecord, error)
+	GetAllVaccinationRecords() ([]model.VaccinationRecord, error)
+	GetAllVaccinationRecordsByIsCompleted(isCompleted bool) ([]model.VaccinationRecord, error)
+	GetVaccinationRecordsByProfileIDAndIsCompleted(profileID uint, isCompleted bool) ([]model.VaccinationRecord, error)
+	GetVaccinationRecordByID(id uint) (model.VaccinationRecord, error)
+	UpdateVaccinationRecordByID(id uint, record model.VaccinationRecord) error
+	DeleteVaccinationRecordByID(id uint) error
+}
+
 type VaccinationRecordService struct {
 	db *gorm.DB
 }

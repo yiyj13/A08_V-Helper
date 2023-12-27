@@ -89,6 +89,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.DELETE("/messages/:id", messageHandler.HandleDeleteMessageByID)
 
 	// 根据疫苗寻找诊所
+	// tzh TODO 15周展示之后 重写
 	clinicService := service.NewClinicService(db)
 	clinicHandler := NewClinicHandler(clinicService)
 	router.GET("/clinics/vaccine/:vaccineID", clinicHandler.HandleGetClinicsByVaccineID)
@@ -96,8 +97,8 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.GET("/clinics/clinicName/:clinicName", clinicHandler.HandleGetClinicsByClinicName)
 	router.POST("/clinics", clinicHandler.HandleCreateClinic)
 	router.GET("/clinics", clinicHandler.HandleGetAllClinics)
-	// router.GET("/clinics/:id", clinicHandler.HandleGetClinicByID)
-	// router.PUT("/clinics/:id", clinicHandler.HandleUpdateClinicByID)
+	router.GET("/clinics/:id", clinicHandler.HandleGetClinicByID)
+	router.PUT("/clinics/:id", clinicHandler.HandleUpdateClinicByID)
 	router.DELETE("/clinics/:id", clinicHandler.HandleDeleteClinicByID)
 	router.GET("/wechat-validation", handleWechatValidation)
 	router.POST("/wechat-validation", SetSubscription)
