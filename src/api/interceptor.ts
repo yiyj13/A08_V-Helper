@@ -1,4 +1,5 @@
 import Taro from '@tarojs/taro'
+import { resetUser } from '../models'
 
 const interceptor = function (chain: any) {
   const requestParams = chain.requestParams
@@ -6,9 +7,7 @@ const interceptor = function (chain: any) {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       return res
     } else if (res.statusCode === 401) {
-      Taro.reLaunch({
-        url: '/pages/login/index',
-      })
+      resetUser()
     } else {
       return Promise.reject(res)
     }

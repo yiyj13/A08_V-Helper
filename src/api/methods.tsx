@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro'
 import api from './http'
-import { getUserID } from '../models'
+import { getUserID, getOpenID } from '../models'
 
 export type GinBase = {
   ID: number
@@ -11,6 +11,7 @@ export type GinBase = {
 
 export type Userinfo = GinBase & {
   openId: string
+  token: string
   userName: string
   avatar: string
   followingArticles: Article[]
@@ -82,6 +83,17 @@ export type Profile = GinBase & {
   gender: string // 性别
   dateOfBirth: string // 出生日期
   note: string // 备注
+}
+
+export type Message = GinBase & {
+  openId: string
+  page: string
+  comment: string
+  vaxLocation: string
+  vaxNum: number
+  realTime: boolean
+  sendTime: string // format: YYYY-MM-DD HH:mm
+  sent: false
 }
 
 export async function Login(): Promise<Userinfo> {
@@ -209,9 +221,7 @@ export async function deleteTemperatureRecord(id: number): Promise<string> {
   return response.data
 }
 
-export async function getTopArticlesWithVaccine(
-  vaccineid: number
-): Promise<Article[]> {
+export async function getTopArticlesWithVaccine(vaccineid: number): Promise<Article[]> {
   const response = await api.get('/api/articles', {
     page: 1,
     size: 2,
@@ -258,5 +268,25 @@ export async function getReplys(articleId: number): Promise<Reply[]> {
 
 export async function postReply(articleId: number, content: string): Promise<Reply> {
   const response = await api.post('/api/replys', { articleId, content })
+  return response.data
+}
+
+export async function getMessage(id: number): Promise<Message> {
+  const response = await api.get('/api/messages/' + id)
+  return response.data
+}
+
+export async function postMessage(props: Partial<Message>): Promise<string> {
+  const params: Partial<Message> = {
+    openId: getOpenID(),
+    page: 'pages/index',
+    ...props,
+  }
+  const response = await api.post('/api/messages', params)
+  return response.data
+}
+
+export async function putMessage(props: Partial<Message>): Promise<string> {
+  const response = await api.put('/api/messages', props)
   return response.data
 }
