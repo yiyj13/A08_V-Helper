@@ -7,8 +7,10 @@ import { useState, useMemo, useEffect } from 'react'
 import { Cell, Switch, Picker, Uploader, Button, DatePicker, TextArea, Input, Popover } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
-import { VaccinationRecord, postVaccineRecord, putVaccineRecord } from '../../api'
+import { VaccinationRecord, postVaccineRecord, putVaccineRecord, postMessage, putMessage } from '../../api'
 import { useProfiles, useVaccines, useVaccineRecordList } from '../../api/hooks'
+import { pushWXSubscription } from '../../api/subscribe'
+import { dayjs } from '../../utils'
 
 export default function VaccineRecord() {
   const router = Taro.getCurrentInstance().router
@@ -21,7 +23,7 @@ export default function VaccineRecord() {
 
   const { data: allRecords, mutate: refreshRecordCache } = useVaccineRecordList()
 
-  const { data: profiles } = useProfiles()
+  const { data: profiles, selectByID } = useProfiles()
   const MemberData = useMemo(
     () => (profiles ? profiles.map((item) => ({ value: item.ID, text: item.relationship })) : []),
     [profiles]
@@ -198,6 +200,7 @@ export default function VaccineRecord() {
     })
   }
 
+  const remindDisabled = router?.params.id !== undefined
   const [remindSwitch, setRemindSwitch] = useState(false)
   const [remindVisible, setRemindVisible] = useState(false)
   const [remindValue, setRemindValue] = useState('')
@@ -327,8 +330,27 @@ export default function VaccineRecord() {
         record.valid !== ''
       ) {
         const nextVaccinationDate = addDays(record.vaccinationDate, validDesc)
-        const remindTime = subtractDays(nextVaccinationDate, remindValue + remindUnit).concat(' 10:00')
+        const remindTime = subtractDays(record.vaccinationDate, remindValue + remindUnit).concat(' 10:00')
         try {
+          if (record.reminder) {
+            await pushWXSubscription()
+            await postMessage({
+              comment: `${selectByID(record.profileId)?.fullName}的${id2name(record.vaccineId)}`,
+              vaxNum: (() => {
+                const type = TypeData[0].find((item) => item.text === record.vaccinationType)?.value
+                if (type === undefined || type > 3) {
+                  return 1
+                } else {
+                  return type + 1
+                }
+              })(),
+              realTime: true,
+              sendTime: (() => {
+                return dayjs(remindTime).format('YYYY-MM-DD HH:mm')
+              })(),
+              sent: false,
+            })
+          }
           await postVaccineRecord({
             ...record,
             nextVaccinationDate: nextVaccinationDate,
@@ -456,12 +478,19 @@ export default function VaccineRecord() {
         <span className='text-sm ml-2' style={{ height: '30px' }}>
           接种提醒
         </span>
-        <Switch className=' ml-2' checked={remindSwitch} onChange={(value) => onSwitchChange(value)} />
-        {remindVisible && (
+        <Switch
+          disabled={remindDisabled}
+          defaultChecked={record.reminder}
+          className=' ml-2'
+          checked={remindSwitch}
+          onChange={(value) => onSwitchChange(value)}
+        />
+        {remindVisible && !remindDisabled && (
           <div className=' flex items-center'>
             <Input
               type='number'
               placeholder='请输入数字'
+              disabled={remindDisabled}
               maxLength={2}
               value={remindValue}
               onChange={(value) => setRemindValue(value)}
