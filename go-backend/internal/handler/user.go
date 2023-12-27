@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"v-helper/internal/model"
 	"v-helper/internal/service"
+	"v-helper/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-resty/resty/v2"
@@ -35,6 +36,22 @@ type UserHandler struct {
 
 func NewUserHandler(userService *service.UserService) *UserHandler {
 	return &UserHandler{userService: userService}
+}
+
+func (h *UserHandler) AuthHandler(c *gin.Context) {
+	user := model.User{OpenID: "Admin"}
+	token, err := utils.GenerateJWT(user)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if len(token) == 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "token is empty"})
+		return
+	}
+	fmt.Println("token:", token)
+	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
 func (h *UserHandler) LogInHandler(c *gin.Context) {
@@ -75,6 +92,13 @@ func (h *UserHandler) LogInHandler(c *gin.Context) {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
+	token, err := utils.GenerateJWT(user)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	user.Token = token
 	c.JSON(http.StatusOK, user)
 }
 

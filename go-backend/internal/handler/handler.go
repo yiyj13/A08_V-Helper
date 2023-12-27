@@ -3,6 +3,7 @@ package handler
 import (
 	"log"
 	"net/http"
+	"strings"
 	"v-helper/internal/service"
 	"v-helper/pkg/utils"
 
@@ -13,9 +14,11 @@ import (
 func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	userService := service.NewUserService(db)
 	userHandler := NewUserHandler(userService)
+	router.GET("/auth", userHandler.AuthHandler)
 	router.GET("/users/login", userHandler.LogInHandler)
+	router.GET("/users/public/:id", userHandler.HandleGetPublicUserByID)
 
-	// router.Use(JWTAuthMiddleware())
+	router.Use(JWTAuthMiddleware())
 	{
 		router.POST("/users", userHandler.HandleCreateUser)
 		router.GET("/users", userHandler.HandleGetAllUsers)
@@ -27,7 +30,6 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 		router.GET("/users/removefollowingVaccine/:id", userHandler.HandleRemoveFollowingVaccine)
 		router.GET("/users/addfollowingArticle/:id", userHandler.HandleAddFollowingArticle)
 		router.GET("/users/removefollowingArticle/:id", userHandler.HandleRemoveFollowingArticle)
-		router.GET("/users/public/:id", userHandler.HandleGetPublicUserByID)
 
 		profileService := service.NewProfileService(db)
 		profileHandler := NewProfileHandler(profileService)
@@ -112,14 +114,23 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 
 func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := c.GetHeader("Authorization")
+		authHeader := c.GetHeader("Authorization")
 
-		if token == "" {
+		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
 			c.Abort()
 			return
 		}
 
+		// 分割Bearer和实际的token
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header format must be Bearer {token}"})
+			c.Abort()
+			return
+		}
+
+		token := parts[1]
 		log.Println("token:", token)
 
 		ok, err := utils.VerifyToken(token)

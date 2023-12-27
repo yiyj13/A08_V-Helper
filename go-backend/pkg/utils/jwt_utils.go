@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"log"
 	"time"
 	"v-helper/internal/model"
 
@@ -51,7 +52,8 @@ func ParseJWT(tokenString string) (*JWTClaims, error) {
 
 // VerifyToken 验证 JWT 令牌
 func VerifyToken(tokenString string) (bool, error) {
-	_, err := ParseJWT(tokenString)
+	claims, err := ParseJWT(tokenString)
+	log.Println("claims:", claims)
 	if err != nil {
 		return false, err
 	}

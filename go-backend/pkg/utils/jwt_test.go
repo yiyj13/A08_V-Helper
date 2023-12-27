@@ -8,7 +8,7 @@ import (
 )
 
 func TestGenerateJWT(t *testing.T) {
-	user := model.User{OpenID: "1234567890"} // 假设的用户模型
+	user := model.User{OpenID: "Admin"} // 假设的用户模型
 	token, err := GenerateJWT(user)
 
 	if err != nil {
@@ -21,7 +21,7 @@ func TestGenerateJWT(t *testing.T) {
 }
 
 func TestParseJWT(t *testing.T) {
-	user := model.User{OpenID: "1234567890"} // 假设的用户模型
+	user := model.User{OpenID: "Admin"} // 假设的用户模型
 	tokenString, _ := GenerateJWT(user)
 	fmt.Println("tokenString:", tokenString)
 
@@ -33,4 +33,13 @@ func TestParseJWT(t *testing.T) {
 		t.Errorf("ParseJWT() claims.OpenID = %v, want %v", claims.OpenID, user.OpenID)
 	}
 	fmt.Println("claims:", claims)
+
+	ok, err := VerifyToken(tokenString)
+	if err != nil {
+		t.Errorf("ValidateJWT() error = %v, wantErr %v", err, nil)
+	}
+	if !ok {
+		t.Errorf("ValidateJWT() ok = %v, want %v", ok, true)
+	}
+
 }
