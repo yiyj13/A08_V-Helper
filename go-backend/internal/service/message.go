@@ -34,6 +34,15 @@ func (s *MessageService) GetAllMessages() ([]model.Message, error) {
 	return messages, nil
 }
 
+// 查询所有未发送的消息
+func (s *MessageService) GetAllUnsentMessages() ([]model.Message, error) {
+	var messages []model.Message
+	if err := s.db.Where("sent = ?", false).Find(&messages).Error; err != nil {
+		return nil, err
+	}
+	return messages, nil
+}
+
 func (s *MessageService) GetMessageByID(id uint) (model.Message, error) {
 	var message model.Message
 	if err := s.db.First(&message, id).Error; err != nil {
