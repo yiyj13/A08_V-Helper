@@ -19,7 +19,7 @@ type JWTClaims struct {
 
 // GenerateJWT 生成 JWT 令牌
 func GenerateJWT(user model.User) (string, error) {
-	expirationTime := time.Now().Add(1 * time.Hour)
+	expirationTime := time.Now().Add(72 * time.Hour)
 	claims := &JWTClaims{
 		OpenID: user.OpenID,
 		StandardClaims: jwt.StandardClaims{
