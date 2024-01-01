@@ -5,7 +5,7 @@ import { useVaccineRecordList } from '../../api'
 import { MergeItems, VacCalendarItemExpire, VacCalendarItem } from './vacCalendarItem'
 import { NetworkError } from '../../components/errors'
 import RecordPopup from './recordPopup'
-import { Header } from './header'
+import { Header } from '../../components/calendarheader'
 import { useCalendarStore } from '../../models'
 import { dayjs } from '../../utils'
 

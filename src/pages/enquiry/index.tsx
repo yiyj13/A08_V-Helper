@@ -13,12 +13,14 @@ export default function VaccineEnquiry() {
       {isLoading ? (
         <Loading className='h-screen w-screen' />
       ) : (
-        <div className='grid grid-cols-2 gap-x-5 gap-y-4 px-6'>
-          {vaccineList?.map((vaccine, index) => (
-            <VaccineItem key={index} {...vaccine} />
-          ))}
+        <>
+          <div className='grid grid-cols-2 gap-x-5 gap-y-4 px-6'>
+            {vaccineList?.map((vaccine, index) => (
+              <VaccineItem key={index} {...vaccine} />
+            ))}
+          </div>
           <div className='h-32' />
-        </div>
+        </>
       )}
     </>
   )
