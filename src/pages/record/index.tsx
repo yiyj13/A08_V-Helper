@@ -4,16 +4,20 @@
 
 import Taro from '@tarojs/taro'
 import { useState, useMemo, useEffect } from 'react'
-import { Cell, Switch, Picker, Uploader, Button, DatePicker, TextArea, Input, Popover } from '@nutui/nutui-react-taro'
+import { Cell, Switch, Picker, Button, DatePicker, TextArea, Input, Popover } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
+import { Image } from '@tarojs/components'
 
-import { VaccinationRecord, postVaccineRecord, putVaccineRecord, postMessage, putMessage } from '../../api'
+import { VaccinationRecord, postVaccineRecord, putVaccineRecord, postMessage } from '../../api'
 import { useProfiles, useVaccines, useVaccineRecordList } from '../../api/hooks'
 import { pushWXSubscription } from '../../api/subscribe'
 import { dayjs } from '../../utils'
+import { PICTURE_BASE_URL } from '../../api/config'
+import { getUserID } from '../../models'
+import { uploadImage } from '../../api/imageUploader'
 
 export default function VaccineRecord() {
-  const router = Taro.getCurrentInstance().router
+  const router = useMemo(() => Taro.getCurrentInstance().router, [])
 
   const [record, setRecord] = useState<Partial<VaccinationRecord>>({
     reminder: false,
@@ -25,7 +29,7 @@ export default function VaccineRecord() {
 
   const { data: profiles, selectByID } = useProfiles()
   const MemberData = useMemo(
-    () => (profiles ? profiles.map((item) => ({ value: item.ID, text: item.relationship })) : []),
+    () => (profiles ? [profiles.map((item) => ({ value: item.ID, text: item.relationship }))] : []),
     [profiles]
   )
 
@@ -39,7 +43,7 @@ export default function VaccineRecord() {
           // TODO: handle 404
           return
         }
-        const relation = MemberData.find((item) => item.value === result.profileId)
+        const relation = MemberData[0].find((item) => item.value === result.profileId)
         setIdDesc(relation ? relation.text : '')
         setNameDesc(id2name(result.vaccineId))
         setTypeDesc(result.vaccinationType)
@@ -62,7 +66,7 @@ export default function VaccineRecord() {
   }, [MemberData, router, allRecords, id2name])
 
   const { data: vaccines } = useVaccines()
-  const VaccineData = vaccines ? vaccines.map((item) => ({ value: item.ID, text: item.name })) : []
+  const VaccineData = vaccines ? [vaccines.map((item) => ({ value: item.ID, text: item.name }))] : []
 
   const TypeData = [
     [
@@ -298,6 +302,7 @@ export default function VaccineRecord() {
         try {
           const nextVaccinationDate = addDays(record.vaccinationDate, validDesc)
           const remindTime = subtractDays(nextVaccinationDate, remindValue + remindUnit).concat(' 10:00')
+          await uploadImageBeforeSubmit()
           await putVaccineRecord(Number(id), {
             ...record,
             nextVaccinationDate: nextVaccinationDate,
@@ -344,13 +349,13 @@ export default function VaccineRecord() {
                   return type + 1
                 }
               })(),
-              realTime: true,
               sendTime: (() => {
                 return dayjs(remindTime).format('YYYY-MM-DD HH:mm')
               })(),
               sent: false,
             })
           }
+          await uploadImageBeforeSubmit()
           await postVaccineRecord({
             ...record,
             nextVaccinationDate: nextVaccinationDate,
@@ -404,6 +409,26 @@ export default function VaccineRecord() {
     Taro.showToast({ title: '重置成功', icon: 'success' })
   }
 
+  const [voucherUrl, setVoucherUrl] = useState<string>('')
+  const cloudpath = useMemo(() => `voucher/${getUserID()}/${dayjs().unix()}`, [])
+  const handleChooseImage = () => {
+    Taro.chooseImage({
+      count: 1,
+      sizeType: ['original', 'compressed'],
+      sourceType: ['album', 'camera'],
+      success: function (res) {
+        setVoucherUrl(res.tempFilePaths[0])
+        setRecord((prev) => ({ ...prev, voucher: `${PICTURE_BASE_URL}/${cloudpath}` }))
+      },
+    })
+  }
+  const uploadImageBeforeSubmit = async () => {
+    if (record.voucher !== undefined && record.voucher !== '' && voucherUrl !== '') {
+      await uploadImage(voucherUrl, cloudpath)
+    }
+  }
+  const previewUrl = (voucherUrl !== '' ? voucherUrl : record.voucher) ?? ''
+
   return (
     <>
       <Cell
@@ -414,6 +439,8 @@ export default function VaccineRecord() {
       />
       <Picker
         title='接种人'
+        // @ts-ignore
+        value={[record.profileId]}
         visible={idVisible}
         options={MemberData}
         onConfirm={(list, values) => confirmID(list, values)}
@@ -427,6 +454,8 @@ export default function VaccineRecord() {
       />
       <Picker
         title='疫苗名称'
+        // @ts-ignore
+        value={[record.vaccineId]}
         visible={nameVisible}
         options={VaccineData}
         onConfirm={(list, values) => confirmName(list, values)}
@@ -440,6 +469,7 @@ export default function VaccineRecord() {
       />
       <Picker
         title='接种类型'
+        value={[TypeData[0].findIndex((item) => item.text === record.vaccinationType)]}
         visible={typeVisible}
         options={TypeData}
         onConfirm={(list) => confirmType(list)}
@@ -455,7 +485,7 @@ export default function VaccineRecord() {
         title='接种时间'
         startDate={startDate}
         endDate={endDate}
-        defaultValue={new Date(Date.now())}
+        defaultValue={dayjs().toDate()}
         visible={dateVisible}
         type='date'
         onClose={() => setDateVisible(false)}
@@ -469,6 +499,7 @@ export default function VaccineRecord() {
       />
       <Picker
         title='有效期限'
+        value={[ValidData[0].findIndex((item) => item.text === record.valid)]}
         visible={validVisible}
         options={ValidData}
         onConfirm={(list, values) => confirmValid(list, values)}
@@ -516,9 +547,11 @@ export default function VaccineRecord() {
 
       <div className='col-span-full flex-content items-center'>
         <span className='ml-2 text-sm'>接种凭证</span>
-        <Uploader
-          className='w-full px-2'
-          url='https://img13.360buyimg.com/imagetools/jfs/t1/169186/5/33010/1762/639703a1E898bcb96/6c372c661c6dddfe.png'
+        <Image
+          src={previewUrl}
+          mode='aspectFill'
+          className='m-2 h-20 w-20 ring-brand ring-2 bg-slate-100 rounded-xl'
+          onClick={handleChooseImage}
         />
       </div>
       <Cell title='TextArea' className='col-span-full px-8' style={{ borderRadius: '8px' }}>

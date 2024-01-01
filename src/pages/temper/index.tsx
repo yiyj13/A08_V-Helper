@@ -18,11 +18,11 @@ export default function TemperRecord() {
     () => (profiles ? profiles.map((item) => ({ value: item.ID, text: item.relationship })) : []),
     [profiles]
   )
-  const router = Taro.getCurrentInstance().router
-
   const { data: allTemperatures, mutate: refreshTemperatureCache } = useTemperatureList()
 
   useEffect(() => {
+    const router = Taro.getCurrentInstance().router
+
     const fetchData = async () => {
       if (router && router.params && router.params.id !== undefined) {
         try {
@@ -43,7 +43,7 @@ export default function TemperRecord() {
       }
     }
     fetchData()
-  }, [MemberData, allTemperatures, router])
+  }, [MemberData, allTemperatures])
 
   const [tempRecord, setTempRecord] = useState<Partial<TemperatureRecord>>({
     date: new Date(Date.now()).toISOString().replace('T', ' ').slice(0, 16),
@@ -100,6 +100,7 @@ export default function TemperRecord() {
   }
 
   const handleSubmission = async () => {
+    const router = Taro.getCurrentInstance().router
     setTempRecord({
       ...tempRecord,
       date: dateDesc,
@@ -167,6 +168,8 @@ export default function TemperRecord() {
       />
       <Picker
         title='测温成员'
+        // @ts-ignore
+        value={[tempRecord.profileId]}
         visible={idVisible}
         options={MemberData}
         onConfirm={(list, values) => confirmId(list, values)}
@@ -175,7 +178,7 @@ export default function TemperRecord() {
       <Cell title='测温时间' description={dateDesc} onClick={() => setDateShow(true)} style={{ textAlign: 'center' }} />
       <DatePicker
         title='测温时间'
-        // value={new Date(Date.now())}
+        value={new Date(Date.now())}
         startDate={startDate}
         endDate={endDate}
         visible={dateShow}
