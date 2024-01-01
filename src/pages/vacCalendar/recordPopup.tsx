@@ -14,7 +14,6 @@ export default function RecordPopup() {
   const recordID = useRecordPopup.use.recordId()
   const isShow = useRecordPopup.use.isShow()
   const hide = useRecordPopup.use.hide()
-  const clear = useRecordPopup.use.clear()
 
   const { data: allRecords, mutate: refresh } = useVaccineRecordList()
 
@@ -48,7 +47,7 @@ export default function RecordPopup() {
       show={isShow}
       overlayStyle='background-color:rgba(225,225,225,0);backdrop-filter:blur(2px);'
       position='bottom'
-      onLeave={clear}
+      onLeave={hide}
     >
       <ScrollView scrollY className='h-screen'>
         <div className='flex flex-col justify-center px-4 pt-2 pb-8'>
