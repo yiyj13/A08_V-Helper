@@ -4,8 +4,8 @@ import useSWRInfinite from 'swr/infinite'
 import { useReachBottom } from '@tarojs/taro'
 import clsx from 'clsx'
 
-import { ArticlePreview } from './ArticlePreview'
 import api, { Article, useVaccines } from '../../api/'
+import { ArticlePreview } from '../../components/articlepreview'
 import { PullDownRefresh } from '../../components/pulldownrefresh'
 import { NetworkError } from '../../components/errors'
 import { EmptyView } from '../../components/empty'
@@ -49,11 +49,11 @@ export function Community() {
   return (
     <PullDownRefresh onRefresh={() => setSize(1)}>
       <main className='px-8 pb-32 mt-4'>
-        <div className='flex flex-col gap-6'>
+        <div className='flex flex-col gap-4'>
           {error && <NetworkError></NetworkError>}
           {isEmpty && <EmptyView text='来发布一篇帖子吧' />}
-          {articles?.map((article, index) => (
-            <ArticlePreview key={index} {...article} />
+          {articles?.map((article) => (
+            <ArticlePreview key={article.ID} {...article} />
           ))}
           {isLoadingMore && !error && <Skeletons />}
         </div>

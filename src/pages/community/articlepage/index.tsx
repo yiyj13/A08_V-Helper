@@ -4,6 +4,7 @@ import useSWRMutation from 'swr/mutation'
 
 import { useState } from 'react'
 import { useRouter } from '@tarojs/taro'
+import { Image } from '@tarojs/components'
 import { Comment, Follow, HeartFill1 } from '@nutui/icons-react-taro'
 import { Button, Skeleton } from '@nutui/nutui-react-taro'
 
@@ -39,7 +40,7 @@ export default function Index() {
     <div className='pb-20'>
       <header className='flex justify-between items-center px-8 py-4 bg-white shadow-sm'>
         <div className='flex items-center gap-4'>
-          <img className='w-12 h-12 rounded-full bg-slate-100' src={author?.avatar} />
+          <Image className='w-12 h-12 rounded-full bg-slate-100' src={author?.avatar ?? ''} mode='aspectFill' />
           <div>
             <div className='text-xl font-bold'>{author?.userName || 'Username'}</div>
             <div className='text-sm text-gray-500'>{article && getCreateTime(article.CreatedAt)}</div>
@@ -58,8 +59,8 @@ export default function Index() {
       <section className='px-8 py-4 bg-white shadow-sm flex justify-between'>
         <div className='flex items-center gap-4'>
           {/* <div className='flex items-center gap-1'> */}
-            {/* <Follow size={8}></Follow> */}
-            {/* <dd className='text-sm text-gray-500'>0</dd> */}
+          {/* <Follow size={8}></Follow> */}
+          {/* <dd className='text-sm text-gray-500'>0</dd> */}
           {/* </div> */}
 
           <div className='flex items-center gap-1'>
@@ -93,15 +94,15 @@ const Skeletons = () => (
   </div>
 )
 
-const CommentBlock = (props: Partial<Reply> & { index: number, }) => {
+const CommentBlock = (props: Partial<Reply> & { index: number }) => {
   const { data: author } = useUserPublic(Number(props.userId))
   return (
     <section className='mt-2 px-8 py-4 bg-white shadow-sm'>
       <div className='flex justify-between items-start'>
         <div className='flex items-center gap-4'>
-          <img className='w-12 h-12 rounded-full bg-slate-100' src={author?.avatar} />
+          <Image className='w-12 h-12 rounded-full bg-slate-100' src={author?.avatar ?? ''} mode='aspectFill' />
           <div className='flex flex-col'>
-            <div className='text-sm font-bold'>{author?.userName || 'Username'}</div>
+            <div className='text-sm font-bold'>{author?.userName ?? ''}</div>
             <div className='text-sm text-gray-500'>{getCreateTime(props.UpdatedAt)}</div>
           </div>
         </div>
