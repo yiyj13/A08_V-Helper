@@ -1,9 +1,7 @@
 import useSWR from 'swr'
 import { getUserPublic } from '../methods'
-import { getUserID } from '../../models'
 
-export function useUserPublic(userID?: number | null) {
-  if (!userID) userID = getUserID()
+export function useUserPublic(userID?: number) {
   return useSWR(userID ? [userID, 'getUserPublic'] : null, ([id]) => getUserPublic(id), {
     revalidateIfStale: false,
   })
