@@ -88,6 +88,7 @@ export type Profile = GinBase & {
 export type Message = GinBase & {
   openId: string
   page: string
+  vaxName: string
   comment: string
   vaxLocation: string
   vaxNum: number
@@ -278,15 +279,11 @@ export async function getMessage(id: number): Promise<Message> {
 
 export async function postMessage(props: Partial<Message>): Promise<string> {
   const params: Partial<Message> = {
-    openId: getOpenID(),
+    openId: String(getOpenID()),
     page: 'pages/index',
+    realTime: false,
     ...props,
   }
   const response = await api.post('/api/messages', params)
-  return response.data
-}
-
-export async function putMessage(props: Partial<Message>): Promise<string> {
-  const response = await api.put('/api/messages', props)
   return response.data
 }
