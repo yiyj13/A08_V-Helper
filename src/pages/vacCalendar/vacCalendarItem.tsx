@@ -67,7 +67,7 @@ export function VacCalendarItem({ key, record, hideOverlook = false }: VacCalend
           <img src={InjectSVG} className='h-full w-full invert' />
         </div>
         <div className='flex flex-col'>
-          <Text className='font-semibold text-brand'>
+          <Text className='font-semibold text-brand truncate'>
             {id2name(record.profileId)} {getVacname(record.vaccineId)} {record.isCompleted ? '已接种' : '未接种'}
           </Text>
           <Text className={clsx('text-xs', { 'text-red-500': timeError, 'text-gray-500': !timeError })}>
@@ -113,7 +113,7 @@ export function VacCalendarItemExpire({ key, record, hideOverlook = false }: Vac
           <img src={InjectSVG} className='h-full w-full' />
         </div>
         <div className='flex flex-col'>
-          <Text className='font-semibold'>
+          <Text className='font-semibold truncate'>
             {id2name(record.profileId)} {getVacname(record.vaccineId)}{' '}
             {overlook ? '已补种' : needHighlight ? '已过期' : '未过期'}
           </Text>

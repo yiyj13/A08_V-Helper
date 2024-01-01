@@ -70,7 +70,11 @@ const _computeVaccineState = (data?: VaccinationRecord[], profileId?: number, va
     if (!record.isCompleted) {
       planning = true
     }
-    if (vaccinationDate.isBefore(currentDate) && (!nextVaccinationDate || nextVaccinationDate.isAfter(currentDate))) {
+    if (
+      record.isCompleted &&
+      vaccinationDate.isBefore(currentDate) &&
+      (!nextVaccinationDate || nextVaccinationDate.isAfter(currentDate))
+    ) {
       inEffect = true
     }
     if (
