@@ -3,13 +3,13 @@ import { ArrowDown } from '@nutui/icons-react-taro'
 import clsx from 'clsx'
 import { useState } from 'react'
 
-import { ArticlePreview } from './ArticlePreview'
-import { useUserFollowing, useVaccines } from '../../../api/'
+import { useUserFollowing, useVaccines, unfollowArticle } from '../../../api/'
 import { NetworkError } from '../../../components/errors'
+import { ArticlePreview } from '../../../components/articlepreview'
 import { EmptyView } from '../../../components/empty'
 
 export default function FollowingPosts() {
-  const { data, isLoading, error } = useUserFollowing()
+  const { data, isLoading, error, mutate } = useUserFollowing()
   const articles = data?.followingArticles
   const vaccines = articles?.reduce((acc, article) => {
     if (!acc.some((id) => id === article.vaccineId)) {
@@ -22,6 +22,11 @@ export default function FollowingPosts() {
   const articlesRender = articles?.filter((article) => !filter || article.vaccineId === filter)
   const isEmpty = articlesRender?.length === 0
 
+  const swipeAction = async (id: number) => {
+    await unfollowArticle(id)
+    mutate()
+  }
+
   return (
     <>
       <Header vaccineIds={vaccines} filter={filter} setFilter={setFilter} />
@@ -29,8 +34,8 @@ export default function FollowingPosts() {
         <div className='flex flex-col'>
           {error && <NetworkError></NetworkError>}
           {isEmpty && <EmptyView text='去社区看一看大家的讨论吧'></EmptyView>}
-          {articlesRender?.map((article, index) => (
-            <ArticlePreview key={index} {...article} />
+          {articlesRender?.map((article) => (
+            <ArticlePreview key={article.ID} {...article} swipeAction={swipeAction} type='primary' buttonText='移除' />
           ))}
           {isLoading && !error && <Skeletons />}
         </div>

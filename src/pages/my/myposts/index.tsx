@@ -4,14 +4,14 @@ import clsx from 'clsx'
 import { useState } from 'react'
 import useSWR from 'swr'
 
-import { ArticlePreview } from './ArticlePreview'
-import { getMyArticles, useVaccines } from '../../../api/'
+import { ArticlePreview } from '../../../components/articlepreview'
+import { deleteArticle, getMyArticles, useVaccines } from '../../../api/'
 import { NetworkError } from '../../../components/errors'
 import { EmptyView } from '../../../components/empty'
 import { dayjs } from '../../../utils'
 
 export default function FollowingPosts() {
-  const { data: articles, isLoading, error } = useSWR('getMyArticles', getMyArticles)
+  const { data: articles, isLoading, error, mutate } = useSWR('getMyArticles', getMyArticles)
   const vaccines = articles?.reduce((acc, article) => {
     if (!acc.some((id) => id === article.vaccineId)) {
       acc.push(article.vaccineId)
@@ -27,6 +27,11 @@ export default function FollowingPosts() {
     })
   const isEmpty = articlesRender?.length === 0
 
+  const swipeAction = async (id: number) => {
+    await deleteArticle(id)
+    mutate()
+  }
+
   return (
     <>
       <Header vaccineIds={vaccines} filter={filter} setFilter={setFilter} />
@@ -34,8 +39,15 @@ export default function FollowingPosts() {
         <div className='flex flex-col'>
           {error && <NetworkError></NetworkError>}
           {isEmpty && <EmptyView text='去发布一篇吧'></EmptyView>}
-          {articlesRender?.map((article, index) => (
-            <ArticlePreview key={index} {...article} />
+          {articlesRender?.map((article) => (
+            <ArticlePreview
+              key={article.ID}
+              {...article}
+              swipeAction={swipeAction}
+              type='danger'
+              buttonText='删帖'
+              showReply
+            />
           ))}
           {isLoading && !error && <Skeletons />}
         </div>

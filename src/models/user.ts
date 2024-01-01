@@ -7,8 +7,9 @@ import { StorageSceneKey } from '../utils'
 import type { Userinfo } from '../api'
 
 interface State {
-  token: string | null
-  id: number | null
+  token?: string
+  id?: number
+  openId?: string
   isLogged: boolean
 }
 interface Action {
@@ -30,8 +31,6 @@ const userStorage: StateStorage = {
 }
 
 const initialState: State = {
-  token: null,
-  id: null,
   isLogged: false,
 }
 const userStore = create<State & Action>()(
@@ -39,8 +38,8 @@ const userStore = create<State & Action>()(
     persist(
       (set, _get) => ({
         ...initialState,
-        setUserInfo: (data) => set({ token: data.openId, id: data.ID, isLogged: true }),
-        removeUserInfo: () => set({ token: null, id: null, isLogged: false }),
+        setUserInfo: (data) => set({ token: data.token, id: data.ID, isLogged: true, openId: data.openId }),
+        removeUserInfo: () => set({ token: undefined, id: undefined, isLogged: false, openId: undefined }),
       }),
       {
         // NOTE: the name here is the unique key of the current Zustand module when caching,
@@ -54,6 +53,6 @@ const userStore = create<State & Action>()(
 
 export const useUserStore = createSelectors(userStore)
 export const getUserID = () => userStore.getState().id
-export function useUserReset() {
-  userStore.setState(initialState)
-}
+export const getToken = () => userStore.getState().token
+export const getOpenID = () => userStore.getState().openId
+export const resetUser = () => userStore.setState(initialState)

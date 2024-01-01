@@ -277,6 +277,7 @@ export default function AddMember() {
       />
       <DatePicker
         title='出生日期'
+        defaultValue={new Date(Date.now())}
         startDate={startDate}
         endDate={endDate}
         visible={dateVisible}

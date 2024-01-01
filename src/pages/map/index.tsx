@@ -1,11 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Taro from '@tarojs/taro'
 
 import { Map as TaroMap, CoverView } from '@tarojs/components'
-import { useEffect } from 'react'
 import { Loading, Cell, Menu } from '@nutui/nutui-react-taro'
 import { MoreS } from '@nutui/icons-react-taro'
-import { useDeviceStore } from '../../models'
 import LocationIconPath from "../../assets/map/position.png"
 import CurrentLocationIconPath from "../../assets/map/focusPosition.png"
 import GPSPositionIcon from "../../assets/map/gps.png"
@@ -14,39 +12,49 @@ import api from '../../api'
 import './index.css'
 
 export default function MapPage() {
-  const location = useDeviceStore.use.location()
-  const updateLocation = useDeviceStore.use.updateLocation()
   const iconWidthNormal = 40
   const iconHeightNormal = 40
   const iconWidthFocus = 60
   const iconHeightFocus = 60
-  const myLatitude = 40.0011
-  const myLongitude = 116.3265
+  const [myLatitude, setMyLatitude] = useState<number | null>(null)
+  const [myLongitude, setMyLongitude] = useState<number | null>(null)
   const myPositionID = 1
+  // 使用定位总是只能定位到海淀区，暂时用清华大学坐标替代
+  const [centralLatitude, setCentralLatitude] = useState(0)
+  const [centralLongitude, setCentralLongitude] = useState(0)
+  const [focusVaccine, setFocusVaccine] = useState('无')
+  const [focusMarkerID, setFocusMarkerID] = useState(1)
   const currentPosition = {
     id: 1,
-    title: "当前位置",
-    latitude: myLatitude,
-    longitude: myLongitude,
+    title: '当前位置',
+    latitude: centralLatitude,
+    longitude: centralLongitude,
     distance: 0,
     iconPath: CurrentLocationIconPath,
     width: iconWidthNormal,
-    height: iconHeightNormal
+    height: iconHeightNormal,
   }
-  // 使用定位总是只能定位到海淀区，暂时用清华大学坐标替代
-  const [centralLatitude, setCentralLatitude] = useState(myLatitude)
-  const [centralLongitude, setCentralLongitude] = useState(myLongitude)
-  const [focusVaccine, setFocusVaccine] = useState('无')
-  const [markers, setMarkers] = useState([currentPosition])
-  const [focusMarkerID, setFocusMarkerID] = useState(1)
 
+  const [markers, setMarkers] = useState([currentPosition])
   // 获取当前位置
   // TODO: error handling
   useEffect(() => {
-    location || updateLocation()
-  })
+    const getLocation = async () => {
+      const res = await Taro.getLocation({ type: 'gcj02' })
+      setMyLatitude(res.latitude)
+      setMyLongitude(res.longitude)
+      setCentralLatitude(res.latitude)
+      setCentralLongitude(res.longitude)
+      setMarkers((s) => {
+        s[0].latitude = res.latitude
+        s[0].longitude = res.longitude
+        return s
+      })
+    }
+    getLocation()
+  }, [])
 
-  if (!location) {
+  if (!myLatitude || !myLongitude) {
     return <Loading className='h-screen w-screen'>Fetching location...</Loading>
   }
 
@@ -64,22 +72,16 @@ export default function MapPage() {
         distance: Math.trunc(2 * 6378 * 1000 * Math.asin(Math.sqrt(Math.pow(Math.sin((Math.PI / 180) * (parseFloat(item.latitude) - centralLatitude) / 2), 2) + Math.cos((Math.PI / 180) * parseFloat(item.latitude)) * Math.cos((Math.PI / 180) * centralLatitude) * Math.pow(Math.sin((Math.PI / 180) * (parseFloat(item.longitude) - centralLongitude) / 2), 2)))),
         iconPath: LocationIconPath,
         width: iconWidthNormal,
-        height: iconHeightNormal
+        height: iconHeightNormal,
       }
     })
     setMarkers([currentPosition, ...clinicMarkers])
   }
 
-  const vaccineList = [
-    '无',
-    '狂犬疫苗',
-    'HPV疫苗',
-    '流感疫苗',
-    '常规疫苗'
-  ]
+  const vaccineList = ['无', '狂犬疫苗', 'HPV疫苗', '流感疫苗', '常规疫苗']
 
   const vaccineOptions = vaccineList.map((item) => {
-    return {text: item, value: item}
+    return { text: item, value: item }
   })
 
   return (
@@ -93,7 +95,6 @@ export default function MapPage() {
           markers={markers}
           includePoints={markers}
           onMarkerTap={(e) => {
-            e.detail.markerId
             const tappedMarker = markers.find((item) => item.id == e.detail.markerId)
             if (tappedMarker) {
               setCentralLatitude(tappedMarker.latitude)
@@ -105,18 +106,21 @@ export default function MapPage() {
           <CoverView className='location-button'>
             <button
               style={{
-                width: 50, height: 50,
+                width: 50,
+                height: 50,
                 borderRadius: 5,
               }}
               onClick={() => {
                 setCentralLatitude(myLatitude)
                 setCentralLongitude(myLongitude)
-              }}>
+              }}
+            >
               <img
                 src={GPSPositionIcon}
                 style={{
                   margin: 10,
-                  width: 30, height: 30
+                  width: 30,
+                  height: 30,
                 }}
               />
             </button>
@@ -154,11 +158,13 @@ export default function MapPage() {
                   <Cell
                     key={index}
                     title={item.title}
-                    description={item.distance > 1000 ? `${(item.distance / 1000).toFixed(1)} km` : `${item.distance} m`}
+                    description={
+                      item.distance > 1000 ? `${(item.distance / 1000).toFixed(1)} km` : `${item.distance} m`
+                    }
                     onClick={() => {
                       setCentralLatitude(item.latitude)
                       setCentralLongitude(item.longitude)
-                      const lastFocusMarker = markers.find((item) => item.id == focusMarkerID)
+                      const lastFocusMarker = markers.find((i) => i.id == focusMarkerID)
                       if (lastFocusMarker) {
                         lastFocusMarker.width = iconWidthNormal
                         lastFocusMarker.height = iconHeightNormal
@@ -168,14 +174,19 @@ export default function MapPage() {
                       item.height = iconHeightFocus
                       setMarkers([...markers])
                     }}
-                    extra={<MoreS onClick={() => {Taro.navigateTo({ url: `/pages/map/clinic/index?clinicName=${item.title}` })}}/>}
+                    extra={
+                      <MoreS
+                        onClick={() => {
+                          Taro.navigateTo({ url: `/pages/map/clinic/index?clinicName=${item.title}` })
+                        }}
+                      />
+                    }
                   />
                 )
               } else {
                 return null
               }
-            })
-          }
+            })}
         </div>
       </div>
     </div>

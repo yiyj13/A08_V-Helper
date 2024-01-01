@@ -16,13 +16,29 @@ export function MiniCalendar() {
 
   const data2render = useMemo(() => {
     if (!data) return []
-    return MergeItems(data)
-      .filter((item) => {
-        const state = getVaccineState(item.record.profileId, item.record.vaccineId)
-        return state.planning || !state.inEffect && item.expireDate
-      })
-      .sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf())
-      .slice(0, 3)
+    return (
+      MergeItems(data)
+        // only show uncompleted items and expired items
+        .filter((x) => {
+          const state = getVaccineState(x.record.profileId, x.record.vaccineId)
+          if (!x.expireDate) {
+            return !x.record.isCompleted
+          } else {
+            return x.record.isCompleted && !(state.inEffect && dayjs().isAfter(dayjs(x.record.nextVaccinationDate)))
+          }
+        })
+        // take the first 3 items in order
+        .sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf())
+        .slice(0, 3)
+        // render
+        .map((x) => {
+          if (x.expireDate) {
+            return <VacCalendarItemExpire key={dayjs(x.date).valueOf()} record={x.record} />
+          } else {
+            return <VacCalendarItem key={dayjs(x.date).valueOf()} record={x.record} />
+          }
+        })
+    )
   }, [data, getVaccineState])
 
   const isDataEmpty = !data || (data && data.length === 0)
@@ -52,15 +68,7 @@ export function MiniCalendar() {
             ) : isRenderEmpty ? (
               <ListEmptyNotice />
             ) : (
-              <ol className='mt-2 space-y-4 text-sm leading-6'>
-                {data2render?.map((item) => {
-                  if (item.expireDate) {
-                    return <VacCalendarItemExpire key={dayjs(item.date).valueOf()} record={item.record} />
-                  } else {
-                    return <VacCalendarItem key={dayjs(item.date).valueOf()} record={item.record} />
-                  }
-                })}
-              </ol>
+              <ol className='mt-2 space-y-4 text-sm leading-6'>{data2render}</ol>
             )}
           </PullDownRefresh>
           <div className='h-32'></div>
