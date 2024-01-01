@@ -8,6 +8,11 @@ const interceptor = function (chain: any) {
       return res
     } else if (res.statusCode === 401) {
       resetUser()
+      Taro.showToast({
+        title: '登录状态过期，请重新登录',
+        icon: 'none',
+        duration: 2000
+      })
     } else {
       return Promise.reject(res)
     }
