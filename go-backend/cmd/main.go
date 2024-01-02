@@ -18,18 +18,16 @@ func main() {
 	}
 	time.Local = loc
 
+	// 从环境变量中加载配置
 	cfg := config.LoadConfig()
+
+	// 初始化数据库连接
 	database := db.Init(cfg)
 
+	// 创建路由
 	r := gin.Default()
 
-	// 创建测试路由
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-
-	handler.SetupRoutes(r, database)
+	// 注册路由
+	handler.SetupRoutes(r, database, cfg)
 	r.Run() // 默认在 8080 端口运行
 }

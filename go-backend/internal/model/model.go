@@ -109,6 +109,15 @@ type Message struct {
 	Sent        bool   `json:"sent"`     // 是否已发送
 }
 
+// MessageSubscription 订阅消息模型
+type MessageSubscription struct {
+	gorm.Model
+	OpenID      string `json:"openId"`
+	Page        string `json:"page"` // 消息跳转页面，例如"pages/welcome/welcome"
+	VaxName     string `json:"vaxName"`
+	VaxLocation string `json:"vaxLocation"`
+}
+
 type StringList []string
 
 // 将数组转换为字符串，以便存入数据库

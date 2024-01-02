@@ -11,6 +11,7 @@ type Config struct {
 	DBName     string
 	DBHost     string // DBHost 应为 Docker Compose 服务名称
 	DBPort     string
+	JWTKey     string
 }
 
 func LoadConfig() Config {

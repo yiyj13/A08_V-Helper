@@ -5,18 +5,31 @@ import (
 	"net/http"
 	"strings"
 	"v-helper/internal/service"
+	"v-helper/pkg/config"
 	"v-helper/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func SetupRoutes(router *gin.Engine, db *gorm.DB) {
-	userService := service.NewUserService(db)
-	userHandler := NewUserHandler(userService)
+func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg config.Config) {
+	userService := service.NewUserService(db)  // 创建用户服务
+	userHandler := NewUserHandler(userService) // 创建用户处理器
 	router.GET("/auth", userHandler.AuthHandler)
 	router.GET("/users/login", userHandler.LogInHandler)
 	router.GET("/users/public/:id", userHandler.HandleGetPublicUserByID)
+
+	profileService := service.NewProfileService(db)     // 创建身份服务
+	profileHandler := NewProfileHandler(profileService) // 创建身份处理器
+
+	vaccineService := service.NewVaccineService(db)     // 创建疫苗服务
+	vaccineHandler := NewVaccineHandler(vaccineService) // 创建疫苗处理器
+
+	vaccinationRecordService := service.NewVaccinationRecordService(db)               // 创建接种记录服务
+	vaccinationRecordHandler := NewVaccinationRecordHandler(vaccinationRecordService) // 创建接种记录处理器
+
+	tempertureRecordService := service.NewTempertureRecordService(db)              // 创建体温记录服务
+	tempertureRecordHandler := NewTempertureRecordHandler(tempertureRecordService) // 创建体温记录处理器
 
 	// 创建需要JWT认证的路由组
 	authGroup := router.Group("/")
@@ -33,8 +46,6 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 		authGroup.GET("/users/addfollowingArticle/:id", userHandler.HandleAddFollowingArticle)
 		authGroup.GET("/users/removefollowingArticle/:id", userHandler.HandleRemoveFollowingArticle)
 
-		profileService := service.NewProfileService(db)
-		profileHandler := NewProfileHandler(profileService)
 		authGroup.POST("/profiles", profileHandler.HandleCreateProfile)
 		authGroup.GET("/profiles", profileHandler.HandleGetAllProfiles)
 		authGroup.GET("/profiles/:id", profileHandler.HandleGetProfileByID)
@@ -42,16 +53,12 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 		authGroup.PUT("/profiles/:id", profileHandler.HandleUpdateProfileByID)
 		authGroup.DELETE("/profiles/:id", profileHandler.HandleDeleteProfileByID)
 
-		vaccineService := service.NewVaccineService(db)
-		vaccineHandler := NewVaccineHandler(vaccineService)
 		authGroup.POST("/vaccines", vaccineHandler.HandleCreateVaccine)
 		authGroup.GET("/vaccines", vaccineHandler.HandleGetAllVaccines)
 		authGroup.GET("/vaccines/:id", vaccineHandler.HandleGetVaccineByID)
 		authGroup.PUT("/vaccines/:id", vaccineHandler.HandleUpdateVaccineByID)
 		authGroup.DELETE("/vaccines/:id", vaccineHandler.HandleDeleteVaccineByID)
 
-		vaccinationRecordService := service.NewVaccinationRecordService(db)
-		vaccinationRecordHandler := NewVaccinationRecordHandler(vaccinationRecordService)
 		authGroup.POST("/vaccination-records", vaccinationRecordHandler.HandleCreateVaccinationRecord)
 		authGroup.GET("/vaccination-records", vaccinationRecordHandler.HandleGetAllVaccinationRecords)
 		authGroup.GET("/vaccination-records/:id", vaccinationRecordHandler.HandleGetVaccinationRecordByID)
@@ -60,8 +67,6 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 		authGroup.PUT("/vaccination-records/:id", vaccinationRecordHandler.HandleUpdateVaccinationRecordByID)
 		authGroup.DELETE("/vaccination-records/:id", vaccinationRecordHandler.HandleDeleteVaccinationRecordByID)
 
-		tempertureRecordService := service.NewTempertureRecordService(db)
-		tempertureRecordHandler := NewTempertureRecordHandler(tempertureRecordService)
 		authGroup.POST("/temperature-records", tempertureRecordHandler.HandleCreateTempertureRecord)
 		authGroup.GET("/temperature-records", tempertureRecordHandler.HandleGetAllTempertureRecords)
 		authGroup.GET("/temperature-records/:id", tempertureRecordHandler.HandleGetTempertureRecordByID)
@@ -98,6 +103,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.GET("/messages/:id", messageHandler.HandleGetMessageByID)
 	router.PUT("/messages/:id", messageHandler.HandleUpdateMessageByID)
 	router.DELETE("/messages/:id", messageHandler.HandleDeleteMessageByID)
+	router.POST("/messagesSubscribe", messageHandler.HandleAddMessageSubscription)
 
 	// 根据疫苗寻找诊所
 	// tzh TODO 15周展示之后 重写
@@ -115,6 +121,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.POST("/wechat-validation", SetSubscription)
 }
 
+// JWTAuthMiddleware JWT认证中间件
 func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")

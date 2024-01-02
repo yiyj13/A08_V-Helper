@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -17,8 +18,9 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-const (
-	defaultTemplateID       = "ocbFMPXogCo85ZjBYlEseGnQzaPlmtvUqXUw1VrVuvQ"
+var (
+	TemplateID1             = os.Getenv("TEMPLATE_ID_1")
+	TempalteID2             = os.Getenv("TEMPLATE_ID_2")
 	WEIXIN_API_SEND_MESSAGE = "https://api.weixin.qq.com/cgi-bin/message/subscribe/send"
 )
 
@@ -119,7 +121,7 @@ func SendTemplateMessage(accessToken, openID, templateID, page, vaxName, comment
 		accessToken, _ = GetAccessToken("", "")
 	}
 	if templateID == "" {
-		templateID = defaultTemplateID
+		templateID = TemplateID1
 	}
 	if page == "" {
 		page = "pages/welcome/welcome"
@@ -333,4 +335,109 @@ func (h *MessageHandler) MessageScheduler() {
 		// 等待一段时间后再次检查
 		time.Sleep(1 * time.Minute)
 	}
+}
+
+type TemplateMessageSubscription struct {
+	ToUser           string                          `json:"touser"`
+	TemplateID       string                          `json:"template_id"`
+	Page             string                          `json:"page"`
+	MiniprogramState string                          `json:"miniprogram_state"`
+	Lang             string                          `json:"lang"`
+	Data             TemplateMessageSubscriptionData `json:"data"`
+}
+
+type TemplateMessageSubscriptionData struct {
+	Thing1 struct {
+		Value string `json:"value"`
+	} `json:"thing1"` // 疫苗名称
+	Thing3 struct {
+		Value string `json:"value"`
+	} `json:"thing3"` // 订阅门诊
+}
+
+func SendTemplateMessageSubscription(accessToken, openID, templateID, page, vaxName, vaxLocation string) error {
+	if accessToken == "" {
+		accessToken, _ = GetAccessToken("", "")
+	}
+	if templateID == "" {
+		templateID = TempalteID2
+	}
+	if page == "" {
+		page = "pages/welcome/welcome"
+	}
+
+	data := TemplateMessageSubscriptionData{
+		Thing1: struct {
+			Value string `json:"value"`
+		}{
+			Value: vaxName,
+		},
+		Thing3: struct {
+			Value string `json:"value"`
+		}{
+			Value: vaxLocation,
+		},
+	}
+
+	message := TemplateMessageSubscription{
+		ToUser:           openID,
+		TemplateID:       templateID,
+		Page:             page,
+		MiniprogramState: "trial", // 跳转小程序类型：developer为开发版；trial为体验版；formal为正式版
+		Lang:             "zh_CN",
+		Data:             data,
+	}
+
+	client := resty.New()
+	resp, err := client.R().
+		SetQueryParam("access_token", accessToken).
+		SetBody(message).
+		Post(WEIXIN_API_SEND_MESSAGE)
+
+	if err != nil {
+		return err
+	}
+
+	var response TemplateMessageResponse
+	if err := json.Unmarshal(resp.Body(), &response); err != nil {
+		return err
+	}
+	log.Println("response:", response)
+
+	if response.ErrorCode != 0 {
+		return fmt.Errorf("failed to send template message: %s", response.ErrorMessage)
+	}
+
+	return nil
+}
+
+type MessageSubscription struct {
+	VaccineID   uint   `json:"vaccineId"`
+	Page        string `json:"page"` // 消息跳转页面，例如"pages/welcome/welcome"
+	VaxName     string `json:"vaxName"`
+	VaxLocation string `json:"vaxLocation"`
+}
+
+func (h *MessageHandler) HandleAddMessageSubscription(c *gin.Context) {
+	var message MessageSubscription
+	if err := c.ShouldBindJSON(&message); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 查找所有关注了VaccineID的用户
+	users, err := h.MessageService.GetUsersFollowingVaccine(message.VaccineID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	for _, user := range users {
+		if err := SendTemplateMessageSubscription("", user.OpenID, "", message.Page, message.VaxName, message.VaxLocation); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, message)
 }

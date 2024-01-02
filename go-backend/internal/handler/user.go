@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"v-helper/internal/model"
 	"v-helper/internal/service"
@@ -17,11 +18,14 @@ import (
 const (
 	GRANT_TYPE = "authorization_code"
 	WEIXIN_API = "https://api.weixin.qq.com/sns/jscode2session"
-
-	defaultAppID     = "wx616961ff9148b541"
-	defaultAppSecret = "46db234bd912cfe6035a3a1a8777d55a"
 )
 
+var (
+	defaultAppID     = os.Getenv("DEFAULT_APP_ID")
+	defaultAppSecret = os.Getenv("DEFAULT_APP_SECRET")
+)
+
+// WeixinResponse 微信返回的数据结构
 type WeixinResponse struct {
 	Openid     string `json:"openid"`
 	SessionKey string `json:"session_key"`
@@ -30,17 +34,20 @@ type WeixinResponse struct {
 	Errmsg     string `json:"errmsg"`
 }
 
+// UserHandler 用户处理器
 type UserHandler struct {
 	userService *service.UserService
 }
 
+// NewUserHandler 创建用户处理器
 func NewUserHandler(userService *service.UserService) *UserHandler {
 	return &UserHandler{userService: userService}
 }
 
+// AuthHandler 管理员登录
 func (h *UserHandler) AuthHandler(c *gin.Context) {
 	user := model.User{OpenID: "Admin"}
-	token, err := utils.GenerateJWT(user)
+	token, err := utils.GenerateJWT(user) // 生成 JWT 令牌
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -54,6 +61,7 @@ func (h *UserHandler) AuthHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
+// LogInHandler 用户登录
 func (h *UserHandler) LogInHandler(c *gin.Context) {
 	// 通过code得到openid，在得到对应用户信息，若不存在则新建用户
 	jsCode := c.Query("code")
@@ -92,7 +100,7 @@ func (h *UserHandler) LogInHandler(c *gin.Context) {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	token, err := utils.GenerateJWT(user)
+	token, err := utils.GenerateJWT(user) // 生成 JWT 令牌
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -102,6 +110,7 @@ func (h *UserHandler) LogInHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// HandleGetUserByOpenID 根据openid获取用户信息
 func (h *UserHandler) HandleCreateUser(c *gin.Context) {
 	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -117,6 +126,7 @@ func (h *UserHandler) HandleCreateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// HandleGetAllUsers 获取所有用户信息
 func (h *UserHandler) HandleGetAllUsers(c *gin.Context) {
 	users, err := h.userService.GetAllUsers()
 	if err != nil {
@@ -127,6 +137,7 @@ func (h *UserHandler) HandleGetAllUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
+// HandleGetUserByID 根据id获取用户信息
 func (h *UserHandler) HandleGetUserByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -142,6 +153,7 @@ func (h *UserHandler) HandleGetUserByID(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// HandleGetUserWithFollowings 根据id获取用户信息，包括关注的疫苗和文章
 func (h *UserHandler) HandleGetUserWithFollowings(c *gin.Context) {
 	userID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -158,6 +170,7 @@ func (h *UserHandler) HandleGetUserWithFollowings(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// HandleAddFollowingVaccine 添加关注的疫苗
 func (h *UserHandler) HandleAddFollowingVaccine(c *gin.Context) {
 	userID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -187,6 +200,7 @@ func (h *UserHandler) HandleAddFollowingVaccine(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "vaccine added successfully"})
 }
 
+// HandleRemoveFollowingVaccine 移除关注的疫苗
 func (h *UserHandler) HandleRemoveFollowingVaccine(c *gin.Context) {
 	userID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -216,6 +230,7 @@ func (h *UserHandler) HandleRemoveFollowingVaccine(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "vaccine removed successfully"})
 }
 
+// HandleAddFollowingArticle 添加关注的文章
 func (h *UserHandler) HandleAddFollowingArticle(c *gin.Context) {
 	userID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -245,6 +260,7 @@ func (h *UserHandler) HandleAddFollowingArticle(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "article added successfully"})
 }
 
+// HandleRemoveFollowingArticle 移除关注的文章
 func (h *UserHandler) HandleRemoveFollowingArticle(c *gin.Context) {
 	userID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -274,6 +290,7 @@ func (h *UserHandler) HandleRemoveFollowingArticle(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "article removed successfully"})
 }
 
+// HandleUpdateUserByID 根据id更新用户信息
 func (h *UserHandler) HandleUpdateUserByID(c *gin.Context) {
 	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -289,6 +306,7 @@ func (h *UserHandler) HandleUpdateUserByID(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// HandleDeleteUserByID 根据id删除用户信息
 func (h *UserHandler) HandleDeleteUserByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -304,6 +322,7 @@ func (h *UserHandler) HandleDeleteUserByID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "user deleted successfully"})
 }
 
+// HandleGetPublicUserByID 根据id获取公开的用户信息，用户名和头像
 func (h *UserHandler) HandleGetPublicUserByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -320,44 +339,12 @@ func (h *UserHandler) HandleGetPublicUserByID(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// Register 用户注册
-func (h *UserHandler) HandleRegister(c *gin.Context) {
-	var user model.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if err := h.userService.Register(user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, user)
-}
-
-// Login 用户登录
-func (h *UserHandler) HandleLogin(c *gin.Context) {
-	var user model.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	token, err := h.userService.Login(user.Email, user.Password)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"token": token})
-}
-
 type Response struct {
 	AccessToken string `json:"access_token"`
 	ExpiresIn   int    `json:"expires_in"`
 }
 
+// GetAccessToken 获取微信access_token
 func GetAccessToken(appID, appSecret string) (string, error) {
 	if appID == "" {
 		appID = defaultAppID

@@ -5,14 +5,13 @@
 - [X] 编写简单数据库模型和接口
 - [X] 配置文件，数据库连接
 - [X] 通过docker-compose部署测试
-- [ ] 完善数据库模型
+- [x] 完善数据库模型
   - [x] 在model中加入新模型时，需要在init中进行迁移
   - [x] 在service中实现对模型的增删改查
   - [x] 在handler中实现API接口，并注册路由
 - [x] 用户登录，主要通过微信接口实现
-- [ ] 对有需要的模型在获取时进行分页、排序(时间排序)和筛选(按疫苗)
-  - [x] 帖子
-  - [ ] 疫苗
+- [x] 对有需要的模型在获取时进行分页、排序(时间排序)和筛选(按疫苗)
+  - [x] 社区帖子
 - [x] 更方便地通过json数据更新数据库
 - [ ] 更新文档中相关API
 - [x] 接种记录的字段完善
@@ -201,6 +200,19 @@ Post 时的json样例：
    "realTime": true,
    "sendTime": "2021-07-01 12:00",
    "sent": false
+}
+```
+
+| POST | /api/messagesSubscribe | 给所有订阅了该疫苗的用户发送消息 |
+
+Post 时的json样例：
+注意vaccineId和vaxName没有做关联，需要前端保证一致性；如果不一致，vaccineId用于查找订阅了该疫苗的用户，vaxName用于消息内容
+```json
+{
+   "vaccineId": 1,
+   "page": "pages/welcome/welcome",
+   "vaxName": "新冠疫苗",
+   "vaxLocation": "本地社区医院",
 }
 ```
 

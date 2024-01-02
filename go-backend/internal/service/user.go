@@ -2,9 +2,7 @@ package service
 
 import (
 	"v-helper/internal/model"
-	"v-helper/pkg/utils"
 
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -31,10 +29,12 @@ func NewUserService(db *gorm.DB) *UserService {
 	return &UserService{db: db}
 }
 
+// CreateUser 创建用户
 func (s *UserService) CreateUser(user model.User) error {
 	return s.db.Create(&user).Error
 }
 
+// GetAllUsers 获取所有用户
 func (s *UserService) GetAllUsers() ([]model.User, error) {
 	var users []model.User
 	if err := s.db.Find(&users).Error; err != nil {
@@ -43,6 +43,7 @@ func (s *UserService) GetAllUsers() ([]model.User, error) {
 	return users, nil
 }
 
+// GetUserByID 根据id获取用户
 func (s *UserService) GetUserByID(id uint) (model.User, error) {
 	var user model.User
 	if err := s.db.First(&user, id).Error; err != nil {
@@ -51,6 +52,7 @@ func (s *UserService) GetUserByID(id uint) (model.User, error) {
 	return user, nil
 }
 
+// GetUserWithFollowings 根据id获取用户，包括关注的疫苗和文章
 func (s *UserService) GetUserWithFollowings(id uint) (model.User, error) {
 	var user model.User
 	if err := s.db.Preload("FollowingVaccines").Preload("FollowingArticles").First(&user, id).Error; err != nil {
@@ -59,6 +61,7 @@ func (s *UserService) GetUserWithFollowings(id uint) (model.User, error) {
 	return user, nil
 }
 
+// AddFollowingVaccine 添加关注的疫苗
 func (s *UserService) AddFollowingVaccine(userID uint, vaccineID uint) error {
 	var user model.User
 	if err := s.db.First(&user, userID).Error; err != nil {
@@ -71,6 +74,7 @@ func (s *UserService) AddFollowingVaccine(userID uint, vaccineID uint) error {
 	return s.db.Model(&user).Association("FollowingVaccines").Append(&vaccine)
 }
 
+// RemoveFollowingVaccine 取消关注的疫苗
 func (s *UserService) RemoveFollowingVaccine(userID uint, vaccineID uint) error {
 	var user model.User
 	if err := s.db.First(&user, userID).Error; err != nil {
@@ -83,6 +87,7 @@ func (s *UserService) RemoveFollowingVaccine(userID uint, vaccineID uint) error 
 	return s.db.Model(&user).Association("FollowingVaccines").Delete(&vaccine)
 }
 
+// AddFollowingArticle 添加关注的文章
 func (s *UserService) AddFollowingArticle(userID uint, articleID uint) error {
 	var user model.User
 	if err := s.db.First(&user, userID).Error; err != nil {
@@ -95,6 +100,7 @@ func (s *UserService) AddFollowingArticle(userID uint, articleID uint) error {
 	return s.db.Model(&user).Association("FollowingArticles").Append(&article)
 }
 
+// RemoveFollowingArticle 取消关注的文章
 func (s *UserService) RemoveFollowingArticle(userID uint, articleID uint) error {
 	var user model.User
 	if err := s.db.First(&user, userID).Error; err != nil {
@@ -107,10 +113,12 @@ func (s *UserService) RemoveFollowingArticle(userID uint, articleID uint) error 
 	return s.db.Model(&user).Association("FollowingArticles").Delete(&article)
 }
 
+// UpdateUserByID 根据id更新用户
 func (s *UserService) UpdateUserByID(user model.User) error {
 	return s.db.Model(&user).Where("id = ?", user.ID).Updates(user).Error
 }
 
+// DeleteUserByID 根据id删除用户
 func (s *UserService) DeleteUserByID(id uint) error {
 	return s.db.Where("id = ?", id).Delete(&model.User{}).Error
 }
@@ -139,37 +147,4 @@ func (s *UserService) GetUserByOpenID(openID string) (model.User, error) {
 		}
 	}
 	return user, nil
-}
-
-// 以下暂时不用
-// Register 新用户注册
-func (s *UserService) Register(user model.User) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-	user.Password = string(hashedPassword)
-	return s.db.Create(&user).Error
-}
-
-// Login 用户登录
-func (s *UserService) Login(email, password string) (string, error) {
-	var user model.User
-	if err := s.db.Where("email = ?", email).First(&user).Error; err != nil {
-		return "", err
-	}
-
-	// 检查密码
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		// 密码不匹配
-		return "", err
-	}
-
-	// 生成 JWT
-	token, err := utils.GenerateJWT(user)
-	if err != nil {
-		return "", err
-	}
-
-	return token, nil
 }

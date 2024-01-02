@@ -3,13 +3,14 @@ package utils
 import (
 	"fmt"
 	"log"
+	"os"
 	"time"
 	"v-helper/internal/model"
 
 	"github.com/dgrijalva/jwt-go"
 )
 
-var jwtKey = []byte("your_secret_key") // 从安全的配置来源获取
+var jwtKey = []byte(os.Getenv("JWT_KEY"))
 
 // JWTClaims 自定义 JWT Claims 结构
 type JWTClaims struct {

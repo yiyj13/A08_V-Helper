@@ -58,3 +58,19 @@ func (s *MessageService) UpdateMessageByID(message model.Message) error {
 func (s *MessageService) DeleteMessageByID(id uint) error {
 	return s.db.Delete(&model.Message{}, id).Error
 }
+
+// GetUsersFollowingVaccine 获取关注某疫苗的用户
+func (s *MessageService) GetUsersFollowingVaccine(vaccineID uint) ([]model.User, error) {
+	var users []model.User
+
+	err := s.db.Joins("JOIN user_following_vaccines on user_following_vaccines.user_id = users.id").
+		Joins("JOIN vaccines on vaccines.id = user_following_vaccines.vaccine_id").
+		Where("vaccines.id = ?", vaccineID).
+		Find(&users).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
