@@ -371,6 +371,73 @@ type Clinic struct {
 }
 ```
 
+## 后端架构文档
+
+### 1. **Web框架**
+- 使用Go作为后端开发语言。
+- 采用Gin框架来构建RESTful API，提供了高性能和简洁的路由功能。
+
+### 2. **数据库**
+- 使用MySQL作为关系型数据库。
+- 通过GORM库实现对象关系映射（ORM），简化数据库操作。
+
+### 3. **API服务**
+- 设计和实现REST API，处理各种HTTP请求。
+- 提供用户认证、数据检索、创建、更新和删除等功能。
+
+### 4. **身份认证**
+- 实现Token-based认证机制，使用JWT（JSON Web Tokens）进行身份验证和授权。
+- 提供安全的用户登录流程，并保护API访问。
+
+### 5. **模型**
+- 定义数据模型，如用户、疫苗、文章等，使用Go结构体表示。
+- 确保模型与数据库表结构一致。
+
+### 6. **服务层**
+- 封装业务逻辑于服务层，例如用户管理、疫苗信息处理等。
+- 分离业务逻辑与API处理，提高代码可维护性。
+
+### 7. **错误处理**
+- 实现统一的错误处理机制。
+- 捕获异常，返回标准化的错误响应。
+
+### 8. **Docker容器**
+- 使用Docker进行应用容器化，确保一致的开发、测试和生产环境。
+- 使用`docker-compose`来管理多个容器服务。
+
+### 9. **数据库迁移**
+- 使用数据库迁移工具（如Flyway或Liquibase）管理数据库结构的更改。
+- 确保数据库结构的版本控制和追踪。
+
+### 10. **日志记录**
+- 实现日志记录系统，记录关键操作和错误信息。
+- 使用标准日志库或第三方日志服务。
+
+### 11. **前端集成**
+- 后端API与前端小程序集成，通过JSON格式交换数据。
+- 确保API的响应格式符合前端需求。
+
+### 12. **GitHub Actions**
+- 使用GitHub Actions实现CI/CD流程，自动化测试和部署流程。
+- 自动化构建Docker镜像，并部署到生产环境。
+
+### 13. **文件结构和代码组织**
+- 明确的项目结构，便于开发和维护：
+  - `cmd`: 存放程序的入口。
+  - `deployments`: 包含Docker相关配置和Dockerfile。
+  - `internal`: 存放私有应用和库代码。
+  - `pkg`: 存放可被外部应用使用的库代码。
+  - `tests`: 存放测试代码和性能测试脚本。
+
+### 14. **性能监控和优化**
+- 监控应用性能，定期进行性能测试。
+- 分析性能瓶颈并进行优化。
+
+### 15. **安全措施**
+- 采取安全措施保护敏感数据。
+- 定期更新依赖，修复安全漏洞。
+
+
 ## 项目优化
 
 在使用Go语言的Gin框架、Gorm ORM、Nginx作为路由器，以及MySQL作为数据库的项目中，下面是一些具体的最佳实践和注意事项，以确保后端服务的安全性、性能、可靠性和可维护性：
@@ -434,6 +501,58 @@ type Clinic struct {
 1. **Gorm模型设计**：
    - 精心设计数据库模型和关联，以优化性能和简化数据访问逻辑。
    - 使用迁移来管理数据库结构的更改。
+
+## 部署
+用配置文件定义GitHub Actions的工作流程，用于自动化Docker容器化的Go后端应用程序的构建和部署。以下是该工作流程的详细步骤和解释：
+
+### 工作流程触发条件
+
+```yaml
+on:
+  push:
+    branches: [ go-backend, backend-dev ]
+```
+
+- 工作流程在`go-backend`和`backend-dev`分支上的推送事件时触发。
+- 这意味着每当有新的代码提交到这两个分支时，GitHub Actions将自动执行定义的步骤。
+
+### 工作流程任务：build-and-deploy
+
+```yaml
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+```
+
+- 定义了一个名为`build-and-deploy`的任务。
+- 该任务在最新版本的Ubuntu环境上运行。
+
+### 步骤1：检出代码
+
+```yaml
+- uses: actions/checkout@v2
+```
+
+- 使用`actions/checkout@v2`动作检出您的代码库到GitHub Actions运行器中。
+
+### 步骤2：部署到服务器
+
+```yaml
+- name: Deploy to Server
+  run: |
+    sshpass -p "xxxxxx" ssh -o StrictHostKeyChecking=no ubuntu@101.43.194.58 "cd /home/ubuntu/backend/A08_V-Helper && git pull && cd go-backend && sudo docker-compose up --build -d"
+```
+
+- 使用SSH连接到部署服务器（IP地址为`101.43.194.58`）。
+- 执行一系列命令来部署应用：
+  - 切换到项目目录。
+  - 拉取最新代码。
+  - 在`go-backend`目录中运行`docker-compose up --build -d`来构建并后台运行容器化应用。
+
+### 安全注意事项
+
+- SSH密码直接写在了脚本中，这可能会引起安全问题。建议使用更安全的认证方式，如SSH密钥。
+- 如果未来您想要使用Docker Hub构建和推送镜像，请确保您的DockerHub凭据是安全的。使用GitHub Secrets来存储敏感信息。
 
 ## 性能测试报告
 
