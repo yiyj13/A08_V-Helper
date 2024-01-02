@@ -5,13 +5,18 @@ import { useState } from 'react'
 import useSWR from 'swr'
 
 import { ArticlePreview } from '../../../components/articlepreview'
-import { deleteArticle, getMyArticles, useVaccines } from '../../../api/'
+import { deleteArticle, getMyArticles, useArticles, useVaccines } from '../../../api/'
 import { NetworkError } from '../../../components/errors'
 import { EmptyView } from '../../../components/empty'
 import { dayjs } from '../../../utils'
 
 export default function FollowingPosts() {
-  const { data: articles, isLoading, error, mutate } = useSWR('getMyArticles', getMyArticles)
+  const {
+    data: articles,
+    isLoading,
+    error,
+    mutate,
+  } = useSWR('getMyArticles', getMyArticles, { dedupingInterval: 1000 * 10 })
   const vaccines = articles?.reduce((acc, article) => {
     if (!acc.some((id) => id === article.vaccineId)) {
       acc.push(article.vaccineId)
@@ -27,9 +32,12 @@ export default function FollowingPosts() {
     })
   const isEmpty = articlesRender?.length === 0
 
+  const {mutate: mutateCommunity}= useArticles()
+
   const swipeAction = async (id: number) => {
     await deleteArticle(id)
     mutate()
+    mutateCommunity()
   }
 
   return (

@@ -1,17 +1,14 @@
 import { Skeleton } from '@nutui/nutui-react-taro'
 import { ArrowDown } from '@nutui/icons-react-taro'
-import useSWRInfinite from 'swr/infinite'
-import { useReachBottom } from '@tarojs/taro'
+import {  useReachBottom } from '@tarojs/taro'
 import clsx from 'clsx'
 
-import api, { Article, useVaccines } from '../../api/'
+import { Article, useVaccines, useArticles } from '../../api/'
 import { ArticlePreview } from '../../components/articlepreview'
 import { PullDownRefresh } from '../../components/pulldownrefresh'
 import { NetworkError } from '../../components/errors'
 import { EmptyView } from '../../components/empty'
 import { useCommunityStore } from '../../models'
-
-const PAGESIZE = 5
 
 export default function Index() {
   return (
@@ -24,16 +21,7 @@ export default function Index() {
 
 // TODO: virtualList optimization
 export function Community() {
-  const filter = useCommunityStore.use.vaccineId()
-
-  const { data, isLoading, size, setSize, error } = useSWRInfinite(
-    (index) =>
-      filter
-        ? `/api/articles?page=${index + 1}&size=${PAGESIZE}&isBind=true&vaccineID=${filter}`
-        : `/api/articles?page=${index + 1}&size=${PAGESIZE}`,
-    (url) => api.get(url).then((res) => res.data),
-    { revalidateIfStale: false }
-  )
+  const { data, isLoading, size, setSize, error, PAGESIZE } = useArticles()
 
   const articles: Article[] = data ? [].concat(...data) : []
 
@@ -50,8 +38,7 @@ export function Community() {
     <PullDownRefresh onRefresh={() => setSize(1)}>
       <main className='px-8 pb-32 mt-4'>
         <div className='flex flex-col gap-4'>
-          {error && <NetworkError></NetworkError>}
-          {isEmpty && <EmptyView text='来发布一篇帖子吧' />}
+          {error ? <NetworkError />: isEmpty ? <EmptyView text='来发布一篇帖子吧' /> : null}
           {articles?.map((article) => (
             <ArticlePreview key={article.ID} {...article} />
           ))}

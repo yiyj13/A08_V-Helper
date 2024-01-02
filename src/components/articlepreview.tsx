@@ -46,8 +46,7 @@ export const ArticlePreview = memo((props: ArticlePreviewProps) => {
         <div className='flex justify-between'>
           <dl className='flex items-center gap-2'>
             <Image
-              alt='Paul Clapton'
-              src={author?.avatar}
+              src={author?.avatar ?? ''}
               className='h-8 w-8 rounded-full object-cover bg-slate-100 shadow-sm'
               mode='aspectFill'
             />
