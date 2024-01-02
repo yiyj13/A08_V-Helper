@@ -2,7 +2,7 @@ import useSWR from 'swr'
 import { useMemo, useCallback } from 'react'
 import { dayjs } from '../../utils'
 
-import { VaccinationRecord, getVaccineRecordList } from '..'
+import { VaccinationRecord, getVaccineRecordList, useProfiles } from '..'
 
 type VaccineState = {
   planning: boolean
@@ -17,7 +17,10 @@ export const initialVaccineState: VaccineState = {
 }
 
 export function useVaccineRecordList() {
-  const { data, ...rest } = useSWR('getVaccineRecordList', getVaccineRecordList, {
+  const {data: profiles} = useProfiles()
+
+  // automactically call getVaccineRecordList when profiles changes
+  const { data, ...rest } = useSWR([profiles, 'getVaccineRecordList'], getVaccineRecordList, {
     revalidateIfStale: false,
   })
 

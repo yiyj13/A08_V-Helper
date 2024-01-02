@@ -20,4 +20,8 @@ const interceptor = function (chain: any) {
   })
 }
 
-export const interceptors = [interceptor, Taro.interceptors.logInterceptor]
+const __interceptors = [interceptor]
+if (process.env.NODE_ENV === 'development') {
+  __interceptors.push(Taro.interceptors.logInterceptor)
+}
+export const interceptors = __interceptors
