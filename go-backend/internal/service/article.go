@@ -2,26 +2,15 @@ package service
 
 import (
 	"v-helper/internal/model"
-
-	"gorm.io/gorm"
+	"v-helper/pkg/utils"
+	// "gorm.io/gorm"
 )
 
-type IArticleService interface {
-	CreateArticle(article model.Article) error
-	GetAllArticles() ([]model.Article, error)
-	GetArticleByID(id uint) (model.Article, error)
-	GetArticlesByUserID(userID uint) ([]model.Article, error)
-	GetArticlesByVaccineID(vaccineID uint) ([]model.Article, error)
-	GetUnbindArticles() ([]model.Article, error)
-	UpdateArticleByID(id uint, article model.Article) error
-	DeleteArticleByID(id uint) error
-}
-
 type ArticleService struct {
-	db *gorm.DB
+	db utils.InterfaceDB
 }
 
-func NewArticleService(db *gorm.DB) *ArticleService {
+func NewArticleService(db utils.InterfaceDB) *ArticleService {
 	return &ArticleService{db: db}
 }
 

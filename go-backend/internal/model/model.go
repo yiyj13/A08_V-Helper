@@ -109,27 +109,11 @@ type Message struct {
 	Sent        bool   `json:"sent"`     // 是否已发送
 }
 
-type StringList []string
-
-// 将数组转换为字符串，以便存入数据库
-// func (l StringList) Value() (string, error) {
-// 	str := strings.Join(l, ",")
-// 	return str, nil
-// }
-
-// 将字符串转换为数组，以便从数据库中读取
-// func (l *StringList) Scan(val interface{}) error {
-// 	bytestring := val.([]uint8)
-// 	*l = strings.Split(string(bytestring), ",")
-// 	return nil
-// }
-
 // 持有某种疫苗的所有诊所
 type VaccineClinicList struct {
 	gorm.Model
 	VaccineName string `json:"vaccineName"`
 	ClinicList  string `json:"clinicList"`
-	// ClinicName  StringList `json:"clinicName"`
 }
 
 // 诊所信息
