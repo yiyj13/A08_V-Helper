@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro'
-import { ReactNode, useMemo } from 'react'
+import { ReactNode, useMemo, useEffect } from 'react'
 import clsx from 'clsx'
 import { Image, PageContainer, ScrollView } from '@tarojs/components'
 import { Date as DateIcon, Clock, Checked, Order, Edit, Del2, Link as ImageIcon } from '@nutui/icons-react-taro'
@@ -40,6 +40,10 @@ export default function RecordPopup() {
   const handleEdit = () => {
     Taro.navigateTo({ url: `/pages/record/index?id=` + recordID })
   }
+
+  useEffect(() => {
+    if (!record) hide()
+  }, [record, hide])
 
   return (
     <PageContainer

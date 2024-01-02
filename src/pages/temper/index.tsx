@@ -5,24 +5,36 @@
 import { useState, useMemo, useEffect } from 'react'
 import Taro from '@tarojs/taro'
 import { Text } from '@tarojs/components'
-import { Picker, Range, DatePicker, Cell, Button, TextArea, InputNumber } from '@nutui/nutui-react-taro'
+import { Cell as NutCell, Picker, Range, DatePicker, Button, TextArea, InputNumber } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
-import { TemperatureRecord, postTemperatureRecord, putTemperatureRecord } from '../../api'
+import { TemperatureRecord, postTemperatureRecord, putTemperatureRecord, deleteTemperatureRecord } from '../../api'
 import { useProfiles, useTemperatureList } from '../../api/hooks'
 
-export default function TemperRecord() {
+import { CheckProfileWrap } from '../../components/checkprofilewrap'
+import { FormCell as Cell, HeaderNecessary, HeaderOptional } from '../../components/formcell'
+
+export default function Index() {
+  return (
+    <CheckProfileWrap>
+      <TemperRecord />
+    </CheckProfileWrap>
+  )
+}
+
+export function TemperRecord() {
   const { data: profiles } = useProfiles()
 
   const MemberData = useMemo(
-    () => (profiles ? profiles.map((item) => ({ value: item.ID, text: item.relationship })) : []),
+    () => (profiles ? profiles.map((item) => ({ value: item.ID, text: item.fullName })) : []),
     [profiles]
   )
   const { data: allTemperatures, mutate: refreshTemperatureCache } = useTemperatureList()
 
-  useEffect(() => {
-    const router = Taro.getCurrentInstance().router
+  const router = useMemo(() => Taro.getCurrentInstance().router, [])
+  const withParams = router?.params?.id !== undefined
 
+  useEffect(() => {
     const fetchData = async () => {
       if (router && router.params && router.params.id !== undefined) {
         try {
@@ -43,7 +55,7 @@ export default function TemperRecord() {
       }
     }
     fetchData()
-  }, [MemberData, allTemperatures])
+  }, [MemberData, allTemperatures, router])
 
   const [tempRecord, setTempRecord] = useState<Partial<TemperatureRecord>>({
     date: new Date(Date.now()).toISOString().replace('T', ' ').slice(0, 16),
@@ -100,7 +112,6 @@ export default function TemperRecord() {
   }
 
   const handleSubmission = async () => {
-    const router = Taro.getCurrentInstance().router
     setTempRecord({
       ...tempRecord,
       date: dateDesc,
@@ -158,8 +169,18 @@ export default function TemperRecord() {
     Taro.showToast({ title: '重置成功', icon: 'success' })
   }
 
+  const handleDelete = async () => {
+    await deleteTemperatureRecord(Number(router?.params.id))
+    Taro.showToast({ title: '删除成功', icon: 'success' })
+    refreshTemperatureCache()
+    setTimeout(() => {
+      Taro.navigateBack()
+    }, 1000)
+  }
+
   return (
-    <>
+    <div className='px-4 flex flex-col gap-y-1'>
+      <HeaderNecessary />
       <Cell
         title='测温成员'
         description={idDesc}
@@ -169,7 +190,7 @@ export default function TemperRecord() {
       <Picker
         title='测温成员'
         // @ts-ignore
-        value={[tempRecord.profileId]}
+        value={withParams ? [tempRecord.profileId] : undefined}
         visible={idVisible}
         options={MemberData}
         onConfirm={(list, values) => confirmId(list, values)}
@@ -186,9 +207,9 @@ export default function TemperRecord() {
         onClose={() => setDateShow(false)}
         onConfirm={(options, values) => confirmDate(values, options)}
       />
-      <>
-        <Cell.Group divider={false} className='flex justify-center'>
-          <Cell className='flex-2 justify-center text-center'>
+      <Cell title='体温数值'>
+        <NutCell.Group divider={false} className='flex justify-center'>
+          <NutCell className='flex-2 justify-center text-center'>
             <InputNumber
               defaultValue={36.2}
               value={tempRecord.temperature}
@@ -197,8 +218,8 @@ export default function TemperRecord() {
               onChange={updateTemperature}
             />
             <Text id='temper_unit'>℃</Text>
-          </Cell>
-          <Cell className='flex-3 justify-center text-center'>
+          </NutCell>
+          <NutCell className='flex-3 justify-center text-center'>
             <Range
               className='justify-center'
               defaultValue={36.2}
@@ -224,22 +245,29 @@ export default function TemperRecord() {
                 }
               }}
             />
-          </Cell>
-        </Cell.Group>
-      </>
-      <Cell title='TextArea' className='col-span-full px-8' style={{ borderRadius: '8px' }}>
-        <TextArea placeholder='请输入备注' value={noteValue} autoSize onChange={(value) => onNoteChange(value)} />
+          </NutCell>
+        </NutCell.Group>
+      </Cell>
+      <HeaderOptional />
+      <Cell title='备注' className='col-span-full px-8' style={{ borderRadius: '8px' }}>
+        <TextArea className='rounded-md' placeholder='请输入备注' value={noteValue} autoSize onChange={(value) => onNoteChange(value)} />
       </Cell>
       <div className='col-span-full flex justify-center mt-4'>
         <Button className='submit_btm' formType='submit' type='primary' onClick={handleSubmission}>
           提交
         </Button>
         <div style={{ marginLeft: '16px' }}>
-          <Button className='reset_btm' formType='reset' onClick={handleReset}>
-            重置
-          </Button>
+          {withParams ? (
+            <Button type='danger' fill='outline' onClick={handleDelete}>
+              删除
+            </Button>
+          ) : (
+            <Button id='reset_btm' formType='reset' onClick={handleReset}>
+              重置
+            </Button>
+          )}
         </div>
       </div>
-    </>
+    </div>
   )
 }

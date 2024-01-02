@@ -39,8 +39,8 @@ interface IBigButton {
 }
 function BigButton({ text, src, onClick }: IBigButton) {
   return (
-    <Button className='grid-btn ' type='primary' onClick={onClick}>
-      <Image src={src} className='grid-btn-image' />
+    <Button className='grid-btn active:scale-105' type='primary' onClick={onClick}>
+      <Image src={src} className='active:scale-105 grid-btn-image' />
       <Text className='grid-btn-title'>{text}</Text>
     </Button>
   )
