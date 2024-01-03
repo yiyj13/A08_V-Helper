@@ -3,6 +3,7 @@ package handler
 import (
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"v-helper/internal/model"
 	"v-helper/internal/service"
@@ -100,6 +101,13 @@ func (h *ArticleHandler) HandleGetAllArticles(c *gin.Context) {
 		articles = articles[start:end]
 	}
 
+	inverted := c.Query("inverted")
+	if inverted != "false" {
+		// 默认按时间倒序排列
+		sort.Slice(articles, func(i, j int) bool {
+			return articles[i].CreatedAt.After(articles[j].CreatedAt)
+		})
+	}
 	c.JSON(http.StatusOK, articles)
 }
 

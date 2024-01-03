@@ -140,7 +140,7 @@ json样例：
 | 方法 | 路由 | 功能 |
 | ---- | ---- | ---- |
 | POST | /api/articles | 发布帖子 |
-| GET | /api/articles?size=10&page=1&isBind=true&vaccineId=1 | 获取全部帖子，可选参数：size(每页大小，默认获取全部)、page(页码，默认为1)、isBind(是否绑定疫苗，不绑定则归为其他类型，默认获取全部)、vaccineId(疫苗id，不指定则获取全部) |
+| GET | /api/articles?size=10&page=1&isBind=true&vaccineId=1&inverted=true | 获取全部帖子，可选参数：size(每页大小，默认获取全部)、page(页码，默认为1)、isBind(是否绑定疫苗，不绑定则归为其他类型，默认获取全部)、vaccineId(疫苗id，不指定则获取全部)、inverted(是否倒序，默认为true) |
 | GET | /api/articles/:id | 获取指定 id 的帖子 |
 | GET | /api/articles/user/:userID | 获取指定 userID 的用户发布的所有帖子 |
 | PUT | /api/articles/:id | 更新指定 id 的帖子 |
