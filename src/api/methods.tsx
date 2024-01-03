@@ -272,6 +272,12 @@ export async function postReply(articleId: number, content: string): Promise<Rep
   return response.data
 }
 
+export async function deleteReply(id: number): Promise<string> {
+  const response = await api.delete('/api/replys/' + id)
+  return response.data
+}
+
+
 export async function getMessage(id: number): Promise<Message> {
   const response = await api.get('/api/messages/' + id)
   return response.data

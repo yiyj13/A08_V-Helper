@@ -1,18 +1,28 @@
+import Taro, { useRouter } from '@tarojs/taro'
 import clsx from 'clsx'
 import useSWR from 'swr'
 import useSWRMutation from 'swr/mutation'
 
 import { useState } from 'react'
-import { useRouter } from '@tarojs/taro'
 import { Image } from '@tarojs/components'
 import { Comment, Follow, HeartFill1 } from '@nutui/icons-react-taro'
 import { Button, Skeleton } from '@nutui/nutui-react-taro'
 
 import { FocusableTextArea } from '../../../components/focusabletextarea'
 
-import { getArticleByID, getReplys, postReply, Reply, followArticle, unfollowArticle } from '../../../api'
-import { useVaccines, useUserFollowing, useUserPublic } from '../../../api/hooks'
+import {
+  getArticleByID,
+  getReplys,
+  postReply,
+  Reply,
+  followArticle,
+  unfollowArticle,
+  deleteReply,
+  deleteArticle,
+} from '../../../api'
+import { useVaccines, useUserFollowing, useUserPublic, useArticles } from '../../../api/hooks'
 import { getCreateTime } from '../../../utils'
+import { getUserID } from '../../../models'
 
 export default function Index() {
   const router = useRouter()
@@ -34,6 +44,21 @@ export default function Index() {
 
   const { data: author } = useUserPublic(Number(article?.userId))
 
+  const editable = article?.userId === getUserID()
+
+  const { mutate: mutateCommunity } = useArticles()
+
+  const handleDeleteArticle = async () => {
+    await deleteArticle(articleID)
+    mutateCommunity()
+    Taro.showToast({
+      title: '删除成功',
+      icon: 'success',
+      duration: 1000,
+    })
+    setTimeout(() => Taro.navigateBack(), 1000)
+  }
+
   if (isLoading || !article) return <Skeletons />
 
   return (
@@ -46,6 +71,11 @@ export default function Index() {
             <div className='text-sm text-gray-500'>{article && getCreateTime(article.CreatedAt)}</div>
           </div>
         </div>
+        {editable && (
+          <Button fill='none' size='small' type='danger' onClick={handleDeleteArticle}>
+            删除帖子
+          </Button>
+        )}
       </header>
 
       <section className='px-8 py-4 bg-white shadow-sm'>
@@ -74,7 +104,7 @@ export default function Index() {
 
       <div className='flex flex-col'>
         {hasReplies ? (
-          replies.map((comment, index) => <CommentBlock key={index} index={index} {...comment} />)
+          replies.map((comment, index) => <CommentBlock key={index} index={index} mutate={mutate} {...comment} />)
         ) : (
           <div className='flex justify-center items-center h-20 text-gray-500'>暂无回复</div>
         )}
@@ -94,8 +124,15 @@ const Skeletons = () => (
   </div>
 )
 
-const CommentBlock = (props: Partial<Reply> & { index: number }) => {
+const CommentBlock = (props: Partial<Reply> & { index: number; mutate: any }) => {
   const { data: author } = useUserPublic(Number(props.userId))
+  const editable = props.userId === Number(getUserID())
+  const handleDeleteClick = async () => {
+    if (!editable) return
+    await deleteReply(Number(props.ID))
+    props.mutate()
+  }
+
   return (
     <section className='mt-2 px-8 py-4 bg-white shadow-sm'>
       <div className='flex justify-between items-start'>
@@ -108,7 +145,14 @@ const CommentBlock = (props: Partial<Reply> & { index: number }) => {
         </div>
 
         {/* show which floor */}
-        <div className='text-sm text-brand'>#{props.index + 1}</div>
+        <div className='flex items-center gap-4'>
+          {editable && (
+            <a className='text-sm text-brand underline' onClick={handleDeleteClick}>
+              删除
+            </a>
+          )}
+          <div className='text-sm text-brand'>#{props.index + 1}</div>
+        </div>
       </div>
       <div className='mt-4 text-sm text-gray-500'>{props.content || 'placeholder'}</div>
     </section>
