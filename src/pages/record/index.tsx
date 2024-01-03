@@ -218,7 +218,7 @@ function VaccineRecord() {
   const [remindSwitch, setRemindSwitch] = useState(false)
   const [remindVisible, setRemindVisible] = useState(false)
   const [remindValue, setRemindValue] = useState('1')
-  const [remindUnit, setRemindUnit] = useState('单位')
+  const [remindUnit, setRemindUnit] = useState('日')
   const [unitVisible, setUnitVisible] = useState(false)
   const itemList = [
     {
