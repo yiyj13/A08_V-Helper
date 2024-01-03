@@ -6,8 +6,8 @@ import clsx from 'clsx'
 import Taro from '@tarojs/taro'
 
 import ComboBox from '../../components/combobox'
-import TextAreaCustom from './maintextarea'
-import InputCustom from './titleinput'
+import TextAreaCustom from '../../components/maintextarea'
+import InputCustom from '../../components/titleinput'
 
 import { postArticle, useVaccines } from '../../api'
 

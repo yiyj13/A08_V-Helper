@@ -1,19 +1,19 @@
 import Taro from '@tarojs/taro'
 import { ReactNode, useMemo } from 'react'
 import clsx from 'clsx'
-import { PageContainer } from '@tarojs/components'
-import { Date as DateIcon, Clock, Checked, Order, Edit, Del2 } from '@nutui/icons-react-taro'
+import { Image, PageContainer, ScrollView } from '@tarojs/components'
+import { Date as DateIcon, Clock, Checked, Order, Edit, Del2, Link as ImageIcon } from '@nutui/icons-react-taro'
 
 import InjectSVG from '../../assets/home/injection.svg'
 
 import { useRecordPopup } from '../../models'
 import { useProfiles, useVaccineRecordList, deleteVaccineRecord, putVaccineRecord, useVaccines } from '../../api'
+import { dayjs } from '../../utils'
 
 export default function RecordPopup() {
   const recordID = useRecordPopup.use.recordId()
   const isShow = useRecordPopup.use.isShow()
   const hide = useRecordPopup.use.hide()
-  const clear = useRecordPopup.use.clear()
 
   const { data: allRecords, mutate: refresh } = useVaccineRecordList()
 
@@ -33,7 +33,7 @@ export default function RecordPopup() {
 
   const handleComplete = async () => {
     if (!recordID || record?.isCompleted) return
-    await putVaccineRecord(recordID, { isCompleted: true })
+    await putVaccineRecord(recordID, { isCompleted: true, vaccinationDate: dayjs().format('YYYY-MM-DD') })
     refresh()
   }
 
@@ -47,40 +47,62 @@ export default function RecordPopup() {
       show={isShow}
       overlayStyle='background-color:rgba(225,225,225,0);backdrop-filter:blur(2px);'
       position='bottom'
-      onLeave={clear}
+      onLeave={hide}
     >
-      <div className='flex flex-col justify-center px-4 pt-2 pb-8'>
-        <Nav />
+      <ScrollView scrollY className='h-screen'>
+        <div className='flex flex-col justify-center px-4 pt-2 pb-8'>
+          <Nav />
 
-        <Header profileId={record?.profileId} vaccineName={id2name(record?.vaccineId)} />
-        <GrayCard text={record?.vaccinationType || '类型'} />
+          <Header profileId={record?.profileId} vaccineName={id2name(record?.vaccineId)} />
+          <GrayCard text={record?.vaccinationType || '类型'} />
 
-        <DividerLine />
+          <DividerLine />
 
-        <SubHeader icon={<DateIcon />} text='日期' />
-        <div className='flex justify-between gap-x-2'>
-          <GrayCard title='接种日期' text={record?.vaccinationDate} />
-          <GrayCard title='失效日期' text={record?.nextVaccinationDate} />
+          <SubHeader icon={<DateIcon />} text='日期' />
+          <div className='flex justify-between gap-x-2'>
+            <GrayCard title='接种日期' text={record?.vaccinationDate} />
+            <GrayCard title='失效日期' text={record?.nextVaccinationDate} />
+          </div>
+          <CompeleteCard onClick={handleComplete} isCompleted={record?.isCompleted} />
+
+          <DividerLine />
+
+          {record?.isCompleted === false && (
+            <>
+              <SubHeader icon={<Clock />} text='提醒' />
+              <GrayCard title='提前提醒' text={record?.reminder ? '失效' + record.remindBefore + '前' : '未设置'} />
+              <DividerLine />
+            </>
+          )}
+
+          <SubHeader icon={<Order />} text='备注' />
+          <GrayCard text={record?.note || '暂无备注'} />
+
+          <DividerLine />
+
+          {record?.voucher && record?.voucher !== '' && (
+            <>
+              <SubHeader icon={<ImageIcon />} text='凭证' />
+              <GrayCard
+                node={
+                  <Image
+                    src={record.voucher}
+                    mode='aspectFit'
+                    className='w-full h-32'
+                    onClick={() => Taro.previewImage({ urls: [record.voucher] })}
+                  />
+                }
+              />
+              <DividerLine />
+            </>
+          )}
+
+          <div className='flex justify-between gap-x-2'>
+            <GrayCardAction icon={<Edit size={16} />} text='编辑' onClick={handleEdit} />
+            <GrayCardAction icon={<Del2 size={16} />} text='删除' onClick={handleDelete} />
+          </div>
         </div>
-        <CompeleteCard onClick={handleComplete} isCompleted={record?.isCompleted} />
-
-        <DividerLine />
-
-        <SubHeader icon={<Clock />} text='提醒' />
-        <GrayCard title='提前提醒' text={record?.reminder ? '失效' + record.remindBefore + '前' : '未设置'} />
-
-        <DividerLine />
-
-        <SubHeader icon={<Order />} text='备注' />
-        <GrayCard text={record?.note || '暂无备注'} />
-
-        <DividerLine />
-
-        <div className='flex justify-between gap-x-2'>
-          <GrayCardAction icon={<Edit size={16} />} text='编辑' onClick={handleEdit} />
-          <GrayCardAction icon={<Del2 size={16} />} text='删除' onClick={handleDelete} />
-        </div>
-      </div>
+      </ScrollView>
     </PageContainer>
   )
 }
@@ -126,11 +148,12 @@ function SubHeader(props: { icon?: ReactNode; text?: string }) {
   )
 }
 
-function GrayCard(props: { title?: string; text?: string }) {
+function GrayCard(props: { title?: string; text?: string; node?: ReactNode }) {
   return (
     <div className='flex flex-col w-full bg-gray-100 rounded-2xl mt-2 px-4 py-2'>
       <text className='text-sm text-gray-500'>{props.title}</text>
       <text className='self-center text-base text-black font-bold font-sans'>{props.text}</text>
+      {props.node}
     </div>
   )
 }

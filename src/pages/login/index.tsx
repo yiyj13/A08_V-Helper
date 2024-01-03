@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import useSWRMutation from 'swr/mutation'
-import { useUserStore } from '../../models'
+import { useTabStore, useUserStore } from '../../models'
 import { Login } from '../../api/methods'
 
 export default function Index() {
@@ -8,7 +8,12 @@ export default function Index() {
 
   const { error, trigger, isMutating } = useSWRMutation('getToken', Login)
 
-  const handleLogin = () => trigger().then((res) => setUserInfo(res))
+  const setTabIndex = useTabStore.use.setTabIndex()
+
+  const handleLogin = () => trigger().then((res) => {
+    setTabIndex(0)
+    setUserInfo(res)
+  })
 
   return (
     <>

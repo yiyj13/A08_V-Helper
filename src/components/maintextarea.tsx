@@ -1,4 +1,4 @@
-import { FocusableTextArea, FocusableTextAreaProps } from '../../components/focusabletextarea'
+import { FocusableTextArea, FocusableTextAreaProps } from './focusabletextarea'
 
 type Props = FocusableTextAreaProps & {
   label?: string

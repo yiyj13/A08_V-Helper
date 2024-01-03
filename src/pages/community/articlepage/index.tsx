@@ -4,13 +4,14 @@ import useSWRMutation from 'swr/mutation'
 
 import { useState } from 'react'
 import { useRouter } from '@tarojs/taro'
+import { Image } from '@tarojs/components'
 import { Comment, Follow, HeartFill1 } from '@nutui/icons-react-taro'
 import { Button, Skeleton } from '@nutui/nutui-react-taro'
 
 import { FocusableTextArea } from '../../../components/focusabletextarea'
 
 import { getArticleByID, getReplys, postReply, Reply, followArticle, unfollowArticle } from '../../../api'
-import { useVaccines, useUserFollowing } from '../../../api/hooks'
+import { useVaccines, useUserFollowing, useUserPublic } from '../../../api/hooks'
 import { getCreateTime } from '../../../utils'
 
 export default function Index() {
@@ -31,15 +32,17 @@ export default function Index() {
 
   const { id2name } = useVaccines()
 
+  const { data: author } = useUserPublic(Number(article?.userId))
+
   if (isLoading || !article) return <Skeletons />
 
   return (
     <div className='pb-20'>
       <header className='flex justify-between items-center px-8 py-4 bg-white shadow-sm'>
         <div className='flex items-center gap-4'>
-          <img className='w-12 h-12 rounded-full' src='https://avatars.githubusercontent.com/u/69092274?v=4' />
+          <Image className='w-12 h-12 rounded-full bg-slate-100' src={author?.avatar ?? ''} mode='aspectFill' />
           <div>
-            <div className='text-xl font-bold'>{article?.userName || 'Username'}</div>
+            <div className='text-xl font-bold'>{author?.userName || 'Username'}</div>
             <div className='text-sm text-gray-500'>{article && getCreateTime(article.CreatedAt)}</div>
           </div>
         </div>
@@ -56,8 +59,8 @@ export default function Index() {
       <section className='px-8 py-4 bg-white shadow-sm flex justify-between'>
         <div className='flex items-center gap-4'>
           {/* <div className='flex items-center gap-1'> */}
-            {/* <Follow size={8}></Follow> */}
-            {/* <dd className='text-sm text-gray-500'>0</dd> */}
+          {/* <Follow size={8}></Follow> */}
+          {/* <dd className='text-sm text-gray-500'>0</dd> */}
           {/* </div> */}
 
           <div className='flex items-center gap-1'>
@@ -91,23 +94,26 @@ const Skeletons = () => (
   </div>
 )
 
-const CommentBlock = (props: Partial<Reply> & { index: number }) => (
-  <section className='mt-2 px-8 py-4 bg-white shadow-sm'>
-    <div className='flex justify-between items-start'>
-      <div className='flex items-center gap-4'>
-        <img className='w-12 h-12 rounded-full' src='https://avatars.githubusercontent.com/u/69092274?v=4' />
-        <div className='flex flex-col'>
-          <div className='text-sm font-bold'>{props.userName || 'Username'}</div>
-          <div className='text-sm text-gray-500'>{getCreateTime(props.UpdatedAt)}</div>
+const CommentBlock = (props: Partial<Reply> & { index: number }) => {
+  const { data: author } = useUserPublic(Number(props.userId))
+  return (
+    <section className='mt-2 px-8 py-4 bg-white shadow-sm'>
+      <div className='flex justify-between items-start'>
+        <div className='flex items-center gap-4'>
+          <Image className='w-12 h-12 rounded-full bg-slate-100' src={author?.avatar ?? ''} mode='aspectFill' />
+          <div className='flex flex-col'>
+            <div className='text-sm font-bold'>{author?.userName ?? ''}</div>
+            <div className='text-sm text-gray-500'>{getCreateTime(props.UpdatedAt)}</div>
+          </div>
         </div>
-      </div>
 
-      {/* show which floor */}
-      <div className='text-sm text-brand'>#{props.index + 1}</div>
-    </div>
-    <div className='mt-4 text-sm text-gray-500'>{props.content || 'placeholder'}</div>
-  </section>
-)
+        {/* show which floor */}
+        <div className='text-sm text-brand'>#{props.index + 1}</div>
+      </div>
+      <div className='mt-4 text-sm text-gray-500'>{props.content || 'placeholder'}</div>
+    </section>
+  )
+}
 
 const BottomBar = (props: { article_id: number; onSubmit: any }) => {
   const [replyContent, setContent] = useState('')

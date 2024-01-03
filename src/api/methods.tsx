@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro'
 import api from './http'
-import { getUserID } from '../models'
+import { getUserID, getOpenID } from '../models'
 
 export type GinBase = {
   ID: number
@@ -11,6 +11,7 @@ export type GinBase = {
 
 export type Userinfo = GinBase & {
   openId: string
+  token: string
   userName: string
   avatar: string
   followingArticles: Article[]
@@ -18,6 +19,8 @@ export type Userinfo = GinBase & {
 }
 
 export type UserFollowing = Pick<Userinfo, 'followingArticles' | 'followingVaccines'>
+
+export type UserPublic = Pick<Userinfo, 'userName' | 'avatar'>
 
 export type Vaccine = GinBase & {
   name: string
@@ -82,10 +85,27 @@ export type Profile = GinBase & {
   note: string // 备注
 }
 
+export type Message = GinBase & {
+  openId: string
+  page: string
+  vaxName: string
+  comment: string
+  vaxLocation: string
+  vaxNum: number
+  realTime: boolean
+  sendTime: string // format: YYYY-MM-DD HH:mm
+  sent: false
+}
+
 export async function Login(): Promise<Userinfo> {
   const responseLogin = await Taro.login()
   const response = await api.get('/api/users/login', { code: responseLogin.code })
   return response.data as Userinfo
+}
+
+export async function getUserPublic(id: number): Promise<UserPublic> {
+  const response = await api.get('/api/users/public/' + id)
+  return response.data as UserPublic
 }
 
 export async function getUserInfo(): Promise<Userinfo> {
@@ -94,7 +114,10 @@ export async function getUserInfo(): Promise<Userinfo> {
 }
 
 export async function updateUserInfo(data: Partial<Userinfo>): Promise<Userinfo> {
-  const response = await api.put('/api/users/' + getUserID(), data)
+  const response = await api.put('/api/users/' + getUserID(), {
+    ...data,
+    ID: getUserID(),
+  })
   return response.data
 }
 
@@ -199,9 +222,7 @@ export async function deleteTemperatureRecord(id: number): Promise<string> {
   return response.data
 }
 
-export async function getTopArticlesWithVaccine(
-  vaccineid: number
-): Promise<Article[]> {
+export async function getTopArticlesWithVaccine(vaccineid: number): Promise<Article[]> {
   const response = await api.get('/api/articles', {
     page: 1,
     size: 2,
@@ -248,5 +269,21 @@ export async function getReplys(articleId: number): Promise<Reply[]> {
 
 export async function postReply(articleId: number, content: string): Promise<Reply> {
   const response = await api.post('/api/replys', { articleId, content })
+  return response.data
+}
+
+export async function getMessage(id: number): Promise<Message> {
+  const response = await api.get('/api/messages/' + id)
+  return response.data
+}
+
+export async function postMessage(props: Partial<Message>): Promise<string> {
+  const params: Partial<Message> = {
+    openId: String(getOpenID()),
+    page: 'pages/index',
+    realTime: false,
+    ...props,
+  }
+  const response = await api.post('/api/messages', params)
   return response.data
 }

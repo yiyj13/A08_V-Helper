@@ -1,4 +1,4 @@
-import { FocusableInput, FocusableInputProps } from '../../components/focusableinput'
+import { FocusableInput, FocusableInputProps } from './focusableinput'
 
 type Props = FocusableInputProps & {
   label?: string

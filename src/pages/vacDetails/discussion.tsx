@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import useSWR from 'swr'
 
 import { getTopArticlesWithVaccine } from '../../api'
-import { ArticlePreview } from '../community/ArticlePreview'
+import { ArticlePreview } from '../../components/articlepreview'
 import { useCommunityStore, useTabStore } from '../../models'
 
 export default function DiscussionBlock(props: { vaccine_id: number }) {
