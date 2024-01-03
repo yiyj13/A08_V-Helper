@@ -9,7 +9,7 @@ import (
 
 func TestEncryptionAndDecryption(t *testing.T) {
 	cryptoKey = []byte("12345678901234567890123456789012")
-	originalText := "Hello, World!"
+	originalText := "通信"
 
 	encryptedText, err := Encrypt(originalText)
 	assert.Nil(t, err, "Encryption should not produce an error")

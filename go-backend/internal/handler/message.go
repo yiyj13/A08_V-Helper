@@ -197,6 +197,12 @@ func (h *MessageHandler) HandleAddMessage(c *gin.Context) {
 		return
 	}
 
+	message.OpenID, err = h.MessageService.GetOpenIDByUserID(message.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	if message.RealTime {
 		// 实时提醒
 		if err := SendTemplateMessage("", message.OpenID, "", message.Page, message.VaxName, message.Comment, message.VaxLocation, message.VaxNum); err != nil {
@@ -434,7 +440,7 @@ func (h *MessageHandler) HandleAddMessageSubscription(c *gin.Context) {
 
 	for _, user := range users {
 		if err := SendTemplateMessageSubscription("", user.OpenID, "", message.Page, message.VaxName, message.VaxLocation); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			log.Println("failed to send template message: ", err)
 			return
 		}
 	}

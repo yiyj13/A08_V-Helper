@@ -74,3 +74,12 @@ func (s *MessageService) GetUsersFollowingVaccine(vaccineID uint) ([]model.User,
 
 	return users, nil
 }
+
+// GetOpenIDByUserID 根据用户id获取openid
+func (s *MessageService) GetOpenIDByUserID(userID uint) (string, error) {
+	var user model.User
+	if err := s.db.First(&user, userID).Error; err != nil {
+		return "", err
+	}
+	return user.OpenID, nil
+}

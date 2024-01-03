@@ -9,7 +9,7 @@ import (
 // 增加和删除关注的疫苗和文章时，使用 Association 方法
 type User struct {
 	gorm.Model                  //gorm.Model 包含了 CreatedAt、UpdatedAt、DeletedAt（用于软删除）以及 ID 字段
-	OpenID            string    `gorm:"unique" json:"openId"`
+	OpenID            string    `gorm:"unique" json:"-"` // 微信用户唯一标识符，不在JSON中显示
 	UserName          string    `json:"userName"`
 	Password          string    `json:"-"` // 存储哈希值，JSON中忽略 -> 使用微信API，不需要密码
 	Email             string    `json:"email"`
@@ -98,8 +98,9 @@ type Reply struct {
 // Message 消息模型
 type Message struct {
 	gorm.Model
-	OpenID      string `json:"openId"`
-	Page        string `json:"page"` // 消息跳转页面，例如"pages/welcome/welcome"
+	OpenID      string `json:"-"`      // 微信用户唯一标识符，不在JSON中显示
+	UserID      uint   `json:"userId"` // 用户ID，用于查询用户的OpenID
+	Page        string `json:"page"`   // 消息跳转页面，例如"pages/welcome/welcome"
 	VaxName     string `json:"vaxName"`
 	Comment     string `json:"comment"`
 	VaxLocation string `json:"vaxLocation"`
@@ -109,11 +110,12 @@ type Message struct {
 	Sent        bool   `json:"sent"`     // 是否已发送
 }
 
-// MessageSubscription 订阅消息模型
+// MessageSubscription 订阅疫苗消息，后续用来存储
 type MessageSubscription struct {
 	gorm.Model
-	OpenID      string `json:"openId"`
-	Page        string `json:"page"` // 消息跳转页面，例如"pages/welcome/welcome"
+	OpenID      string `json:"-"`      // 微信用户唯一标识符，不在JSON中显示
+	UserID      uint   `json:"userId"` // 用户ID，用于查询用户的OpenID
+	Page        string `json:"page"`   // 消息跳转页面，例如"pages/welcome/welcome"
 	VaxName     string `json:"vaxName"`
 	VaxLocation string `json:"vaxLocation"`
 }
