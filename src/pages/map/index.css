@@ -9,6 +9,8 @@
 
 .location-button {
   position: absolute;
-  bottom: 10px;
+  /* top: 10px; */
+  /* left: 10px; */
+  bottom: 20px;
   right: 10px;
 }

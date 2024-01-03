@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import Taro from '@tarojs/taro'
 
-import { Map as TaroMap, CoverView } from '@tarojs/components'
+import { Map as TaroMap, View } from '@tarojs/components'
 import { Loading, Cell, Menu } from '@nutui/nutui-react-taro'
 import { MoreS } from '@nutui/icons-react-taro'
 import LocationIconPath from "../../assets/map/position.png"
@@ -103,28 +103,23 @@ export default function MapPage() {
             }
           }}
         >
-          <CoverView className='location-button'>
-            <button
+          <View className='location-button'>
+            <img
+              src={GPSPositionIcon}
               style={{
-                width: 50,
-                height: 50,
+                width: 30,
+                height: 30,
                 borderRadius: 5,
+                backgroundColor: 'white',
+                padding: 10,
+                zIndex: 100
               }}
               onClick={() => {
                 setCentralLatitude(myLatitude)
                 setCentralLongitude(myLongitude)
               }}
-            >
-              <img
-                src={GPSPositionIcon}
-                style={{
-                  margin: 10,
-                  width: 30,
-                  height: 30,
-                }}
-              />
-            </button>
-          </CoverView>
+            ></img>
+          </View>
         </TaroMap>
       </div>
       <div className='flex flex-row'>
