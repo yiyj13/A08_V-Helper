@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react'
 import Taro from '@tarojs/taro'
 
 import { Map as TaroMap, View } from '@tarojs/components'
-import { useEffect } from 'react'
-import { Map as TaroMap, CoverView } from '@tarojs/components'
 import { Loading, Cell, Menu } from '@nutui/nutui-react-taro'
 import { MoreS } from '@nutui/icons-react-taro'
 import LocationIconPath from "../../assets/map/position.png"
