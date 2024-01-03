@@ -450,7 +450,7 @@ function VaccineRecord() {
   }
 
   return (
-    <div className='px-4 flex flex-col gap-y-1'>
+    <div className='px-4 flex flex-col gap-y-1 animate-delayed-show'>
       <HeaderNecessary />
       <Cell
         title='接种人'

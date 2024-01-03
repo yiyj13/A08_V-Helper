@@ -246,7 +246,7 @@ export default function AddMember() {
   }
 
   return (
-    <div className='px-4 flex flex-col gap-y-1'>
+    <div className='px-4 flex flex-col gap-y-1 animate-delayed-show'>
       <HeaderNecessary />
 
       <Cell title='成员姓名' style={{ borderRadius: '8px' }}>

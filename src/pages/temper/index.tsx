@@ -179,7 +179,7 @@ export function TemperRecord() {
   }
 
   return (
-    <div className='px-4 flex flex-col gap-y-1'>
+    <div className='px-4 flex flex-col gap-y-1 animate-delayed-show'>
       <HeaderNecessary />
       <Cell
         title='测温成员'

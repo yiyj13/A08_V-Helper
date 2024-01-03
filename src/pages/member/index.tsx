@@ -1,5 +1,6 @@
 import { Button } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
+import { Image } from '@tarojs/components'
 
 import { useProfiles } from '../../api'
 
@@ -62,7 +63,11 @@ const ItemRender = ({ data }: { data: Profile }) => {
   return (
     <li className='py-5 flex items-start justify-between'>
       <div className='flex gap-3 items-center'>
-        <img src={data.avatar} className='flex-none w-12 h-12 rounded-full' />
+        <Image
+          src={data?.avatar ?? ''}
+          className='h-12 w-12 animate-fade-in rounded-full object-cover bg-slate-100 shadow-sm'
+          mode='aspectFill'
+        />
         <div className='flex flex-col'>
           <span className='block text-base text-brand font-semibold'>{data.relationship}</span>
           <span className='block text-lg text-gray-700 font-semibold'>{data.fullName}</span>

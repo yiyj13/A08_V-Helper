@@ -58,7 +58,7 @@ export default function Index() {
             label='正文'
             value={content}
             maxlength={150}
-            onInput={(val) => setContent(val.detail.value.substr(0, 150))}
+            onInput={(val) => setContent(val.detail.value.substring(0, 150))}
           />
         </div>
         <Divider />

@@ -65,7 +65,12 @@ export default function Index() {
     <div className='pb-20'>
       <header className='flex justify-between items-center px-8 py-4 bg-white shadow-sm'>
         <div className='flex items-center gap-4'>
-          <Image className='w-12 h-12 rounded-full bg-slate-100' src={author?.avatar ?? ''} mode='aspectFill' />
+          <Image
+            src={author?.avatar ?? ''}
+            className='h-12 w-12 animate-fade-in rounded-full object-cover bg-slate-100 shadow-sm'
+            mode='aspectFill'
+            lazyLoad
+          />
           <div>
             <div className='text-xl font-bold'>{author?.userName || 'Username'}</div>
             <div className='text-sm text-gray-500'>{article && getCreateTime(article.CreatedAt)}</div>
@@ -137,7 +142,12 @@ const CommentBlock = (props: Partial<Reply> & { index: number; mutate: any }) =>
     <section className='mt-2 px-8 py-4 bg-white shadow-sm'>
       <div className='flex justify-between items-start'>
         <div className='flex items-center gap-4'>
-          <Image className='w-12 h-12 rounded-full bg-slate-100' src={author?.avatar ?? ''} mode='aspectFill' />
+          <Image
+            src={author?.avatar ?? ''}
+            className='h-12 w-12 animate-fade-in rounded-full object-cover bg-slate-100 shadow-sm'
+            mode='aspectFill'
+            lazyLoad
+          />
           <div className='flex flex-col'>
             <div className='text-sm font-bold'>{author?.userName ?? ''}</div>
             <div className='text-sm text-gray-500'>{getCreateTime(props.UpdatedAt)}</div>
