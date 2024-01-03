@@ -268,7 +268,7 @@ export async function getReplys(articleId: number): Promise<Reply[]> {
 }
 
 export async function postReply(articleId: number, content: string): Promise<Reply> {
-  const response = await api.post('/api/replys', { articleId, content })
+  const response = await api.post('/api/replys', { articleId, content, userId: getUserID() })
   return response.data
 }
 
