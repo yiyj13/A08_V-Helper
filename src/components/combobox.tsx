@@ -27,7 +27,7 @@ const ComboBox = ({ title, options, onSelect, defaultValue }: ComboBoxProps) => 
   return (
     <View className='relative' id='comboBox'>
       <View
-        className={clsx('border text-gray-500 bg-white border-gray-300 p-2 rounded-md transition-all', {
+        className={clsx('border text-gray-500 bg-white border-gray-100 p-2 rounded-md transition-all', {
           'ring-2 ring-brand': isOpen,
         })}
         onClick={toggleComboBox}
