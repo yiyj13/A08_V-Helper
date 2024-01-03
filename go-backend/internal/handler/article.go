@@ -85,6 +85,13 @@ func (h *ArticleHandler) HandleGetAllArticles(c *gin.Context) {
 		}
 	}
 	// log.Println("articles fetched successfully: ", articles)
+	inverted := c.Query("inverted")
+	if inverted != "false" {
+		// 默认按时间倒序排列
+		sort.Slice(articles, func(i, j int) bool {
+			return articles[i].CreatedAt.After(articles[j].CreatedAt)
+		})
+	}
 
 	// 分页
 	if size != 0 {
@@ -101,13 +108,6 @@ func (h *ArticleHandler) HandleGetAllArticles(c *gin.Context) {
 		articles = articles[start:end]
 	}
 
-	inverted := c.Query("inverted")
-	if inverted != "false" {
-		// 默认按时间倒序排列
-		sort.Slice(articles, func(i, j int) bool {
-			return articles[i].CreatedAt.After(articles[j].CreatedAt)
-		})
-	}
 	c.JSON(http.StatusOK, articles)
 }
 
