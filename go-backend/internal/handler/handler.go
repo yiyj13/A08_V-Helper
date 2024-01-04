@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"reflect"
 	"strings"
 	"v-helper/internal/model"
 	"v-helper/internal/service"
@@ -179,16 +180,19 @@ func DecryptionAndBindingMiddleware(targetType interface{}) gin.HandlerFunc {
 			return
 		}
 
-		if err := json.Unmarshal([]byte(decryptedData), targetType); err != nil {
+		// 创建一个新的实例
+		newTarget := reflect.New(reflect.TypeOf(targetType).Elem()).Interface()
+
+		if err := json.Unmarshal([]byte(decryptedData), newTarget); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid data format"})
 			c.Abort()
 			return
 		}
 		log.Println("encryptedRequest:", encryptedRequest)
 		log.Println("decryptedData:", decryptedData)
-		log.Println("parsedData:", targetType)
+		log.Println("parsedData:", newTarget)
 
-		c.Set("parsedData", targetType)
+		c.Set("parsedData", newTarget)
 		c.Next()
 	}
 }
