@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
-	"encoding/hex"
+	"encoding/base64"
 	"os"
 )
 
@@ -22,7 +22,7 @@ func Encrypt(plaintext string) (string, error) {
 	mode := cipher.NewCBCEncrypter(block, cryptoKey[:block.BlockSize()])
 	mode.CryptBlocks(ciphertext, plaintextBytes)
 
-	return hex.EncodeToString(ciphertext), nil
+	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
 // PKCS7Padding 填充
@@ -39,7 +39,7 @@ func Decrypt(ciphertext string) (string, error) {
 		return "", err
 	}
 
-	decodedCiphertext, err := hex.DecodeString(ciphertext)
+	decodedCiphertext, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
 		return "", err
 	}

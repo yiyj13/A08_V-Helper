@@ -1,13 +1,11 @@
 package handler
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
 	"v-helper/internal/model"
 	"v-helper/internal/service"
-	"v-helper/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,31 +19,14 @@ func NewProfileHandler(profileService *service.ProfileService) *ProfileHandler {
 }
 
 func (h *ProfileHandler) HandleCreateProfile(c *gin.Context) {
-	// 读取加密的字符串数据
-	var encryptedData struct {
-		Data string `json:"data"`
-	}
-	if err := c.ShouldBindJSON(&encryptedData); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
-		return
-	}
-
-	// 解密数据
-	decryptedData, err := utils.Decrypt(encryptedData.Data)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decrypt data"})
-		return
-	}
-
-	// 解析JSON到Profile结构体
-	var profile model.Profile
-	if err := json.Unmarshal([]byte(decryptedData), &profile); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid profile data"})
+	profile, exists := c.Get("parsedData")
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Profile data not found"})
 		return
 	}
 
 	// 创建Profile
-	if err := h.profileService.CreateProfile(profile); err != nil {
+	if err := h.profileService.CreateProfile(profile.(model.Profile)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

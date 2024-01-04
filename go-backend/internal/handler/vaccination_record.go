@@ -18,13 +18,13 @@ func NewVaccinationRecordHandler(vaccinationRecordService *service.VaccinationRe
 }
 
 func (h *VaccinationRecordHandler) HandleCreateVaccinationRecord(c *gin.Context) {
-	var record model.VaccinationRecord
-	if err := c.BindJSON(&record); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	record, exists := c.Get("parsedData")
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "record data not found"})
 		return
 	}
 
-	if err := h.vaccinationRecordService.CreateVaccinationRecord(record); err != nil {
+	if err := h.vaccinationRecordService.CreateVaccinationRecord(record.(model.VaccinationRecord)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -129,13 +129,13 @@ func (h *VaccinationRecordHandler) HandleUpdateVaccinationRecordByID(c *gin.Cont
 		return
 	}
 
-	var record model.VaccinationRecord
-	if err := c.BindJSON(&record); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	record, exists := c.Get("parsedData")
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "record data not found"})
 		return
 	}
 
-	if err := h.vaccinationRecordService.UpdateVaccinationRecordByID(uint(id), record); err != nil {
+	if err := h.vaccinationRecordService.UpdateVaccinationRecordByID(uint(id), record.(model.VaccinationRecord)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
