@@ -3,7 +3,6 @@ import { immer } from 'zustand/middleware/immer'
 import { createJSONStorage, persist, StateStorage } from 'zustand/middleware'
 import { setStorageSync, getStorageSync, removeStorageSync } from '@tarojs/taro'
 import createSelectors from './selectors'
-import { StorageSceneKey } from '../utils'
 import type { Userinfo } from '../api'
 
 interface State {
@@ -44,7 +43,7 @@ const userStore = create<State & Action>()(
       {
         // NOTE: the name here is the unique key of the current Zustand module when caching,
         // and each Zustand module that needs to be cached must be assigned a unique key
-        name: StorageSceneKey.USER,
+        name: "storage-user",
         storage: createJSONStorage(() => userStorage),
       }
     )

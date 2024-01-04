@@ -33,7 +33,7 @@ export default function RecordPopup() {
 
   const handleComplete = async () => {
     if (!recordID || record?.isCompleted) return
-    await putVaccineRecord(recordID, { isCompleted: true, vaccinationDate: dayjs().format('YYYY-MM-DD') })
+    await putVaccineRecord(recordID, { ...record, isCompleted: true, vaccinationDate: dayjs().format('YYYY-MM-DD') })
     refresh()
   }
 
