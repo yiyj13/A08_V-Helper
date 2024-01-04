@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"v-helper/internal/model"
@@ -23,6 +24,7 @@ func (h *VaccinationRecordHandler) HandleCreateVaccinationRecord(c *gin.Context)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "record data not found"})
 		return
 	}
+	log.Println("trying to create record: ", record)
 
 	if err := h.vaccinationRecordService.CreateVaccinationRecord(*record.(*model.VaccinationRecord)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -135,6 +137,7 @@ func (h *VaccinationRecordHandler) HandleUpdateVaccinationRecordByID(c *gin.Cont
 		return
 	}
 
+	log.Println("trying to update record: ", record)
 	if err := h.vaccinationRecordService.UpdateVaccinationRecordByID(uint(id), *record.(*model.VaccinationRecord)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

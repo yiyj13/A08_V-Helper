@@ -20,6 +20,7 @@ func NewProfileHandler(profileService *service.ProfileService) *ProfileHandler {
 
 func (h *ProfileHandler) HandleCreateProfile(c *gin.Context) {
 	profile, exists := c.Get("parsedData")
+	log.Println("trying to create profile: ", profile)
 	if !exists {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Profile data not found"})
 		return
@@ -31,7 +32,6 @@ func (h *ProfileHandler) HandleCreateProfile(c *gin.Context) {
 		return
 	}
 
-	log.Println("Profile created successfully: ", profile)
 	c.JSON(http.StatusOK, gin.H{"message": "profile created successfully"})
 }
 
@@ -72,12 +72,12 @@ func (h *ProfileHandler) HandleUpdateProfileByID(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Profile data not found"})
 		return
 	}
+	log.Println("trying to update profile: ", profile)
 
 	if err := h.profileService.UpdateProfileByID(uint(id), *profile.(*model.Profile)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	log.Println("profile updated successfully: ", profile)
 	c.JSON(http.StatusOK, gin.H{"message": "profile updated successfully"})
 }
 
