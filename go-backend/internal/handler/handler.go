@@ -35,6 +35,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg config.Config) {
 
 	// 创建需要JWT认证的路由组
 	authGroup := router.Group("/")
+	// disable auth for tests
 	authGroup.Use(JWTAuthMiddleware())
 	{
 		authGroup.POST("/users", userHandler.HandleCreateUser)
@@ -108,10 +109,8 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg config.Config) {
 	router.POST("/messagesSubscribe", messageHandler.HandleAddMessageSubscription)
 
 	// 根据疫苗寻找诊所
-	// tzh TODO 15周展示之后 重写
 	clinicService := service.NewClinicService(db)
 	clinicHandler := NewClinicHandler(clinicService)
-	router.GET("/clinics/vaccine/:vaccineID", clinicHandler.HandleGetClinicsByVaccineID)
 	router.GET("/clinics/vaccineName/:vaccineName", clinicHandler.HandleGetClinicsByVaccineName)
 	router.GET("/clinics/clinicName/:clinicName", clinicHandler.HandleGetClinicsByClinicName)
 	router.POST("/clinics", clinicHandler.HandleCreateClinic)
