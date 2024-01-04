@@ -24,7 +24,7 @@ func (h *VaccinationRecordHandler) HandleCreateVaccinationRecord(c *gin.Context)
 		return
 	}
 
-	if err := h.vaccinationRecordService.CreateVaccinationRecord(record.(model.VaccinationRecord)); err != nil {
+	if err := h.vaccinationRecordService.CreateVaccinationRecord(*record.(*model.VaccinationRecord)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -135,7 +135,7 @@ func (h *VaccinationRecordHandler) HandleUpdateVaccinationRecordByID(c *gin.Cont
 		return
 	}
 
-	if err := h.vaccinationRecordService.UpdateVaccinationRecordByID(uint(id), record.(model.VaccinationRecord)); err != nil {
+	if err := h.vaccinationRecordService.UpdateVaccinationRecordByID(uint(id), *record.(*model.VaccinationRecord)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
