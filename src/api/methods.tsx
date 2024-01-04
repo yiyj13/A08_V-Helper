@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro'
 import api from './http'
-import { getUserID, getOpenID } from '../models'
+import { getUserID } from '../models'
 
 export type GinBase = {
   ID: number
@@ -86,7 +86,7 @@ export type Profile = GinBase & {
 }
 
 export type Message = GinBase & {
-  openId: string
+  userId: Number
   page: string
   vaxName: string
   comment: string
@@ -285,7 +285,7 @@ export async function getMessage(id: number): Promise<Message> {
 
 export async function postMessage(props: Partial<Message>): Promise<string> {
   const params: Partial<Message> = {
-    openId: String(getOpenID()),
+    userId: getUserID(),
     page: 'pages/index',
     realTime: false,
     ...props,
