@@ -5,10 +5,9 @@
 
 import { useState, useMemo } from 'react'
 import { Tabs } from '@nutui/nutui-react-taro'
-import { IconFont } from '@nutui/icons-react-taro'
 import Taro from '@tarojs/taro'
 
-import { useProfiles, useVaccineRecordList, useTemperatureList, useVaccines } from '../../api'
+import { useVaccineRecordList, useTemperatureList, useVaccines } from '../../api'
 import { dayjs } from '../../utils'
 
 import { VaccinationRecord, TemperatureRecord } from '../../api/methods'
@@ -38,10 +37,15 @@ export default function RecordHistory() {
   return (
     <>
       <Tabs
+        tabStyle={{
+          backgroundColor: '#ffffff',
+        }}
         value={tab1value}
         onChange={(value: string) => {
           setTab1value(value)
         }}
+        // @ts-ignore
+        activeType='card'
       >
         <Tabs.TabPane title='接种档案'>
           {vaccinationRecordList.map((item, index) => (
@@ -59,46 +63,24 @@ export default function RecordHistory() {
 }
 
 const VaccineItemRender = ({ data }: { data: VaccinationRecord }) => {
-  const { selectByID } = useProfiles()
-  const profileInfo = selectByID(data.profileId)
   const { id2name } = useVaccines()
 
-  // const handleReadDocument = (recordData: VaccinationRecord) => {
-  //   Taro.navigateTo({
-  //     url: `/pages/record/index?id=` + recordData.ID, // 修改record的跳转逻辑
-  //   })
-  // }
   return (
-    <div
-      className='border border-gray-300 p-2 rounded-md'
-      style={{ borderRadius: '8px', marginLeft: '6px', marginRight: '6px' }}
-    >
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center'>
-          <IconFont className='text-2xl mr-2' name={profileInfo?.avatar} style={{ width: '40px', height: '40px' }} />
-          <div className='flex justify-between mt-2'>
-            <div className='font-bold' style={{ color: '#4796A1' }}>
-              {profileInfo?.relationship}
-            </div>
-            <div className='font-bold ml-2'>{profileInfo?.fullName}</div>
-          </div>
+    <div className='bg-gray-100 p-3 rounded-xl mt-2'>
+      <div className='grid grid-cols-2 gap-2 mt-2'>
+        <div className='flex flex-col text-gray-500'>
+          接种疫苗 <b className='text-black font-bold truncate'>{id2name(data.vaccineId)}</b>
         </div>
-        {/* <Eye className='cursor-pointer' onClick={() => handleReadDocument(data)} style={{ marginRight: '10px' }} /> */}
-      </div>
-      <div className='flex justify-between mt-2'>
-        <div className='text-gray-500'>
-          接种疫苗 <b className='text-black font-bold'>{id2name(data.vaccineId)}</b>
-        </div>
-        <div className='text-gray-500'>
-          接种类型 <b className='text-black font-bold'>{data.vaccinationType}</b>
+        <div className='flex flex-col text-gray-500'>
+          接种类型 <b className='text-black font-bold truncate'>{data.vaccinationType}</b>
         </div>
       </div>
-      <div className='flex justify-between mt-2'>
-        <div className='text-gray-500'>
-          接种日期 <b className='text-black font-bold'>{data.vaccinationDate}</b>
+      <div className='grid grid-cols-2 gap-2 mt-2'>
+        <div className='flex flex-col text-gray-500'>
+          接种日期 <b className='text-black font-bold truncate'>{data.vaccinationDate}</b>
         </div>
-        <div className='text-gray-500'>
-          到期时间 <b className='text-black font-bold'>{data.nextVaccinationDate}</b>
+        <div className='flex flex-col text-gray-500'>
+          到期时间 <b className='text-black font-bold truncate'>{data.nextVaccinationDate}</b>
         </div>
       </div>
     </div>
@@ -106,14 +88,6 @@ const VaccineItemRender = ({ data }: { data: VaccinationRecord }) => {
 }
 
 const TemperItemRender = ({ data }: { data: TemperatureRecord }) => {
-  const { selectByID } = useProfiles()
-  const profileInfo = selectByID(data.profileId)
-
-  // const handleReadDocument = (recordData: TemperatureRecord) => {
-  //   Taro.navigateTo({
-  //     url: `/pages/temper/index?id=` + recordData.ID, // 修改record的跳转逻辑
-  //   })
-  // }
   let colorClass = ''
 
   if (data.temperature > 38) {
@@ -125,22 +99,7 @@ const TemperItemRender = ({ data }: { data: TemperatureRecord }) => {
   }
 
   return (
-    <div
-      className='border border-gray-300 p-2 rounded-md'
-      style={{ borderRadius: '8px', marginLeft: '6px', marginRight: '6px' }}
-    >
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center'>
-          <IconFont className='text-2xl mr-2' name={profileInfo?.avatar} style={{ width: '40px', height: '40px' }} />
-          <div className='flex justify-between mt-2'>
-            <div className='font-bold' style={{ color: '#4796A1' }}>
-              {profileInfo?.relationship}
-            </div>
-            <div className='font-bold ml-2'>{profileInfo?.fullName}</div>
-          </div>
-        </div>
-        {/* <Eye className='cursor-pointer' onClick={() => handleReadDocument(data)} style={{ marginRight: '10px' }} /> */}
-      </div>
+    <div className='bg-gray-100 p-3 rounded-xl mt-2'>
       <div className='flex justify-between mt-2'>
         <div className='text-gray-500'>
           测温时间 <b className='text-black font-bold'>{data.date}</b>

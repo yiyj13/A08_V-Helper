@@ -3,26 +3,24 @@
 */
 
 import Taro from '@tarojs/taro'
-import { useState, useEffect } from 'react'
-import {
-  Input,
-  Cell,
-  Checkbox,
-  Image,
-  Picker,
-  Radio,
-  Button,
-  DatePicker,
-  TextArea,
-  Popup,
-  Grid,
-} from '@nutui/nutui-react-taro'
+import { Image } from '@tarojs/components'
+import { useState, useEffect, useMemo } from 'react'
+import { Input, Checkbox, Picker, Button, DatePicker, TextArea } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 
 import { useProfiles, postProfile, putProfile } from '../../api'
-import { Profile } from '../../api/methods'
+import { deleteProfile, Profile } from '../../api/methods'
+import { getUserID } from '../../models'
+import { dayjs } from '../../utils'
+import { uploadImage } from '../../api/imageUploader'
+import { FormCell as Cell, HeaderNecessary, HeaderOptional } from '../../components/formcell'
+import { PICTURE_BASE_URL } from '../../api/config'
+import useThrottle from '../../utils/useThrottle'
 
 export default function AddMember() {
+  const router = useMemo(() => Taro.getCurrentInstance().router, [])
+  const withParams = router?.params?.id !== undefined
+
   const relationshipOptions: PickerOption[] = [
     { value: 0, text: '本人' },
     { value: 1, text: '父亲' },
@@ -116,23 +114,6 @@ export default function AddMember() {
     })
   }
 
-  const [showPopup, setShowPopup] = useState(false)
-  const [selectedAvatar, setSelectedAvatar] = useState(1) // Track the selected avatar
-  const handlePopupOpen = () => {
-    setShowPopup(true)
-  }
-  const handlePopupClose = () => {
-    setShowPopup(false)
-  }
-
-  const handleAvatarSelect = (value: number) => {
-    setSelectedAvatar(value)
-    const avatar = 'http://101.43.194.58:8081/profile_avatar/avatar' + value + '.png'
-    setMember({
-      ...member,
-      avatar: avatar,
-    })
-  }
 
   const [noteValue, setNoteValue] = useState('')
   const onNoteChange = (value: string) => {
@@ -146,8 +127,6 @@ export default function AddMember() {
   const { selectByID, mutate: refreshProfileCache } = useProfiles()
 
   useEffect(() => {
-    const router = Taro.getCurrentInstance().router
-
     const fetchData = async () => {
       if (router && router.params && router.params.id !== undefined) {
         try {
@@ -174,15 +153,14 @@ export default function AddMember() {
       }
     }
     fetchData()
-  }, [selectByID])
+  }, [router, selectByID])
 
   const handleSubmission = async () => {
-    const router = Taro.getCurrentInstance().router
-
     if (router && router.params && router.params.id) {
       const { id } = router.params
       if (id) {
         try {
+          await uploadImageBeforeSubmit()
           await putProfile(Number(id), member)
           refreshProfileCache()
           Taro.showToast({ title: '提交成功', icon: 'success' })
@@ -196,6 +174,7 @@ export default function AddMember() {
     } else {
       if (member && member.fullName && member.relationship && member.gender && member.dateOfBirth) {
         try {
+          await uploadImageBeforeSubmit()
           const res = await postProfile(member)
           setMember({
             ...member,
@@ -232,14 +211,52 @@ export default function AddMember() {
     setDateDesc('')
     setDateVisible(false)
     setNoteValue('')
+    setTempUrl('')
     Taro.showToast({ title: '重置成功', icon: 'success' })
   }
 
+  const handleDelete = async () => {
+    await deleteProfile(Number(router?.params.id))
+    Taro.showToast({ title: '删除成功', icon: 'success' })
+    refreshProfileCache()
+    setTimeout(() => {
+      Taro.navigateBack()
+    }, 1000)
+  }
+
+  const [tempUrl, setTempUrl] = useState('')
+  const previewUrl = (tempUrl !== '' ? tempUrl : member?.avatar) ?? ''
+
+  const cloudpath = useMemo(() => `member/${getUserID()}/${dayjs().unix()}`, [])
+
+  const handleChooseImage = () => {
+    Taro.chooseImage({
+      count: 1,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: function (res) {
+        setTempUrl(res.tempFilePaths[0])
+        setMember((prev) => ({ ...prev, avatar: `${PICTURE_BASE_URL}/${cloudpath}` }))
+      },
+    })
+  }
+  const uploadImageBeforeSubmit = async () => {
+    if (member.avatar !== undefined && member.avatar !== '' && tempUrl !== '') {
+      await uploadImage(tempUrl, cloudpath)
+    }
+  }
+
+  const { actionDisabled, throttle } = useThrottle()
+
+
   return (
-    <>
+    <div className='px-4 flex flex-col gap-y-1 animate-delayed-show'>
+      <HeaderNecessary />
+
       <Cell title='成员姓名' style={{ borderRadius: '8px' }}>
         <Input
           type='text'
+          className='rounded-md'
           placeholder='请输入成员姓名'
           value={nameValue}
           onChange={(value) => onNameChange(value)}
@@ -248,12 +265,20 @@ export default function AddMember() {
       </Cell>
 
       <Cell title='性别' className='col-span-full flex justify-center'>
-        <Checkbox title='男' value={0} className='mr-2' checked={checkbox1} onChange={(value) => onMaleChange(value)}>
-          男
-        </Checkbox>
-        <Checkbox title='女' value={1} className='ml-2' checked={checkbox2} onChange={(value) => onFemaleChange(value)}>
-          女
-        </Checkbox>
+        <div className='flex'>
+          <Checkbox title='男' value={0} className='mr-2' checked={checkbox1} onChange={(value) => onMaleChange(value)}>
+            男
+          </Checkbox>
+          <Checkbox
+            title='女'
+            value={1}
+            className='ml-2'
+            checked={checkbox2}
+            onChange={(value) => onFemaleChange(value)}
+          >
+            女
+          </Checkbox>
+        </div>
       </Cell>
 
       <Cell
@@ -285,40 +310,43 @@ export default function AddMember() {
         onClose={() => setDateVisible(false)}
         onConfirm={(options, values) => confirmDate(values, options)}
       />
-      <div className='col-span-full flex-content flex items-center'>
-        <Button className='flex items-center' formType='submit' type='primary' onClick={handlePopupOpen}>
-          选择头像
-        </Button>
-        <Popup visible={showPopup} style={{ height: '42%' }} position='bottom' onClose={handlePopupClose}>
-          <Radio.Group value={`${selectedAvatar}`} onChange={(value) => handleAvatarSelect(Number(value))}>
-            <Grid gap={3} columns={3}>
-              {[...Array(9)].map((_, index) => (
-                <Grid.Item key={index + 1}>
-                  <Radio value={`${index + 1}`} checked={selectedAvatar === index + 1}>
-                    <Image
-                      src={`http://101.43.194.58:8081/profile_avatar/avatar${index + 1}.png`}
-                      style={{ width: '80px', height: '80px' }}
-                    />
-                  </Radio>
-                </Grid.Item>
-              ))}
-            </Grid>
-          </Radio.Group>
-        </Popup>
-      </div>
-      <Cell title='TextArea' className='col-span-full px-8' style={{ borderRadius: '8px' }}>
-        <TextArea placeholder='请输入备注' value={noteValue} onChange={(value) => onNoteChange(value)} />
+
+      <HeaderOptional />
+      <Cell title='头像'>
+        <div className='flex justify-center'>
+          <Image
+            src={previewUrl}
+            mode='aspectFit'
+            className='w-16 h-16 rounded-full bg-white ring-2 ring-brand'
+            onClick={handleChooseImage}
+          />
+        </div>
+      </Cell>
+      <Cell title='备注' className='col-span-full px-8' style={{ borderRadius: '8px' }}>
+        <TextArea
+          className='rounded-md'
+          placeholder='请输入备注'
+          value={noteValue}
+          autoSize
+          onChange={(value) => onNoteChange(value)}
+        />
       </Cell>
       <div className='col-span-full flex justify-center mt-4'>
-        <Button className='submit_btm' formType='submit' type='primary' onClick={handleSubmission}>
+        <Button className='submit_btm' formType='submit' type='primary' onClick={throttle(handleSubmission)} disabled={actionDisabled}>
           提交
         </Button>
         <div style={{ marginLeft: '16px' }}>
-          <Button className='reset_btm' formType='reset' onClick={handleReset}>
-            重置
-          </Button>
+          {withParams ? (
+            <Button type='danger' fill='outline' onClick={throttle(handleDelete)} disabled={actionDisabled}>
+              删除
+            </Button>
+          ) : (
+            <Button id='reset_btm' formType='reset' onClick={throttle(handleReset)} disabled={actionDisabled}>
+              重置
+            </Button>
+          )}
         </div>
       </div>
-    </>
+    </div>
   )
 }

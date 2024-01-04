@@ -1,5 +1,6 @@
 import { ScreenLittle } from '@nutui/icons-react-taro'
 import { View, ScrollView, ViewProps } from '@tarojs/components'
+import clsx from 'clsx'
 import { useState } from 'react'
 
 type ComboBoxProps = ViewProps & {
@@ -19,16 +20,16 @@ const ComboBox = ({ title, options, onSelect, defaultValue }: ComboBoxProps) => 
 
   const handleOptionClick = (option: string) => {
     setSelectedOption(option)
-    onSelect(option)
+    onSelect && onSelect(option)
     setIsOpen(false)
   }
 
   return (
     <View className='relative' id='comboBox'>
       <View
-        className={
-          'border text-gray-500 bg-white border-gray-300 p-2 rounded-md' + ' ' + (isOpen ? 'ring-2 ring-brand' : '')
-        }
+        className={clsx('border text-gray-500 bg-white border-gray-100 p-2 rounded-md transition-all', {
+          'ring-2 ring-brand': isOpen,
+        })}
         onClick={toggleComboBox}
       >
         <View className='flex flex-row justify-between items-center'>
@@ -37,17 +38,27 @@ const ComboBox = ({ title, options, onSelect, defaultValue }: ComboBoxProps) => 
         </View>
       </View>
 
-      {isOpen && (
-        <ScrollView scrollY className='absolute bg-white z-20 mt-1 h-64 ring-2 ring-gray-300 rounded-md shadow-lg'>
-          <View className='absolute mt-0 w-full'>
-            {options.map((option) => (
-              <View key={option} className='p-2 active:bg-slate-100 text-gray-500' onClick={() => handleOptionClick(option)}>
-                {option}
-              </View>
-            ))}
-          </View>
-        </ScrollView>
-      )}
+      {/* {isOpen && ( */}
+      <ScrollView
+        scrollY
+        className={clsx('absolute bg-white mt-2 h-64 border border-gray-100 rounded-md shadow-lg transition-all', {
+          '-z-10 -translate-y-2 opacity-0': !isOpen,
+          'z-20': isOpen
+        })}
+      >
+        <View className='absolute mt-0 w-full'>
+          {options.map((option) => (
+            <View
+              key={option}
+              className='p-2 active:bg-slate-100'
+              onClick={() => handleOptionClick(option)}
+            >
+              {option}
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+      {/* )} */}
     </View>
   )
 }

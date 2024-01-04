@@ -6,7 +6,6 @@ export default defineAppConfig({
     'pages/vacCalendar/index',
     'pages/sendpost/index',
     'pages/vacDetails/index',
-    'pages/blank/index',
     'pages/map/index',
     'pages/record/index',
     'pages/temper/index',

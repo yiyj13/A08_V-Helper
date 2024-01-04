@@ -12,12 +12,6 @@ export async function uploadImage(imagePath: string, cloudPath: string) {
     formData: {
       cloudpath: cloudPath,
     },
-    success: (res) => {
-      console.log(res)
-    },
-    fail: (err) => {
-      console.log(err)
-    },
   })
 }
 

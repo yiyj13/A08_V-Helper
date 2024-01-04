@@ -8,7 +8,7 @@ import dayjs from 'dayjs'
 import { useVaccineRecordList } from '../../api'
 import { MergeItems, VacCalendarItemExpire, VacCalendarItem } from './vacCalendarItem'
 import { NetworkError } from '../../components/errors'
-import { PullDownRefresh } from '../../components/pulldownrefresh'
+import { ActiveRefreshIcon } from '../../components/activerefresh'
 import RecordPopup from './recordPopup'
 
 export function MiniCalendar() {
@@ -47,7 +47,12 @@ export function MiniCalendar() {
   return (
     <>
       <div className='mx-8 mt-4 flex flex-row items-center justify-between'>
-        <Text className='text-2xl font-bold'>疫苗日历</Text>
+        <div className='flex items-center gap-x-4'>
+          <a className='flex items-center space-x-2'>
+            <span className='text-2xl font-bold'>疫苗日历</span>
+          </a>
+          <ActiveRefreshIcon onClick={() => mutate(undefined)} />
+        </div>
         <Text
           className='rounded-xl p-2 text-base text-brand active:bg-slate-100'
           onClick={() => Taro.navigateTo({ url: '/pages/vacCalendar/index' })}
@@ -58,19 +63,17 @@ export function MiniCalendar() {
 
       <div className='mx-2 mt-2 flex h-full flex-col overflow-y-scroll'>
         <div className='mx-4 w-auto rounded-2xl'>
-          <PullDownRefresh onRefresh={mutate}>
-            {isLoading ? (
-              <Skeleton animated rows={3} visible={!isLoading} />
-            ) : error ? (
-              <NetworkError />
-            ) : isDataEmpty ? (
-              <EmptyNotice />
-            ) : isRenderEmpty ? (
-              <ListEmptyNotice />
-            ) : (
-              <ol className='mt-2 space-y-4 text-sm leading-6'>{data2render}</ol>
-            )}
-          </PullDownRefresh>
+          {isLoading ? (
+            <Skeleton animated rows={3} visible={!isLoading} />
+          ) : error ? (
+            <NetworkError />
+          ) : isDataEmpty ? (
+            <EmptyNotice />
+          ) : isRenderEmpty ? (
+            <ListEmptyNotice />
+          ) : (
+            <ol className='mt-2 space-y-4 text-sm leading-6'>{data2render}</ol>
+          )}
           <div className='h-32'></div>
         </div>
       </div>

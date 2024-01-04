@@ -1,17 +1,14 @@
 import { Skeleton } from '@nutui/nutui-react-taro'
 import { ArrowDown } from '@nutui/icons-react-taro'
-import useSWRInfinite from 'swr/infinite'
 import { useReachBottom } from '@tarojs/taro'
 import clsx from 'clsx'
 
-import api, { Article, useVaccines } from '../../api/'
+import { Article, useVaccines, useArticles } from '../../api/'
 import { ArticlePreview } from '../../components/articlepreview'
-import { PullDownRefresh } from '../../components/pulldownrefresh'
+import { ActiveRefreshIcon } from '../../components/activerefresh'
 import { NetworkError } from '../../components/errors'
 import { EmptyView } from '../../components/empty'
 import { useCommunityStore } from '../../models'
-
-const PAGESIZE = 5
 
 export default function Index() {
   return (
@@ -24,16 +21,7 @@ export default function Index() {
 
 // TODO: virtualList optimization
 export function Community() {
-  const filter = useCommunityStore.use.vaccineId()
-
-  const { data, isLoading, size, setSize, error } = useSWRInfinite(
-    (index) =>
-      filter
-        ? `/api/articles?page=${index + 1}&size=${PAGESIZE}&isBind=true&vaccineID=${filter}`
-        : `/api/articles?page=${index + 1}&size=${PAGESIZE}`,
-    (url) => api.get(url).then((res) => res.data),
-    { revalidateIfStale: false }
-  )
+  const { data, isLoading, size, setSize, error, PAGESIZE } = useArticles()
 
   const articles: Article[] = data ? [].concat(...data) : []
 
@@ -47,18 +35,15 @@ export function Community() {
   useReachBottom(() => shouldLoadMore && loadMore())
 
   return (
-    <PullDownRefresh onRefresh={() => setSize(1)}>
-      <main className='px-8 pb-32 mt-4'>
-        <div className='flex flex-col gap-4'>
-          {error && <NetworkError></NetworkError>}
-          {isEmpty && <EmptyView text='来发布一篇帖子吧' />}
-          {articles?.map((article) => (
-            <ArticlePreview key={article.ID} {...article} />
-          ))}
-          {isLoadingMore && !error && <Skeletons />}
-        </div>
-      </main>
-    </PullDownRefresh>
+    <main className='px-8 pb-32 mt-4'>
+      <div className='flex flex-col'>
+        {error ? <NetworkError /> : isEmpty ? <EmptyView text='来发布一篇帖子吧' /> : null}
+        {articles?.map((article) => (
+          <ArticlePreview key={article.ID} {...article} />
+        ))}
+        {isLoadingMore && !error && <Skeletons />}
+      </div>
+    </main>
   )
 }
 
@@ -78,6 +63,8 @@ const Header = () => {
   const toggleFilter = useCommunityStore.use.toggleFilter()
   const toggleExpand = useCommunityStore.use.toggleExpandFilter()
 
+  const { mutate } = useArticles()
+
   return (
     <header
       className={clsx('transition-all', {
@@ -85,20 +72,20 @@ const Header = () => {
         'h-32': expand,
       })}
     >
-      <nav
-        id='foo'
-        className={clsx('fixed z-20 w-full bg-white md:relative md:bg-transparent', {})}
-      >
+      <nav id='foo' className={clsx('fixed z-20 w-full bg-white md:relative md:bg-transparent', {})}>
         <div className='m-auto px-6 md:px-12'>
           <div className='flex flex-wrap items-center justify-between gap-6 py-3'>
             <div className='flex w-full justify-between'>
-              <a className='flex items-center space-x-2'>
-                <span className='text-2xl font-bold'>疫苗社区</span>
-              </a>
+              <div className='flex items-center gap-x-4'>
+                <a className='flex items-center space-x-2'>
+                  <span className='text-2xl font-bold'>疫苗社区</span>
+                </a>
+                <ActiveRefreshIcon onClick={() => mutate(undefined)} />
+              </div>
               <div className='flex items-center' onClick={toggleExpand}>
-                <span className='pr-2 py-2 text-sm rounded-md'>{
-                  filter ? '#'+data?.find(v => v.ID === filter)?.name : '筛选'
-                }</span>
+                <span className='pr-2 py-2 text-sm rounded-md'>
+                  {filter ? '#' + data?.find((v) => v.ID === filter)?.name : '筛选'}
+                </span>
                 <ArrowDown
                   size={10}
                   className={clsx('transition-all transform', {
@@ -127,7 +114,7 @@ const Header = () => {
               )}
               onClick={() => toggleFilter(vaccine.ID)}
             >
-              {'#'+vaccine.name}
+              {'#' + vaccine.name}
             </li>
           ))}
         </ul>

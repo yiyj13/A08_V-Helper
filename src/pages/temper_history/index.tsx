@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useMemo } from 'react'
 import { Button } from '@nutui/nutui-react-taro'
-import { IconFont } from '@nutui/icons-react-taro'
 import Taro from '@tarojs/taro'
+import { Image } from '@tarojs/components'
 
 import { useTemperatureList, useProfiles } from '../../api'
 
@@ -81,10 +81,10 @@ const ItemRender: React.FC<TemperatureRecordProps> = ({ data }) => {
 
       <div className='flex items-center justify-between'>
         <div className='flex items-center'>
-          <IconFont
-            className='text-2xl mr-2 rounded-full border bg-white'
-            name={profileInfo?.avatar}
-            style={{ width: '40px', height: '40px' }}
+          <Image
+            src={profileInfo?.avatar ?? ''}
+            mode='aspectFit'
+            className='w-10 h-10 rounded-full bg-white mr-2'
           />
           <div className='flex flex-col'>
             <div className='flex w-full justify-between'>

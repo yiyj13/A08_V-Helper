@@ -1,30 +1,48 @@
 import { Button } from '@nutui/nutui-react-taro'
-import { IconFont, Edit, Eye } from '@nutui/icons-react-taro'
 import Taro from '@tarojs/taro'
+import { Image } from '@tarojs/components'
 
 import { useProfiles } from '../../api'
 
 import { Profile } from '../../api/methods'
 
-export default function Member() {
-  const {data: memberDataList} = useProfiles()
+import { CheckProfileWrap } from '../../components/checkprofilewrap'
+
+export default function Index() {
+  return (
+    <CheckProfileWrap>
+      <Members />
+    </CheckProfileWrap>
+  )
+}
+
+const Members = () => {
+  const { data: memberDataList } = useProfiles()
 
   const handleAddMember = () => {
     Taro.navigateTo({ url: '/pages/addMember/index' })
   }
 
   return (
-    <div style={{ height: '100%', position: 'relative', paddingBottom: '70px' }}>
-      {memberDataList?.map((item, index) => (
-        <ItemRender data={item} key={index} />
-      ))}
-      <Button
-        type='primary'
-        onClick={handleAddMember}
-        style={{ width: '90%', position: 'fixed', bottom: '10px', marginLeft: '5%', marginRight: '5%', zIndex: 999 }}
-      >
-        新增成员
-      </Button>
+    <div className='max-w-2xl mx-auto px-6'>
+      <div className='items-center justify-between flex mt-4'>
+        <div>
+          <h4 className='text-gray-800 text-2xl font-semibold'>成员档案</h4>
+          <p className='text-gray-400'>管理你的家庭成员</p>
+        </div>
+        <Button
+          type='primary'
+          className='inline-flex items-center justify-center gap-1 py-2 px-3 mt-2 font-medium text-sm text-center text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 rounded-lg sm:mt-0'
+          onClick={handleAddMember}
+        >
+          添加成员
+        </Button>
+      </div>
+      <ul className='mt-12 divide-y divide-gray-100'>
+        {memberDataList?.map((item) => (
+          <ItemRender data={item} key={item.ID} />
+        ))}
+      </ul>
     </div>
   )
 }
@@ -43,33 +61,40 @@ const ItemRender = ({ data }: { data: Profile }) => {
   }
 
   return (
-    <div
-      className='border border-gray-300 p-4 rounded-md'
-      style={{ borderRadius: '8px', marginLeft: '10px', marginRight: '10px' }}
-    >
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center'>
-          <IconFont className='text-2xl mr-2' name={data.avatar} style={{ width: '60px', height: '60px' }} />
-          <div>
-            <span className='font-bold' style={{ color: '#4796A1' }}>
-              {data.relationship}
-            </span>
-            <span className='font-bold text-lg'>{data.fullName}</span>
+    <li className='py-5 flex items-start justify-between'>
+      <div className='flex gap-3 items-center'>
+        <Image
+          src={data?.avatar ?? ''}
+          className='h-12 w-12 animate-fade-in rounded-full object-cover bg-slate-100 shadow-sm'
+          mode='aspectFill'
+        />
+        <div className='flex flex-col'>
+          <span className='block text-base text-brand font-semibold'>{data.relationship}</span>
+          <span className='block text-lg text-gray-700 font-semibold'>{data.fullName}</span>
+          <div className='flex gap-x-2'>
+            <span className='block text-sm text-gray-600'>{'性别 '}</span>
+            <span className='block text-sm font-semibold'>{data.gender}</span>
+          </div>
+          <div className='flex gap-x-2'>
+            <span className='block text-sm text-gray-600'>{'生日 '} </span>
+            <span className='block text-sm font-semibold'>{data.dateOfBirth}</span>
           </div>
         </div>
-        <div className='flex items-center'>
-          <Eye className='cursor-pointer' onClick={() => handleDocument(data)} style={{ marginRight: '10px' }} />
-          <Edit className='cursor-pointer' onClick={() => handleEditMember(data)} />
-        </div>
       </div>
-      <div className='flex justify-between mt-2'>
-        <div className='text-gray-500'>
-          性别 <b className='text-black font-bold'>{data.gender}</b>
-        </div>
-        <div className='text-gray-500'>
-          出生日期 <b className='text-black font-bold'>{data.dateOfBirth}</b>
-        </div>
+      <div className='flex gap-x-2'>
+        <label
+          className='text-sm border rounded-lg px-3 text-brand py-2 duration-150 bg-white active:bg-gray-100'
+          onClick={() => handleDocument(data)}
+        >
+          查看
+        </label>
+        <label
+          className='text-sm border rounded-lg px-3 text-brand py-2 duration-150 bg-white active:bg-gray-100'
+          onClick={() => handleEditMember(data)}
+        >
+          编辑
+        </label>
       </div>
-    </div>
+    </li>
   )
 }

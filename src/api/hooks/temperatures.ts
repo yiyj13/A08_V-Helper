@@ -1,9 +1,12 @@
 import useSWR from 'swr'
 
-import { getTemperatureRecordList } from '..'
+import { getTemperatureRecordList, useProfiles } from '..'
 
 export function useTemperatureList() {
-  const { data, ...rest } = useSWR('getTemperatureRecordList', getTemperatureRecordList, {
+  const { data: profiles } = useProfiles()
+
+  // automactically call getTemperatureRecordList when profiles changes
+  const { data, ...rest } = useSWR([profiles, 'getTemperatureRecordList'], getTemperatureRecordList, {
     revalidateIfStale: false,
   })
 

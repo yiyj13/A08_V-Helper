@@ -27,7 +27,7 @@ export const ArticlePreview = memo((props: ArticlePreviewProps) => {
     <Swipe
       ref={closeRef}
       disabled={props.swipeAction === undefined}
-      className='rounded-lg border border-gray-100 border-b-0 shadow-md mb-4 transition-all active:shadow-xl active:scale-105'
+      className='rounded-lg border animate-delayed-show border-gray-100 border-b-0 shadow-md mb-4 transition-all active:shadow-xl active:scale-105'
       rightAction={
         <Button type={props.type} shape='square'>
           {props.buttonText}
@@ -46,10 +46,10 @@ export const ArticlePreview = memo((props: ArticlePreviewProps) => {
         <div className='flex justify-between'>
           <dl className='flex items-center gap-2'>
             <Image
-              alt='Paul Clapton'
-              src={author?.avatar}
+              src={author?.avatar ?? ''}
               className='h-8 w-8 rounded-full object-cover bg-slate-100 shadow-sm'
               mode='aspectFill'
+              lazyLoad
             />
 
             <div className='flex flex-col'>
@@ -59,7 +59,8 @@ export const ArticlePreview = memo((props: ArticlePreviewProps) => {
           </dl>
         </div>
 
-        <h3 className='mt-2 text-sm font-semibold text-gray-900'>{props.title}</h3>
+        <h3 className='mt-2 text-sm font-semibold text-gray-900 truncate'>{props.title}</h3>
+        <p className='mt-3 text-xs text-gray-500 truncate max-w-full'>{props.content}</p>
 
         <div className='mt-4 flex items-center justify-end'>
           <label className='text-xs font-medium text-brand'>

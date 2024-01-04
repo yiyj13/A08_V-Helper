@@ -1,8 +1,8 @@
 import clsx from 'clsx'
-import { useState, useMemo } from 'react'
-import { Button, Menu } from '@nutui/nutui-react-taro'
-import { IconFont, Edit } from '@nutui/icons-react-taro'
+import {  useMemo } from 'react'
+import { Button } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
+import { Image } from '@tarojs/components'
 
 import { useProfiles, useVaccineRecordList, useVaccines } from '../../api'
 
@@ -74,7 +74,11 @@ const ItemRender = ({ data }: { data: VaccinationRecord }) => {
       ></span>
       <div className='flex items-center justify-between'>
         <div className='flex items-center'>
-          <IconFont className='text-2xl mr-2' name={profileInfo?.avatar} style={{ width: '40px', height: '40px' }} />
+          <Image
+            src={profileInfo?.avatar ?? ''}
+            mode='aspectFit'
+            className='w-10 h-10 rounded-full bg-white mr-2'
+          />
           <div className='flex justify-between mt-2'>
             <div className='font-bold' style={{ color: '#4796A1' }}>
               {profileInfo?.relationship}

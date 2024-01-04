@@ -4,19 +4,30 @@
 
 import Taro from '@tarojs/taro'
 import { useState, useMemo, useEffect } from 'react'
-import { Cell, Switch, Picker, Button, DatePicker, TextArea, Input, Popover } from '@nutui/nutui-react-taro'
+import { Switch, Picker, Button, DatePicker, TextArea, Popover, InputNumber } from '@nutui/nutui-react-taro'
 import { PickerOption } from '@nutui/nutui-react-taro/dist/types/packages/picker/types'
 import { Image } from '@tarojs/components'
 
-import { VaccinationRecord, postVaccineRecord, putVaccineRecord, postMessage } from '../../api'
+import { VaccinationRecord, postVaccineRecord, putVaccineRecord, postMessage, deleteVaccineRecord } from '../../api'
 import { useProfiles, useVaccines, useVaccineRecordList } from '../../api/hooks'
 import { pushWXSubscription } from '../../api/subscribe'
 import { dayjs } from '../../utils'
 import { PICTURE_BASE_URL } from '../../api/config'
 import { getUserID } from '../../models'
 import { uploadImage } from '../../api/imageUploader'
+import { CheckProfileWrap } from '../../components/checkprofilewrap'
+import { FormCell as Cell, HeaderNecessary, HeaderOptional } from '../../components/formcell'
+import useThrottle from '../../utils/useThrottle'
 
-export default function VaccineRecord() {
+export default function Index() {
+  return (
+    <CheckProfileWrap>
+      <VaccineRecord />
+    </CheckProfileWrap>
+  )
+}
+
+function VaccineRecord() {
   const router = useMemo(() => Taro.getCurrentInstance().router, [])
 
   const [record, setRecord] = useState<Partial<VaccinationRecord>>({
@@ -29,7 +40,7 @@ export default function VaccineRecord() {
 
   const { data: profiles, selectByID } = useProfiles()
   const MemberData = useMemo(
-    () => (profiles ? [profiles.map((item) => ({ value: item.ID, text: item.relationship }))] : []),
+    () => (profiles ? [profiles.map((item) => ({ value: item.ID, text: item.fullName }))] : []),
     [profiles]
   )
 
@@ -204,11 +215,11 @@ export default function VaccineRecord() {
     })
   }
 
-  const remindDisabled = router?.params.id !== undefined
+  const withParams = router?.params.id !== undefined
   const [remindSwitch, setRemindSwitch] = useState(false)
   const [remindVisible, setRemindVisible] = useState(false)
-  const [remindValue, setRemindValue] = useState('')
-  const [remindUnit, setRemindUnit] = useState('单位')
+  const [remindValue, setRemindValue] = useState('1')
+  const [remindUnit, setRemindUnit] = useState('日')
   const [unitVisible, setUnitVisible] = useState(false)
   const itemList = [
     {
@@ -397,6 +408,7 @@ export default function VaccineRecord() {
     setRemindValue('')
     setRemindUnit('')
     setNoteValue('')
+    setVoucherUrl('')
     setRemindSwitch(false)
 
     setIdVisible(false)
@@ -429,8 +441,20 @@ export default function VaccineRecord() {
   }
   const previewUrl = (voucherUrl !== '' ? voucherUrl : record.voucher) ?? ''
 
+  const handleDelete = async () => {
+    await deleteVaccineRecord(Number(router?.params.id))
+    Taro.showToast({ title: '删除成功', icon: 'success' })
+    refreshRecordCache()
+    setTimeout(() => {
+      Taro.navigateBack()
+    }, 1000)
+  }
+
+  const { actionDisabled, throttle } = useThrottle()
+
   return (
-    <>
+    <div className='px-4 flex flex-col gap-y-1 animate-delayed-show'>
+      <HeaderNecessary />
       <Cell
         title='接种人'
         description={idDesc}
@@ -440,7 +464,7 @@ export default function VaccineRecord() {
       <Picker
         title='接种人'
         // @ts-ignore
-        value={[record.profileId]}
+        value={withParams ? [record.profileId] : undefined}
         visible={idVisible}
         options={MemberData}
         onConfirm={(list, values) => confirmID(list, values)}
@@ -455,7 +479,7 @@ export default function VaccineRecord() {
       <Picker
         title='疫苗名称'
         // @ts-ignore
-        value={[record.vaccineId]}
+        value={withParams ? [record.vaccineId] : undefined}
         visible={nameVisible}
         options={VaccineData}
         onConfirm={(list, values) => confirmName(list, values)}
@@ -475,12 +499,20 @@ export default function VaccineRecord() {
         onConfirm={(list) => confirmType(list)}
         onClose={() => setTypeVisible(false)}
       />
-      <Cell
-        title='接种时间'
-        description={dateDesc}
-        onClick={() => setDateVisible(true)}
-        style={{ textAlign: 'center' }}
-      />
+      <div className='flex justify-between gap-x-2'>
+        <Cell
+          title='接种时间'
+          description={dateDesc}
+          onClick={() => setDateVisible(true)}
+          style={{ textAlign: 'center' }}
+        />
+        <Cell
+          title='有效期限'
+          description={validDesc}
+          onClick={() => setValidVisible(!validVisible)}
+          style={{ textAlign: 'center' }}
+        />
+      </div>
       <DatePicker
         title='接种时间'
         startDate={startDate}
@@ -491,12 +523,6 @@ export default function VaccineRecord() {
         onClose={() => setDateVisible(false)}
         onConfirm={(options, values) => confirmDate(values, options)}
       />
-      <Cell
-        title='有效期限'
-        description={validDesc}
-        onClick={() => setValidVisible(!validVisible)}
-        style={{ textAlign: 'center' }}
-      />
       <Picker
         title='有效期限'
         value={[ValidData[0].findIndex((item) => item.text === record.valid)]}
@@ -505,48 +531,58 @@ export default function VaccineRecord() {
         onConfirm={(list, values) => confirmValid(list, values)}
         onClose={() => setValidVisible(false)}
       />
-      <div className='col-span-full flex-content flex items-center mt-2 mb-2'>
-        <span className='text-sm ml-2' style={{ height: '30px' }}>
-          接种提醒
-        </span>
-        <Switch
-          disabled={remindDisabled}
-          defaultChecked={record.reminder}
-          className=' ml-2'
-          checked={remindSwitch}
-          onChange={(value) => onSwitchChange(value)}
-        />
-        {remindVisible && !remindDisabled && (
-          <div className=' flex items-center'>
-            <Input
-              type='number'
-              placeholder='请输入数字'
-              disabled={remindDisabled}
-              maxLength={2}
-              value={remindValue}
-              onChange={(value) => setRemindValue(value)}
-            />
-            <Popover
-              visible={unitVisible}
-              list={itemList}
-              location='bottom-start'
-              onClick={() => {
-                unitVisible ? setUnitVisible(false) : setUnitVisible(true)
-              }}
-              onSelect={(item) => {
-                setRemindUnit(item.name)
-                setUnitVisible(false)
-              }}
-            >
-              <Button type='primary'>{remindUnit}</Button>
-            </Popover>
-            <span className='text-sm mr-2'>前提醒</span>
-          </div>
-        )}
-      </div>
+
+      <HeaderOptional />
+
+      <Cell title='接种提醒'>
+        <div className='flex h-5'>
+          <Switch
+            disabled={withParams}
+            defaultChecked={record.reminder}
+            className=' ml-2'
+            checked={remindSwitch}
+            onChange={(value) => onSwitchChange(value)}
+          />
+          {remindVisible && !withParams && (
+            <div className=' flex items-center'>
+              <InputNumber
+                className='mx-2'
+                placeholder='请输入数字'
+                min={1}
+                max={6}
+                disabled={withParams}
+                value={remindValue}
+                onChange={(value) => setRemindValue(String(value))}
+              ></InputNumber>
+              <Popover
+                visible={unitVisible}
+                list={itemList}
+                location='bottom-start'
+                onClick={() => {
+                  unitVisible ? setUnitVisible(false) : setUnitVisible(true)
+                }}
+                onSelect={(item) => {
+                  setRemindUnit(item.name)
+                  setUnitVisible(false)
+                }}
+              >
+                <span className='text-sm text-brand'>{remindUnit}</span>
+              </Popover>
+              <span className='text-sm'>前提醒</span>
+            </div>
+          )}
+        </div>
+      </Cell>
 
       <div className='col-span-full flex-content items-center'>
-        <span className='ml-2 text-sm'>接种凭证</span>
+        <div className='flex gap-x-2'>
+          <span className='ml-4 text-sm text-gray-500'>接种凭证</span>
+          {previewUrl !== '' && (
+            <span className='text-sm underline text-brand' onClick={() => Taro.previewImage({ urls: [previewUrl] })}>
+              预览
+            </span>
+          )}
+        </div>
         <Image
           src={previewUrl}
           mode='aspectFill'
@@ -554,19 +590,37 @@ export default function VaccineRecord() {
           onClick={handleChooseImage}
         />
       </div>
-      <Cell title='TextArea' className='col-span-full px-8' style={{ borderRadius: '8px' }}>
-        <TextArea placeholder='请输入备注' value={noteValue} autoSize onChange={(value) => onNoteChange(value)} />
+      <Cell title='备注' className='col-span-full px-8' style={{ borderRadius: '8px' }}>
+        <TextArea
+          className='rounded-md'
+          placeholder='请输入备注'
+          value={noteValue}
+          autoSize
+          onChange={(value) => onNoteChange(value)}
+        />
       </Cell>
       <div className='col-span-full flex justify-center mt-4'>
-        <Button id='submit_btm' formType='submit' type='primary' onClick={handleSubmission}>
+        <Button
+          id='submit_btm'
+          formType='submit'
+          type='primary'
+          onClick={throttle(handleSubmission)}
+          disabled={actionDisabled}
+        >
           提交
         </Button>
         <div style={{ marginLeft: '16px' }}>
-          <Button id='reset_btm' formType='reset' onClick={handleReset}>
-            重置
-          </Button>
+          {withParams ? (
+            <Button type='danger' fill='outline' onClick={throttle(handleDelete)} disabled={actionDisabled}>
+              删除
+            </Button>
+          ) : (
+            <Button id='reset_btm' formType='reset' onClick={throttle(handleReset)} disabled={actionDisabled}>
+              重置
+            </Button>
+          )}
         </div>
       </div>
-    </>
+    </div>
   )
 }

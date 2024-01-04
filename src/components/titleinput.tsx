@@ -9,7 +9,7 @@ export default function InputCustom(props: Props) {
     <div className='relative mt-4'>
       <FocusableInput
         {...props}
-        baseClass='peer block h-auto w-auto appearance-none rounded-xl bg-transparent px-1 py-2.5 text-xl font-bold text-gray-600'
+        baseClass='peer block h-auto w-auto appearance-none rounded-xl bg-transparent mx-1 py-2.5 text-xl font-bold text-gray-600'
         focusClass='focused'
         placeholderShownClass='placed'
       />
