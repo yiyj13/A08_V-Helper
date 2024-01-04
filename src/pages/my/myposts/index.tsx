@@ -54,7 +54,7 @@ export default function FollowingPosts() {
               swipeAction={swipeAction}
               type='danger'
               buttonText='删帖'
-              showReply
+              // showReply
             />
           ))}
           {isLoading && !error && <Skeletons />}
