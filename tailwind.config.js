@@ -9,4 +9,32 @@ module.exports = {
     // 小程序不需要 preflight，因为这主要是给 h5 的，如果你要同时开发多端，你应该使用 process.env.TARO_ENV 环境变量来控制它
     preflight: false,
   },
+  theme: {
+    extend: {
+      colors: {
+        // add our brand color to the palette
+        brand: '#176b87',
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.3s ease-in-out',
+        'fade-in-half': 'fadeInHalf 0.3s ease-in',
+        'delayed-show': 'delayedShow 0.4s ease-in-out',
+      },
+      keyframes: () => ({
+        fadeIn: {
+          '0%': { opacity: 0 },
+          '100%': { opacity: 1 },
+        },
+        fadeInHalf: {
+          '0%': { opacity: 0 },
+          '100%': { opacity: 0.5 },
+        },
+        delayedShow: {
+          '0%': { opacity: 0 },
+          '50%': { opacity: 0 },
+          '100%': { opacity: 1 },
+        },
+      }),
+    },
+  },
 }

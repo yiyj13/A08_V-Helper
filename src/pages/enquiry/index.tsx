@@ -1,40 +1,27 @@
 import { Loading } from '@nutui/nutui-react-taro'
-import { useEffect, useState } from 'react'
 
-import api from '../../api'
-
-type TVaccine = {
-  id: number
-  name: string
-  type: string
-  description: string
-  status: number
-  createdAt: string
-  updatedAt: string
-}
+import { useVaccines } from '../../api'
+import { Header } from './header'
+import VaccineItem from './vaccineItem'
 
 export default function VaccineEnquiry() {
-  const [vaccineList, setVaccineList] = useState<TVaccine[] | null>()
-
-  useEffect(() => {
-    api.request({ url: '/api/vaccines' }).then((res) => {
-      setVaccineList(res.data.data)
-    })
-  }, [])
-
-  if (!vaccineList) {
-    return <Loading className='h-screen w-screen' />
-  }
+  const { data: vaccineList, isLoading } = useVaccines()
 
   return (
-    <div className='flex flex-col p-5'>
-      <div>
-        {vaccineList.map((vaccineName) => (
-          <div className='flex flex-col p-5 mt-4 rounded-xl border-t-gray-50' key={vaccineName.id}>
-            {vaccineName.name}
+    <>
+      <Header />
+      {isLoading ? (
+        <Loading className='h-screen w-screen' />
+      ) : (
+        <>
+          <div className='grid grid-cols-2 gap-x-5 gap-y-4 px-6'>
+            {vaccineList?.map((vaccine, index) => (
+              <VaccineItem key={index} {...vaccine} />
+            ))}
           </div>
-        ))}
-      </div>
-    </div>
+          <div className='h-32' />
+        </>
+      )}
+    </>
   )
 }

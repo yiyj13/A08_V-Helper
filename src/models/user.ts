@@ -1,48 +1,45 @@
-import { create } from "zustand";
-import { immer } from "zustand/middleware/immer";
-import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
-import {
-  setStorageSync,
-  getStorageSync,
-  removeStorageSync,
-} from "@tarojs/taro";
-import createSelectors from "./selectors";
-import { StorageSceneKey } from "../utils";
+import { create } from 'zustand'
+import { immer } from 'zustand/middleware/immer'
+import { createJSONStorage, persist, StateStorage } from 'zustand/middleware'
+import { setStorageSync, getStorageSync, removeStorageSync } from '@tarojs/taro'
+import createSelectors from './selectors'
+import { StorageSceneKey } from '../utils'
+import type { Userinfo } from '../api'
 
 interface State {
-  token: string;
-  isLogged: boolean;
+  token?: string
+  id?: number
+  openId?: string
+  isLogged: boolean
 }
 interface Action {
-  setToken: (token: string) => void;
-  removeToken: () => void;
+  setUserInfo: (token: Userinfo) => void
+  removeUserInfo: () => void
 }
 
 const userStorage: StateStorage = {
   getItem: (key) => {
-    const value = getStorageSync(key);
-    return value ?? null;
+    const value = getStorageSync(key)
+    return value ?? null
   },
   setItem: (key, value) => {
-    setStorageSync(key, value);
+    setStorageSync(key, value)
   },
   removeItem: (key) => {
-    removeStorageSync(key);
+    removeStorageSync(key)
   },
-};
+}
 
 const initialState: State = {
-  token: "",
   isLogged: false,
-};
+}
 const userStore = create<State & Action>()(
   immer(
     persist(
       (set, _get) => ({
-        token: "",
-        isLogged: false,
-        setToken: (token) => set({ token, isLogged: true }),
-        removeToken: () => set({ token: "", isLogged: false }),
+        ...initialState,
+        setUserInfo: (data) => set({ token: data.token, id: data.ID, isLogged: true, openId: data.openId }),
+        removeUserInfo: () => set({ token: undefined, id: undefined, isLogged: false, openId: undefined }),
       }),
       {
         // NOTE: the name here is the unique key of the current Zustand module when caching,
@@ -52,9 +49,10 @@ const userStore = create<State & Action>()(
       }
     )
   )
-);
+)
 
-export const useUserStore = createSelectors(userStore);
-export function useUserReset() {
-  userStore.setState(initialState);
-}
+export const useUserStore = createSelectors(userStore)
+export const getUserID = () => userStore.getState().id
+export const getToken = () => userStore.getState().token
+export const getOpenID = () => userStore.getState().openId
+export const resetUser = () => userStore.setState(initialState)

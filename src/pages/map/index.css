@@ -1,0 +1,16 @@
+.square-button {
+  margin-top: 100px;
+  width: 300px;
+  border-radius: 30px;
+  background: #673bb7;
+  color: white;
+  padding: 0rpx 100rpx;
+}
+
+.location-button {
+  position: absolute;
+  /* top: 10px; */
+  /* left: 10px; */
+  bottom: 20px;
+  right: 10px;
+}
