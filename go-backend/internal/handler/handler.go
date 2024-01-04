@@ -48,11 +48,11 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg config.Config) {
 		authGroup.GET("/users/addfollowingArticle/:id", userHandler.HandleAddFollowingArticle)
 		authGroup.GET("/users/removefollowingArticle/:id", userHandler.HandleRemoveFollowingArticle)
 
-		authGroup.POST("/profiles", DecryptionAndBindingMiddleware(&model.Profile{}), profileHandler.HandleCreateProfile)
+		authGroup.POST("/profiles", DecryptionAndBindingMiddleware(model.Profile{}), profileHandler.HandleCreateProfile)
 		authGroup.GET("/profiles", profileHandler.HandleGetAllProfiles)
 		authGroup.GET("/profiles/:id", profileHandler.HandleGetProfileByID)
 		authGroup.GET("/profiles/user/:userID", profileHandler.HandleGetProfilesByUserID)
-		authGroup.PUT("/profiles/:id", DecryptionAndBindingMiddleware(&model.Profile{}), profileHandler.HandleUpdateProfileByID)
+		authGroup.PUT("/profiles/:id", DecryptionAndBindingMiddleware(model.Profile{}), profileHandler.HandleUpdateProfileByID)
 		authGroup.DELETE("/profiles/:id", profileHandler.HandleDeleteProfileByID)
 
 		authGroup.POST("/vaccines", vaccineHandler.HandleCreateVaccine)
@@ -61,12 +61,12 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg config.Config) {
 		authGroup.PUT("/vaccines/:id", vaccineHandler.HandleUpdateVaccineByID)
 		authGroup.DELETE("/vaccines/:id", vaccineHandler.HandleDeleteVaccineByID)
 
-		authGroup.POST("/vaccination-records", DecryptionAndBindingMiddleware(&model.VaccinationRecord{}), vaccinationRecordHandler.HandleCreateVaccinationRecord)
+		authGroup.POST("/vaccination-records", DecryptionAndBindingMiddleware(model.VaccinationRecord{}), vaccinationRecordHandler.HandleCreateVaccinationRecord)
 		authGroup.GET("/vaccination-records", vaccinationRecordHandler.HandleGetAllVaccinationRecords)
 		authGroup.GET("/vaccination-records/:id", vaccinationRecordHandler.HandleGetVaccinationRecordByID)
 		authGroup.GET("/vaccination-records/user/:userID", vaccinationRecordHandler.HandleGetVaccinationRecordsByUserID)
 		authGroup.GET("/vaccination-records/profile/:profileID", vaccinationRecordHandler.HandleGetVaccinationRecordsByProfileID)
-		authGroup.PUT("/vaccination-records/:id", DecryptionAndBindingMiddleware(&model.VaccinationRecord{}), vaccinationRecordHandler.HandleUpdateVaccinationRecordByID)
+		authGroup.PUT("/vaccination-records/:id", DecryptionAndBindingMiddleware(model.VaccinationRecord{}), vaccinationRecordHandler.HandleUpdateVaccinationRecordByID)
 		authGroup.DELETE("/vaccination-records/:id", vaccinationRecordHandler.HandleDeleteVaccinationRecordByID)
 
 		authGroup.POST("/temperature-records", tempertureRecordHandler.HandleCreateTempertureRecord)
@@ -180,7 +180,7 @@ func DecryptionAndBindingMiddleware(targetType interface{}) gin.HandlerFunc {
 			return
 		}
 
-		if err := json.Unmarshal([]byte(decryptedData), targetType); err != nil {
+		if err := json.Unmarshal([]byte(decryptedData), &targetType); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid data format"})
 			c.Abort()
 			return
@@ -189,7 +189,7 @@ func DecryptionAndBindingMiddleware(targetType interface{}) gin.HandlerFunc {
 		log.Println("decryptedData:", decryptedData)
 		log.Println("parsedData:", targetType)
 
-		c.Set("parsedData", targetType)
+		c.Set("parsedData", &targetType)
 		c.Next()
 	}
 }
