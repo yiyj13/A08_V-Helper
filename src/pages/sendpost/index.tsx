@@ -10,6 +10,7 @@ import TextAreaCustom from '../../components/maintextarea'
 import InputCustom from '../../components/titleinput'
 
 import { postArticle, useVaccines, useArticles } from '../../api'
+import { ThrottleWrap } from '../../utils/useThrottle'
 
 export default function Index() {
   const [route, { back }] = useRouter()
@@ -63,9 +64,11 @@ export default function Index() {
         </div>
         <Divider />
         <div className='flex flex-row w-auto my-4 items-center justify-between p-2'>
-          <Button fill='outline' size='normal' type='primary' onClick={handleSubmit}>
-            发布
-          </Button>
+          <ThrottleWrap>
+            <Button fill='outline' size='normal' type='primary' onClick={handleSubmit}>
+              发布
+            </Button>
+          </ThrottleWrap>
           {/* // input length: now/full */}
           <a className='text-gray-500 font-mono'>
             {`${content.length}/150`}

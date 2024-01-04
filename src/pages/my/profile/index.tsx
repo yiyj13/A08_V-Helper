@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import Taro from '@tarojs/taro'
 import { Image } from '@tarojs/components'
-import {  Button } from '@nutui/nutui-react-taro'
+import { Button } from '@nutui/nutui-react-taro'
 import { useEffect, useMemo, useState } from 'react'
 
 import { updateUserInfo, useUserPublic } from '../../../api'
@@ -9,6 +9,7 @@ import { PICTURE_BASE_URL } from '../../../api/config'
 import { getUserID } from '../../../models'
 import { uploadImage } from '../../../api/imageUploader'
 import { dayjs } from '../../../utils'
+import { ThrottleWrap } from '../../../utils/useThrottle'
 import InputCustom from '../../../components/titleinput'
 
 export default function Index() {
@@ -40,7 +41,6 @@ export default function Index() {
 
   const handleSUbmit = async () => {
     if (isAvartarChanged) {
-      console.log('tempUrl', JSON.stringify(tempUrl, null, 2))
       await uploadImage(tempUrl, cloudpath)
     }
     await updateUserInfo({
@@ -86,9 +86,9 @@ export default function Index() {
           <p className='mt-1 text-gray-500'>点击编辑头像</p>
         </div>
         <InputCustom
-          label='用户名'
+          label={`用户名 (${username.length}/10)`}
           onInput={(n) => {
-            setUsername(n.detail.value.slice(0, 18))
+            setUsername(n.detail.value.slice(0, 10))
           }}
           value={username}
         ></InputCustom>
@@ -96,14 +96,16 @@ export default function Index() {
           <Button type='default' onClick={handleReset}>
             重置
           </Button>
-          <Button
-            disabled={isSubmitDisabled}
-            type='primary'
-            fill={isSubmitDisabled ? 'none' : 'solid'}
-            onClick={handleSUbmit}
-          >
-            提交
-          </Button>
+          <ThrottleWrap>
+            <Button
+              disabled={isSubmitDisabled}
+              type='primary'
+              fill={isSubmitDisabled ? 'none' : 'solid'}
+              onClick={handleSUbmit}
+            >
+              提交
+            </Button>
+          </ThrottleWrap>
         </div>
       </div>
     </div>

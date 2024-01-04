@@ -13,6 +13,7 @@ import { useProfiles, useTemperatureList } from '../../api/hooks'
 
 import { CheckProfileWrap } from '../../components/checkprofilewrap'
 import { FormCell as Cell, HeaderNecessary, HeaderOptional } from '../../components/formcell'
+import useThrottle from '../../utils/useThrottle'
 
 export default function Index() {
   return (
@@ -178,6 +179,8 @@ export function TemperRecord() {
     }, 1000)
   }
 
+  const { actionDisabled, throttle } = useThrottle()
+
   return (
     <div className='px-4 flex flex-col gap-y-1 animate-delayed-show'>
       <HeaderNecessary />
@@ -253,16 +256,16 @@ export function TemperRecord() {
         <TextArea className='rounded-md' placeholder='请输入备注' value={noteValue} autoSize onChange={(value) => onNoteChange(value)} />
       </Cell>
       <div className='col-span-full flex justify-center mt-4'>
-        <Button className='submit_btm' formType='submit' type='primary' onClick={handleSubmission}>
+        <Button className='submit_btm' formType='submit' type='primary' onClick={throttle(handleSubmission)} disabled={actionDisabled}>
           提交
         </Button>
         <div style={{ marginLeft: '16px' }}>
           {withParams ? (
-            <Button type='danger' fill='outline' onClick={handleDelete}>
+            <Button type='danger' fill='outline' onClick={throttle(handleDelete)} disabled={actionDisabled}>
               删除
             </Button>
           ) : (
-            <Button id='reset_btm' formType='reset' onClick={handleReset}>
+            <Button id='reset_btm' formType='reset' onClick={throttle(handleReset)} disabled={actionDisabled}>
               重置
             </Button>
           )}

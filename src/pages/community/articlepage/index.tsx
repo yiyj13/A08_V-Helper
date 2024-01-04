@@ -9,6 +9,7 @@ import { Comment, Follow, HeartFill1 } from '@nutui/icons-react-taro'
 import { Button, Skeleton } from '@nutui/nutui-react-taro'
 
 import { FocusableTextArea } from '../../../components/focusabletextarea'
+import { ThrottleWrap } from '../../../utils/useThrottle'
 
 import {
   getArticleByID,
@@ -77,9 +78,11 @@ export default function Index() {
           </div>
         </div>
         {editable && (
-          <Button fill='none' size='small' type='danger' onClick={handleDeleteArticle}>
-            删除帖子
-          </Button>
+          <ThrottleWrap>
+            <Button fill='none' size='small' type='danger' onClick={handleDeleteArticle}>
+              删除帖子
+            </Button>
+          </ThrottleWrap>
         )}
       </header>
 
@@ -164,7 +167,7 @@ const CommentBlock = (props: Partial<Reply> & { index: number; mutate: any }) =>
           <div className='text-sm text-brand'>#{props.index + 1}</div>
         </div>
       </div>
-      <div className='mt-4 text-sm text-gray-500'>{props.content || 'placeholder'}</div>
+      <div className='mt-4 text-sm text-gray-500'>{props.content}</div>
     </section>
   )
 }
@@ -185,12 +188,12 @@ const BottomBar = (props: { article_id: number; onSubmit: any }) => {
           placeholder='发表你的看法...'
           autoHeight
           value={replyContent}
-          onInput={(e) => setContent(e.detail.value)}
+          onInput={(e) => setContent(e.detail.value.substring(0, 100))}
         />
         <Button
           type='primary'
           size='small'
-          disabled={isMutating}
+          disabled={isMutating || replyContent === ''}
           onClick={() =>
             trigger().then(() => {
               setContent('')
