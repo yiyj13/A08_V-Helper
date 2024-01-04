@@ -2,15 +2,16 @@ package service
 
 import (
 	"v-helper/internal/model"
-	"v-helper/pkg/utils"
-	// "gorm.io/gorm"
+	// "v-helper/pkg/utils"
+	"gorm.io/gorm"
 )
 
 type ArticleService struct {
-	db utils.InterfaceDB
+	db *gorm.DB
+	// db utils.InterfaceDB
 }
 
-func NewArticleService(db utils.InterfaceDB) *ArticleService {
+func NewArticleService(db *gorm.DB) *ArticleService {
 	return &ArticleService{db: db}
 }
 

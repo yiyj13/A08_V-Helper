@@ -7,16 +7,24 @@ import (
 	"net/http"
 	"strconv"
 	"testing"
+	"time"
 
 	"v-helper/internal/model"
+	"v-helper/pkg/utils"
 )
 
 func TestVaccine(t *testing.T) {
 	const url string = "http://localhost:80/api/vaccines"
+	timeStr := time.Now().Format("2006-01-02 15:04:05")
+	user := model.User{OpenID: "Admin"}
+	token, err := utils.GenerateJWT(user)
+	if err != nil {
+		t.Fatalf("Failed to generate JWT: %v", err)
+	}
 
 	// POST /vaccines
 	newVaccine := model.Vaccine{
-		Name:          "testName",
+		Name:          timeStr,
 		Description:   "testDescription",
 		TargetDisease: "testTargetDisease",
 		SideEffects:   "testSideEffects",
@@ -25,10 +33,7 @@ func TestVaccine(t *testing.T) {
 		Type:          "testType",
 	}
 	jsonData, _ := json.Marshal(newVaccine)
-	resp, err := http.Post(
-		"http://localhost:80/api/vaccines",
-		"application/json", bytes.NewBuffer(jsonData),
-	)
+	resp, err := sendRequestWithToken("POST", url, bytes.NewBuffer(jsonData), token)
 	if err != nil {
 		t.Fatalf("Failed to send POST request: %v", err)
 	}
@@ -36,8 +41,8 @@ func TestVaccine(t *testing.T) {
 		t.Fatalf("Failed to create: %v", resp.StatusCode)
 	}
 
-	// GET
-	resp, err = http.Get("http://localhost:80/api/vaccines")
+	// GET /vaccines
+	resp, err = sendRequestWithToken("GET", url, nil, token)
 	if err != nil {
 		t.Fatalf("Failed to send GET request: %v", err)
 	}
@@ -57,20 +62,26 @@ func TestVaccine(t *testing.T) {
 	}
 	var targetID uint
 	for _, vaccine := range vaccines {
-		if vaccine.Name == "testName" {
+		if vaccine.Name == timeStr {
 			targetID = vaccine.ID
+			break
 		}
 	}
 	urlWithId := url + "/" + strconv.Itoa(int(targetID))
 
+	// GET /vaccines/:id
+	resp, err = sendRequestWithToken("GET", urlWithId, nil, token)
+	if err != nil {
+		t.Fatalf("Failed to send GET request: %v", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("Failed to get: %v", resp.StatusCode)
+	}
+
 	// PUT /vaccines/:id
 	newVaccine.Name = "testName2"
 	jsonData, _ = json.Marshal(newVaccine)
-	req, err := http.NewRequest("PUT", urlWithId, bytes.NewBuffer(jsonData))
-	if err != nil {
-		t.Fatalf("Failed to create PUT request: %v", err)
-	}
-	resp, err = http.DefaultClient.Do(req)
+	resp, err = sendRequestWithToken("PUT", urlWithId, bytes.NewBuffer(jsonData), token)
 	if err != nil {
 		t.Fatalf("Failed to send PUT request: %v", err)
 	}
@@ -79,11 +90,7 @@ func TestVaccine(t *testing.T) {
 	}
 
 	// DELETE /vaccines/:id
-	req, err = http.NewRequest("DELETE", urlWithId, nil)
-	if err != nil {
-		t.Fatalf("Failed to create DELETE request: %v", err)
-	}
-	resp, err = http.DefaultClient.Do(req)
+	resp, err = sendRequestWithToken("DELETE", urlWithId, nil, token)
 	if err != nil {
 		t.Fatalf("Failed to send DELETE request: %v", err)
 	}

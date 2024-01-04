@@ -7,22 +7,30 @@ import (
 	"net/http"
 	"strconv"
 	"testing"
+	"time"
 
 	"v-helper/internal/model"
+	"v-helper/pkg/utils"
 )
 
 func TestReply(t *testing.T) {
 	const url string = "http://localhost:80/api/replys"
+	timeStr := time.Now().Format("2006-01-02 15:04:05")
+	user := model.User{OpenID: "Admin"}
+	token, err := utils.GenerateJWT(user)
+	if err != nil {
+		t.Fatalf("Failed to generate JWT: %v", err)
+	}
 
 	// POST /replys
 	newReply := model.Reply{
 		ArticleID: 1,
 		UserID:    1,
 		Content:   "testContent",
-		UserName:  "testUserName",
+		UserName:  timeStr,
 	}
 	jsonData, _ := json.Marshal(newReply)
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	resp, err := sendRequestWithToken("POST", url, bytes.NewBuffer(jsonData), token)
 	if err != nil {
 		t.Fatalf("Failed to send POST request: %v", err)
 	}
@@ -31,7 +39,7 @@ func TestReply(t *testing.T) {
 	}
 
 	// GET /replys
-	resp, err = http.Get(url)
+	resp, err = sendRequestWithToken("GET", url, nil, token)
 	if err != nil {
 		t.Fatalf("Failed to send GET request: %v", err)
 	}
@@ -51,14 +59,15 @@ func TestReply(t *testing.T) {
 	}
 	var targetID uint
 	for _, profile := range profiles {
-		if profile.UserName == "testUserName" {
+		if profile.UserName == timeStr {
 			targetID = profile.ID
+			break
 		}
 	}
 	urlWithId := url + "/" + strconv.Itoa(int(targetID))
 
 	// GET /replys/:id
-	resp, err = http.Get(urlWithId)
+	resp, err = sendRequestWithToken("GET", urlWithId, nil, token)
 	if err != nil {
 		t.Fatalf("Failed to send GET request: %v", err)
 	}
@@ -69,11 +78,7 @@ func TestReply(t *testing.T) {
 	// PUT /replys/:id
 	newReply.Content = "testUpdateContent"
 	jsonData, _ = json.Marshal(newReply)
-	req, err := http.NewRequest("PUT", urlWithId, bytes.NewBuffer(jsonData))
-	if err != nil {
-		t.Fatalf("Failed to create PUT request: %v", err)
-	}
-	resp, err = http.DefaultClient.Do(req)
+	resp, err = sendRequestWithToken("PUT", urlWithId, bytes.NewBuffer(jsonData), token)
 	if err != nil {
 		t.Fatalf("Failed to send PUT request: %v", err)
 	}
@@ -82,11 +87,7 @@ func TestReply(t *testing.T) {
 	}
 
 	// DELETE /replys/:id
-	req, err = http.NewRequest("DELETE", urlWithId, nil)
-	if err != nil {
-		t.Fatalf("Failed to create DELETE request: %v", err)
-	}
-	resp, err = http.DefaultClient.Do(req)
+	resp, err = sendRequestWithToken("DELETE", urlWithId, nil, token)
 	if err != nil {
 		t.Fatalf("Failed to send DELETE request: %v", err)
 	}
