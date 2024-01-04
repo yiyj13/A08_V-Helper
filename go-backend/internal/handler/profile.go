@@ -27,7 +27,7 @@ func (h *ProfileHandler) HandleCreateProfile(c *gin.Context) {
 	}
 
 	// 创建Profile
-	if err := h.profileService.CreateProfile(profile.(model.Profile)); err != nil {
+	if err := h.profileService.CreateProfile(*profile.(*model.Profile)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -74,7 +74,7 @@ func (h *ProfileHandler) HandleUpdateProfileByID(c *gin.Context) {
 	}
 	log.Println("trying to update profile: ", profile)
 
-	if err := h.profileService.UpdateProfileByID(uint(id), profile.(model.Profile)); err != nil {
+	if err := h.profileService.UpdateProfileByID(uint(id), *profile.(*model.Profile)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

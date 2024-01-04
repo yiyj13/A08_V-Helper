@@ -188,7 +188,7 @@ func DecryptionAndBindingMiddleware(targetType interface{}) gin.HandlerFunc {
 		log.Println("decryptedData:", decryptedData)
 		log.Println("parsedData:", targetType)
 
-		c.Set("parsedData", targetType)
+		c.Set("parsedData", &targetType)
 		c.Next()
 	}
 }
