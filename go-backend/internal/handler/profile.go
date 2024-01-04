@@ -1,11 +1,13 @@
 package handler
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
 	"v-helper/internal/model"
 	"v-helper/internal/service"
+	"v-helper/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,18 +21,37 @@ func NewProfileHandler(profileService *service.ProfileService) *ProfileHandler {
 }
 
 func (h *ProfileHandler) HandleCreateProfile(c *gin.Context) {
-	var profile model.Profile
-	if err := c.ShouldBindJSON(&profile); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 读取加密的字符串数据
+	var encryptedData struct {
+		Data string `json:"data"`
+	}
+	if err := c.ShouldBindJSON(&encryptedData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
 
+	// 解密数据
+	decryptedData, err := utils.Decrypt(encryptedData.Data)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decrypt data"})
+		return
+	}
+
+	// 解析JSON到Profile结构体
+	var profile model.Profile
+	if err := json.Unmarshal([]byte(decryptedData), &profile); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid profile data"})
+		return
+	}
+
+	// 创建Profile
 	if err := h.profileService.CreateProfile(profile); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	log.Println("profile created successfully: ", profile)
-	c.JSON(http.StatusOK, profile)
+
+	log.Println("Profile created successfully: ", profile)
+	c.JSON(http.StatusOK, gin.H{"message": "profile created successfully"})
 }
 
 func (h *ProfileHandler) HandleGetAllProfiles(c *gin.Context) {
@@ -40,7 +61,7 @@ func (h *ProfileHandler) HandleGetAllProfiles(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, profiles)
+	EncryptedJSON(c, http.StatusOK, profiles)
 }
 
 func (h *ProfileHandler) HandleGetProfileByID(c *gin.Context) {
@@ -55,7 +76,7 @@ func (h *ProfileHandler) HandleGetProfileByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, profile)
+	EncryptedJSON(c, http.StatusOK, profile)
 }
 
 func (h *ProfileHandler) HandleUpdateProfileByID(c *gin.Context) {
@@ -65,18 +86,18 @@ func (h *ProfileHandler) HandleUpdateProfileByID(c *gin.Context) {
 		return
 	}
 
-	var profile model.Profile
-	if err := c.ShouldBindJSON(&profile); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	profile, exists := c.Get("parsedData")
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Profile data not found"})
 		return
 	}
 
-	if err := h.profileService.UpdateProfileByID(uint(id), profile); err != nil {
+	if err := h.profileService.UpdateProfileByID(uint(id), profile.(model.Profile)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	log.Println("profile updated successfully: ", profile)
-	c.JSON(http.StatusOK, profile)
+	c.JSON(http.StatusOK, gin.H{"message": "profile updated successfully"})
 }
 
 func (h *ProfileHandler) HandleDeleteProfileByID(c *gin.Context) {
@@ -108,5 +129,5 @@ func (h *ProfileHandler) HandleGetProfilesByUserID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, profiles)
+	EncryptedJSON(c, http.StatusOK, profiles)
 }

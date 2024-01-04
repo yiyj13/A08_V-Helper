@@ -29,7 +29,7 @@ func (h *VaccinationRecordHandler) HandleCreateVaccinationRecord(c *gin.Context)
 		return
 	}
 
-	c.JSON(http.StatusCreated, record)
+	c.JSON(http.StatusCreated, gin.H{"message": "record created successfully"})
 }
 
 func (h *VaccinationRecordHandler) HandleGetVaccinationRecordsByUserID(c *gin.Context) {
@@ -45,7 +45,7 @@ func (h *VaccinationRecordHandler) HandleGetVaccinationRecordsByUserID(c *gin.Co
 		return
 	}
 
-	c.JSON(http.StatusOK, record)
+	EncryptedJSON(c, http.StatusOK, record)
 }
 
 func (h *VaccinationRecordHandler) HandleGetVaccinationRecordsByProfileID(c *gin.Context) {
@@ -67,7 +67,7 @@ func (h *VaccinationRecordHandler) HandleGetVaccinationRecordsByProfileID(c *gin
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, records)
+		EncryptedJSON(c, http.StatusOK, records)
 		return
 	}
 
@@ -77,7 +77,7 @@ func (h *VaccinationRecordHandler) HandleGetVaccinationRecordsByProfileID(c *gin
 		return
 	}
 
-	c.JSON(http.StatusOK, records)
+	EncryptedJSON(c, http.StatusOK, records)
 }
 
 func (h *VaccinationRecordHandler) HandleGetAllVaccinationRecords(c *gin.Context) {
@@ -93,7 +93,7 @@ func (h *VaccinationRecordHandler) HandleGetAllVaccinationRecords(c *gin.Context
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, records)
+		EncryptedJSON(c, http.StatusOK, records)
 		return
 	}
 
@@ -103,7 +103,7 @@ func (h *VaccinationRecordHandler) HandleGetAllVaccinationRecords(c *gin.Context
 		return
 	}
 
-	c.JSON(http.StatusOK, records)
+	EncryptedJSON(c, http.StatusOK, records)
 }
 
 func (h *VaccinationRecordHandler) HandleGetVaccinationRecordByID(c *gin.Context) {
@@ -119,7 +119,7 @@ func (h *VaccinationRecordHandler) HandleGetVaccinationRecordByID(c *gin.Context
 		return
 	}
 
-	c.JSON(http.StatusOK, record)
+	EncryptedJSON(c, http.StatusOK, record)
 }
 
 func (h *VaccinationRecordHandler) HandleUpdateVaccinationRecordByID(c *gin.Context) {
@@ -140,7 +140,7 @@ func (h *VaccinationRecordHandler) HandleUpdateVaccinationRecordByID(c *gin.Cont
 		return
 	}
 
-	c.JSON(http.StatusOK, record)
+	c.JSON(http.StatusOK, gin.H{"message": "record updated successfully"})
 }
 
 func (h *VaccinationRecordHandler) HandleDeleteVaccinationRecordByID(c *gin.Context) {

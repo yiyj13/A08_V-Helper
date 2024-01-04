@@ -196,7 +196,7 @@ func (h *MessageHandler) HandleAddMessage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
+	var err error
 	message.OpenID, err = h.MessageService.GetOpenIDByUserID(message.UserID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
